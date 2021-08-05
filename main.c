@@ -93,7 +93,7 @@ int main() {
     fill_matrix_ones (B, K*N);
     fill_matrix_zeros(C, M*N);
 
-    int64_t rep = 10;
+    int64_t rep = 100;
 
     const uint64_t t0 = rdtsc();
 
@@ -111,14 +111,14 @@ int main() {
 
     //print_matrix(C, M, N);
 
-    const uint64_t bt0 = rdtsc();
+    //const uint64_t bt0 = rdtsc();
 
-    for(int i=0;i<rep;++i) {
-        cblas_dgemm(CblasColMajor,CblasNoTrans, CblasNoTrans,M,N,K,1.0,A,M,B,K,0.0,D,M);
-    }
+    //for(int i=0;i<rep;++i) {
+    //    cblas_dgemm(CblasColMajor,CblasNoTrans, CblasNoTrans,M,N,K,1.0,A,M,B,K,0.0,D,M);
+    //}
 
-    const uint64_t bdt = rdtsc() - bt0;
-    printf("BLAS DGEMM = %f\n", 1e-9 * bdt/rep);
+    //const uint64_t bdt = rdtsc() - bt0;
+    //printf("BLAS DGEMM = %f\n", 1e-9 * bdt/rep);
 
     //print_matrix(C, M, N);
 

@@ -1,10 +1,12 @@
 #!/bin/bash
 
-CC=${CC:-icc}
+CC=${CC:-icpc}
 CCFLAGS=(
- -O2 
+ -O3 
  -g
- -fno-unroll-loops
+ -xCORE-AVX512
+ -qopt-zmm-usage=high
+ -I/users/p18005/gopalchi/gemm_asm/MIPP/src -I.
 )
 MKL_PATH=/usr/local/intel/2020.0.015/compilers_and_libraries/linux/mkl
 OMP_PATH=/usr/local/intel/2019.0.015/compilers_and_libraries/linux/lib/intel64
