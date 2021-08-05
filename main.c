@@ -33,6 +33,7 @@ int dgemm_main(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA, int6
             idxk = k * KC * incColA;
 
             for(int j=0;j<mb;++j) {
+              //printf("===(%d %d)===\n",k,j);
                 packA(kc, &A[idxk + j*MC*incRowA], incRowA, incColA, _A);
 
                 dgemm_macro_kernel(MC, KC, NC, &C[idxi + j*MC*incRowC], incRowC, incColC, _A, _B);
@@ -89,12 +90,15 @@ int main() {
     C = (double *)malloc( M * N * sizeof(double));
     D = (double *)malloc( M * N * sizeof(double));
 
-    fill_matrix_ones (A, M*K);
-    fill_matrix_ones (B, K*N);
-    fill_matrix_zeros(C, M*N);
-    fill_matrix_zeros(D, M*N);
+    //fill_matrix_uniform(A, M,K);
+    //fill_matrix_uniform(B, K, N);
+    fill_matrix_random(A, M,K);
+    fill_matrix_random(B, K, N);
+    fill_matrix_zeros  (C, M*N);
+    fill_matrix_zeros  (D, M*N);
+    //print_matrix(A,M,K);
 
-    int64_t rep = 10;
+    int64_t rep = 1;
 
     const uint64_t t0 = rdtsc();
 
@@ -110,20 +114,20 @@ int main() {
     const uint64_t dt = rdtsc() - t0;
     printf("MyDGEMM = %f\n", 1e-9 * dt/rep);
 
-    print_matrix(C, M, N);
+    //print_matrix(C, M, N);
 
     const uint64_t bt0 = rdtsc();
 
     for(int i=0;i<rep;++i) {
-        cblas_dgemm(CblasColMajor,CblasNoTrans, CblasNoTrans,M,N,K,1.0,A,M,B,K,0.0,D,M);
+        cblas_dgemm(CblasColMajor,CblasNoTrans, CblasNoTrans,M,N,K,1.0,B,M,A,K,0.0,D,M);
     }
 
     const uint64_t bdt = rdtsc() - bt0;
     printf("BLAS DGEMM = %f\n", 1e-9 * bdt/rep);
 
-    print_matrix(D, M, N);
-    printf("\n-------------diff-----------------\n");
-    print_diff_matrix(C,D, M, N);
+    //print_matrix(D, M, N);
+    //printf("\n-------------diff-----------------\n");
+    //print_diff_matrix(C,D, M, N);
 
     free(A);
     free(B);

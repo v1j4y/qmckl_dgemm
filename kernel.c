@@ -314,7 +314,7 @@ void dgemm_kernel_avx512_asm(int64_t kc, double *A, double *B, double *C, int64_
     double AB[MR*NR] __attribute__ ((aligned(64)));
     double *tmpA = A;
     double *tmpB = B;
-    uint64_t kl = (kc >> 4);
+    uint64_t kl = kc;
 
     for(int l=0;l<( MR * NR ) - 4;l = l + 4) {
         AB[l + 0] = 0.0;
@@ -507,6 +507,23 @@ void dgemm_kernel_avx512_asm(int64_t kc, double *A, double *B, double *C, int64_
             //printf("(%d %d) %5.3f\n",i,j,AB[i + j*MR]);
         //}
     }
+    //printf("\nMatrx A\n");
+    //for(int i=0;i<kc;++i){
+    //  for(int j=0;j<MR;++j){
+    //    printf(" %5.3f ",A[i*MR + j]);
+    //  }
+    //  printf("\n");
+    //}
+    //printf("\nMatrx B\n");
+    //for(int i=0;i<kc;++i){
+    //  for(int j=0;j<NR;++j){
+    //    printf(" %5.3f ",B[i*NR + j]);
+    //  }
+    //  printf("\n");
+    //}
+    //printf("Matrx AB\n");
+    //print_matrix(AB,MR,NR);
+    //exit(0);
 }
 
 void dgemm_kernel_avx512_mipp(int64_t kc, double *A, double *B, double *C, int64_t incRowC, int64_t incColC) {
@@ -523,167 +540,188 @@ void dgemm_kernel_avx512_mipp(int64_t kc, double *A, double *B, double *C, int64
     }
 
     // Cols of AB in SSE registers
-    mipp::Reg<double>   ab_00_11_22_33_44_55_66_77;
-    mipp::Reg<double>   ab_01_10_23_32_45_54_67_76;
-    mipp::Reg<double>   ab_02_13_20_31_46_57_64_75;
-    mipp::Reg<double>   ab_12_03_21_30_47_56_65_74;
-    mipp::Reg<double>   ab_04_15_26_37_40_51_62_73;
-    mipp::Reg<double>   ab_05_14_27_36_41_50_63_72;
-    mipp::Reg<double>   ab_06_17_24_35_42_53_60_71;
-    mipp::Reg<double>   ab_07_16_25_34_43_52_61_70;
+    mipp::Reg<double>   ab_00;
+    mipp::Reg<double>   ab_01;
+    mipp::Reg<double>   ab_02;
+    mipp::Reg<double>   ab_03;
+    mipp::Reg<double>   ab_04;
+    mipp::Reg<double>   ab_05;
+    mipp::Reg<double>   ab_06;
+    mipp::Reg<double>   ab_07;
+    mipp::Reg<double>   ab_08;
+    mipp::Reg<double>   ab_09;
+    mipp::Reg<double>   ab_10;
+    mipp::Reg<double>   ab_11;
+    mipp::Reg<double>   ab_12;
+    mipp::Reg<double>   ab_13;
+    mipp::Reg<double>   ab_14;
+    mipp::Reg<double>   ab_15;
+    mipp::Reg<double>   ab_16;
+    mipp::Reg<double>   ab_17;
+    mipp::Reg<double>   ab_18;
+    mipp::Reg<double>   ab_19;
+    mipp::Reg<double>   ab_20;
+    mipp::Reg<double>   ab_21;
+    mipp::Reg<double>   ab_22;
+    mipp::Reg<double>   ab_23;
+    mipp::Reg<double>   ab_24;
+    mipp::Reg<double>   ab_25;
+    mipp::Reg<double>   ab_26;
+    mipp::Reg<double>   ab_27;
 
     mipp::Reg<double>   a_00;
-    mipp::Reg<double>   b_00;
-    mipp::Reg<double>   tmp1, tmp2, tmp3, tmp4;
-    mipp::Reg<double>   tmp5, tmp6, tmp7;
+    mipp::Reg<double>   a_01;
+    mipp::Reg<double>   tmp1, tmp2;
 
     int rD = mipp::N<double>();
 
-    ab_00_11_22_33_44_55_66_77 = 0.0;
-    ab_01_10_23_32_45_54_67_76 = 0.0;
-    ab_02_13_20_31_46_57_64_75 = 0.0;
-    ab_12_03_21_30_47_56_65_74 = 0.0;
-    ab_04_15_26_37_40_51_62_73 = 0.0;
-    ab_05_14_27_36_41_50_63_72 = 0.0;
-    ab_06_17_24_35_42_53_60_71 = 0.0;
-    ab_07_16_25_34_43_52_61_70 = 0.0;
+    // Set them to 0
+    ab_00 = 0.0;
+    ab_01 = 0.0;
+    ab_02 = 0.0;
+    ab_03 = 0.0;
+    ab_04 = 0.0;
+    ab_05 = 0.0;
+    ab_06 = 0.0;
+    ab_07 = 0.0;
+    ab_08 = 0.0;
+    ab_09 = 0.0;
+    ab_10 = 0.0;
+    ab_11 = 0.0;
+    ab_12 = 0.0;
+    ab_13 = 0.0;
+    ab_14 = 0.0;
+    ab_15 = 0.0;
+    ab_16 = 0.0;
+    ab_17 = 0.0;
+    ab_18 = 0.0;
+    ab_19 = 0.0;
+    ab_20 = 0.0;
+    ab_21 = 0.0;
+    ab_22 = 0.0;
+    ab_23 = 0.0;
+    ab_24 = 0.0;
+    ab_25 = 0.0;
+    ab_26 = 0.0;
+    ab_27 = 0.0;
 
-    for(int k=0;k<(kc - 4);k = k + 4) {
-			a_00.load(A);
+    for(int k=0;k<(kc);++k) {
+        a_00.load(A + 0); // Preload A 0 - 8
+        a_01.load(A + 8); // Preload A 9 - 15
 
-      b_00.load(B);
-    
-      //tmp1 = mipp::rrot(b_00);
-      //tmp2 = mipp::rrot(tmp1);
-      ab_00_11_22_33_44_55_66_77 += a_00 * b_00;
-      ab_01_10_23_32_45_54_67_76 += a_00 * b_00;
-      //ab_02_13_20_31_46_57_64_75 += a_00 * b_00;
-      //
-      //tmp3 = mipp::rrot(tmp2);
-      //tmp4 = mipp::rrot(tmp3);
+        tmp1 = B + 0; // Preload B 0 - 1
+        tmp2 = B + 1; // Preload B 0 - 1
+        ab_00 = mipp::fmadd(a_00, tmp1, ab_00); // FMA and save to C zmm4 - zmm7
+        ab_01 = mipp::fmadd(a_01, tmp1, ab_01); // FMA and save to C zmm4 - zmm7
+        ab_02 = mipp::fmadd(a_00, tmp2, ab_02); // FMA and save to C zmm4 - zmm7
+        ab_03 = mipp::fmadd(a_01, tmp2, ab_03); // FMA and save to C zmm4 - zmm7
 
-      //ab_12_03_21_30_47_56_65_74 += a_00 * tmp3;
-      //ab_04_15_26_37_40_51_62_73 += a_00 * tmp4;
+        tmp1 = B + 2; // Preload B 0 - 1
+        tmp2 = B + 3; // Preload B 0 - 1
+        ab_04 = mipp::fmadd(a_00, tmp1, ab_04); // FMA and save to C zmm4 - zmm7
+        ab_05 = mipp::fmadd(a_01, tmp1, ab_05); // FMA and save to C zmm4 - zmm7
+        ab_06 = mipp::fmadd(a_00, tmp2, ab_06); // FMA and save to C zmm4 - zmm7
+        ab_07 = mipp::fmadd(a_01, tmp2, ab_07); // FMA and save to C zmm4 - zmm7
 
-      //tmp5 = mipp::rrot(tmp4);
-      //tmp6 = mipp::rrot(tmp5);
-      //tmp7 = mipp::rrot(tmp6);
-      //ab_05_14_27_36_41_50_63_72 += a_00 * tmp1;
-      //ab_06_17_24_35_42_53_60_71 += a_00 * tmp2;
-      //ab_07_16_25_34_43_52_61_70 += a_00 * tmp3;
+        tmp1 = B + 4; // Preload B 0 - 1
+        tmp2 = B + 5; // Preload B 0 - 1
+        ab_08 = mipp::fmadd(a_00, tmp1, ab_08); // FMA and save to C zmm4 - zmm7
+        ab_09 = mipp::fmadd(a_01, tmp1, ab_09); // FMA and save to C zmm4 - zmm7
+        ab_10 = mipp::fmadd(a_00, tmp2, ab_10); // FMA and save to C zmm4 - zmm7
+        ab_11 = mipp::fmadd(a_01, tmp2, ab_11); // FMA and save to C zmm4 - zmm7
 
-      A = A + 8;
-      B = B + 8;
-			a_00.load(A);
+        tmp1 = B + 6; // Preload B 0 - 1
+        tmp2 = B + 7; // Preload B 0 - 1
+        ab_12 = mipp::fmadd(a_00, tmp1, ab_12); // FMA and save to C zmm4 - zmm7
+        ab_13 = mipp::fmadd(a_01, tmp1, ab_13); // FMA and save to C zmm4 - zmm7
+        ab_14 = mipp::fmadd(a_00, tmp2, ab_14); // FMA and save to C zmm4 - zmm7
+        ab_15 = mipp::fmadd(a_01, tmp2, ab_15); // FMA and save to C zmm4 - zmm7
 
-      b_00.load(B);
-    
-      //tmp1 = mipp::rrot(b_00);
-      //tmp2 = mipp::rrot(tmp1);
-      ab_00_11_22_33_44_55_66_77 += a_00 * b_00;
-      //ab_01_10_23_32_45_54_67_76 += a_00 * b_00;
-      //ab_02_13_20_31_46_57_64_75 += a_00 * b_00;
-      //
-      //tmp3 = mipp::rrot(tmp2);
-      //tmp4 = mipp::rrot(tmp3);
+        tmp1 = B + 8; // Preload B 0 - 1
+        tmp2 = B + 9; // Preload B 0 - 1
+        ab_16 = mipp::fmadd(a_00, tmp1, ab_16); // FMA and save to C zmm4 - zmm7
+        ab_17 = mipp::fmadd(a_01, tmp1, ab_17); // FMA and save to C zmm4 - zmm7
+        ab_18 = mipp::fmadd(a_00, tmp2, ab_18); // FMA and save to C zmm4 - zmm7
+        ab_19 = mipp::fmadd(a_01, tmp2, ab_19); // FMA and save to C zmm4 - zmm7
 
-      //ab_12_03_21_30_47_56_65_74 += a_00 * tmp3;
-      //ab_04_15_26_37_40_51_62_73 += a_00 * tmp4;
+        tmp1 = B + 10; // Preload B 0 - 1
+        tmp2 = B + 11; // Preload B 0 - 1
+        ab_20 = mipp::fmadd(a_00, tmp1, ab_20); // FMA and save to C zmm4 - zmm7
+        ab_21 = mipp::fmadd(a_01, tmp1, ab_21); // FMA and save to C zmm4 - zmm7
+        ab_22 = mipp::fmadd(a_00, tmp2, ab_22); // FMA and save to C zmm4 - zmm7
+        ab_23 = mipp::fmadd(a_01, tmp2, ab_23); // FMA and save to C zmm4 - zmm7
 
-      //tmp5 = mipp::rrot(tmp4);
-      //tmp6 = mipp::rrot(tmp5);
-      //tmp7 = mipp::rrot(tmp6);
-      //ab_05_14_27_36_41_50_63_72 += a_00 * tmp1;
-      //ab_06_17_24_35_42_53_60_71 += a_00 * tmp2;
-      //ab_07_16_25_34_43_52_61_70 += a_00 * tmp3;
+        tmp1 = B + 12; // Preload B 0 - 1
+        tmp2 = B + 13; // Preload B 0 - 1
+        ab_24 = mipp::fmadd(a_00, tmp1, ab_24); // FMA and save to C zmm4 - zmm7
+        ab_25 = mipp::fmadd(a_01, tmp1, ab_25); // FMA and save to C zmm4 - zmm7
+        ab_26 = mipp::fmadd(a_00, tmp2, ab_26); // FMA and save to C zmm4 - zmm7
+        ab_27 = mipp::fmadd(a_01, tmp2, ab_27); // FMA and save to C zmm4 - zmm7
 
-      A = A + 8;
-      B = B + 8;
-			a_00.load(A);
-
-      b_00.load(B);
-    
-      //tmp1 = mipp::rrot(b_00);
-      //tmp2 = mipp::rrot(tmp1);
-      ab_00_11_22_33_44_55_66_77 += a_00 * b_00;
-      //ab_01_10_23_32_45_54_67_76 += a_00 * b_00;
-      //ab_02_13_20_31_46_57_64_75 += a_00 * b_00;
-      //
-      //tmp3 = mipp::rrot(tmp2);
-      //tmp4 = mipp::rrot(tmp3);
-
-      //ab_12_03_21_30_47_56_65_74 += a_00 * tmp3;
-      //ab_04_15_26_37_40_51_62_73 += a_00 * tmp4;
-
-      //tmp5 = mipp::rrot(tmp4);
-      //tmp6 = mipp::rrot(tmp5);
-      //tmp7 = mipp::rrot(tmp6);
-      //ab_05_14_27_36_41_50_63_72 += a_00 * tmp1;
-      //ab_06_17_24_35_42_53_60_71 += a_00 * tmp2;
-      //ab_07_16_25_34_43_52_61_70 += a_00 * tmp3;
-
-      A = A + 8;
-      B = B + 8;
-			a_00.load(A);
-
-      b_00.load(B);
-    
-      //tmp1 = mipp::rrot(b_00);
-      //tmp2 = mipp::rrot(tmp1);
-      ab_00_11_22_33_44_55_66_77 += a_00 * b_00;
-      //ab_01_10_23_32_45_54_67_76 += a_00 * b_00;
-      //ab_02_13_20_31_46_57_64_75 += a_00 * b_00;
-      //
-      //tmp3 = mipp::rrot(tmp2);
-      //tmp4 = mipp::rrot(tmp3);
-
-      //ab_12_03_21_30_47_56_65_74 += a_00 * tmp3;
-      //ab_04_15_26_37_40_51_62_73 += a_00 * tmp4;
-
-      //tmp5 = mipp::rrot(tmp4);
-      //tmp6 = mipp::rrot(tmp5);
-      //tmp7 = mipp::rrot(tmp6);
-      //ab_05_14_27_36_41_50_63_72 += a_00 * tmp1;
-      //ab_06_17_24_35_42_53_60_71 += a_00 * tmp2;
-      //ab_07_16_25_34_43_52_61_70 += a_00 * tmp3;
-
-      A = A + 8;
-      B = B + 8;
+      A = A + 16;
+      B = B + 14;
     }
 
 
-    ab_00_11_22_33_44_55_66_77.store(AB + 8 * 0);
-    ab_01_10_23_32_45_54_67_76.store(AB + 8 * 1);
-    ab_02_13_20_31_46_57_64_75.store(AB + 8 * 2);
-    ab_12_03_21_30_47_56_65_74.store(AB + 8 * 3);
-    ab_04_15_26_37_40_51_62_73.store(AB + 8 * 4);
-    ab_05_14_27_36_41_50_63_72.store(AB + 8 * 5);
-    ab_06_17_24_35_42_53_60_71.store(AB + 8 * 6);
-    ab_07_16_25_34_43_52_61_70.store(AB + 8 * 7);
+    ab_00.store(AB +  0); // Store res in C
+    ab_01.store(AB +  8); // Store res in C
+    ab_02.store(AB + 16); // Store res in C
+    ab_03.store(AB + 24); // Store res in C
+    ab_04.store(AB + 32); // Store res in C
+    ab_05.store(AB + 40); // Store res in C
+    ab_06.store(AB + 48); // Store res in C
+    ab_07.store(AB + 56); // Store res in C
+    ab_08.store(AB + 64); // Store res in C
+    ab_09.store(AB + 72); // Store res in C
+    ab_10.store(AB + 80); // Store res in C
+    ab_11.store(AB + 88); // Store res in C
+    ab_12.store(AB + 96); // Store res in C
+    ab_13.store(AB + 104); // Store res in C
+    ab_14.store(AB + 112 +  0); // Store res in C
+    ab_15.store(AB + 112 +  8); // Store res in C
+    ab_16.store(AB + 112 + 16); // Store res in C
+    ab_17.store(AB + 112 + 24); // Store res in C
+    ab_18.store(AB + 112 + 32); // Store res in C
+    ab_19.store(AB + 112 + 40); // Store res in C
+    ab_20.store(AB + 112 + 48); // Store res in C
+    ab_21.store(AB + 112 + 56); // Store res in C
+    ab_22.store(AB + 112 + 64); // Store res in C
+    ab_23.store(AB + 112 + 72); // Store res in C
+    ab_24.store(AB + 112 + 80); // Store res in C
+    ab_25.store(AB + 112 + 88); // Store res in C
+    ab_26.store(AB + 112 + 96); // Store res in C
+    ab_27.store(AB + 112 + 104); // Store res in C
+
 
     // C = C + AB
-    for(int j=0;j<NR;++j) {
+    for(int j=0;j<MR;++j) {
       double *cidxj = C + j*incRowC;
-      int    *idxlstj = idxlist + j * MR;
-        for(int i=0;i<(MR-8);i=i+8) {
-            int idx1 = idxlstj[i + 0];
-            int idx2 = idxlstj[i + 1];
-            int idx3 = idxlstj[i + 2];
-            int idx4 = idxlstj[i + 3];
-            int idx5 = idxlstj[i + 4];
-            int idx6 = idxlstj[i + 5];
-            int idx7 = idxlstj[i + 6];
-            int idx8 = idxlstj[i + 7];
-            cidxj[i + 0] = cidxj[i + 0] + AB[idx1];
-            cidxj[i + 1] = cidxj[i + 1] + AB[idx2];
-            cidxj[i + 2] = cidxj[i + 2] + AB[idx3];
-            cidxj[i + 3] = cidxj[i + 3] + AB[idx4];
-            cidxj[i + 4] = cidxj[i + 4] + AB[idx5];
-            cidxj[i + 5] = cidxj[i + 5] + AB[idx6];
-            cidxj[i + 6] = cidxj[i + 6] + AB[idx7];
-            cidxj[i + 7] = cidxj[i + 7] + AB[idx8];
+      //int    *idxlstj = idxlist + j * MR;
+        //for(int i=0;i<(MR-8);i=i+8) {
+            //int idx1 = idxlstj[i + 0];
+            //int idx2 = idxlstj[i + 1];
+            //int idx3 = idxlstj[i + 2];
+            //int idx4 = idxlstj[i + 3];
+            //int idx5 = idxlstj[i + 4];
+            //int idx6 = idxlstj[i + 5];
+            //int idx7 = idxlstj[i + 6];
+            //int idx8 = idxlstj[i + 7];
+            cidxj[ 0] = cidxj[ 0] + AB[0*16 + j];
+            cidxj[ 1] = cidxj[ 1] + AB[1*16 + j];
+            cidxj[ 2] = cidxj[ 2] + AB[2*16 + j];
+            cidxj[ 3] = cidxj[ 3] + AB[3*16 + j];
+            cidxj[ 4] = cidxj[ 4] + AB[4*16 + j];
+            cidxj[ 5] = cidxj[ 5] + AB[5*16 + j];
+            cidxj[ 6] = cidxj[ 6] + AB[6*16 + j];
+            cidxj[ 7] = cidxj[ 7] + AB[7*16 + j];
+            cidxj[ 8] = cidxj[ 8] + AB[8*16 + j];
+            cidxj[ 9] = cidxj[ 9] + AB[9*16 + j];
+            cidxj[10] = cidxj[10] + AB[10*16 + j];
+            cidxj[11] = cidxj[11] + AB[11*16 + j];
+            cidxj[12] = cidxj[12] + AB[12*16 + j];
+            cidxj[13] = cidxj[13] + AB[13*16 + j];
             //printf("(%d %d) %5.3f\n",i,j,AB[i + j*MR]);
-        }
+        //}
     }
 }
 
@@ -693,11 +731,11 @@ void dgemm_macro_kernel(int64_t mc, int64_t kc, int64_t nc, double *C, int64_t i
 
     for(int j=0;j<np;++j) {
         for(int i=0;i<mp;++i) {
-          //printf("(%d %d)\n",i,j);
             //dgemm_kernel(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[i*MR*incRowC + j*NR*incColC], incRowC, incColC);
             //dgemm_kernel_sse_asm(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[i*MR*incRowC + j*NR*incColC], incRowC, incColC);
             //dgemm_kernel_avx512_mipp(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[i*MR*incRowC + j*NR*incColC], incRowC, incColC);
             dgemm_kernel_avx512_asm(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[i*MR*incRowC + j*NR*incColC], incRowC, incColC);
+          //printf("(%d %d) %5.3f\n",i,j, C[0]);
         }
     }
 }

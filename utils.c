@@ -13,6 +13,39 @@ void fill_matrix_ones(double *A, int64_t dim) {
     }
 }
 
+void fill_matrix_random(double *dA, int64_t dM, int64_t dN) {
+    double count=0.0;
+    srand ( time ( NULL));
+    for(int i=0;i<dM;++i) {
+      for(int j=0;j<dN;++j) {
+        double random_value = (double)rand()/RAND_MAX*2.0-1.0;//float in range -1 to 1
+        dA[i*dN + j] = random_value;
+      }
+    }
+}
+
+void fill_matrix_uniform(double *dA, int64_t dM, int64_t dN) {
+    double count=0.0;
+    for(int i=0;i<dM;++i) {
+      count = 0.0;
+      for(int j=0;j<dN;++j) {
+        dA[i*dN + j] = count;
+        count += 1.0;
+      }
+    }
+}
+
+void fill_matrix_uniform_2(double *dA, int64_t dM, int64_t dN) {
+    double count=0.0;
+    for(int i=0;i<dN;++i) {
+      count = 0.0;
+      for(int j=0;j<dM;++j) {
+        dA[j*dN + i] = count;
+        count += 1.0;
+      }
+    }
+}
+
 void fill_matrix_zeros(double *A, int64_t dim) {
     for(int i=0;i<dim;++i) {
         A[i] = 0.0;
@@ -20,9 +53,9 @@ void fill_matrix_zeros(double *A, int64_t dim) {
 }
 
 void print_matrix(double *A, int64_t M, int64_t N) {
-    for(int j=0;j<N;++j) {
-        for(int i=0;i<M;++i) {
-            printf(" %5.3f ",A[i + j*M]);
+    for(int j=0;j<M;++j) {
+        for(int i=0;i<N;++i) {
+            printf(" %5.3f ",A[i + j*N]);
         }
         printf("\n");
     }
@@ -45,12 +78,20 @@ void packA(int64_t kc, double *A, int64_t dimRowA, int64_t dimColA, double *buff
   for(int k=0;k<mp;++k) {
     for(int j=0;j<MR;++j) {
       for(int i=0;i<kc;++i) {
-        buffer[j + i*MR] = A[j*dimColA + i];
+        buffer[j + i*MR] = A[j*dimRowA + i];
       }
     }
     buffer = buffer + MR * kc;
-    A = A + MR * dimColA;
+    A = A + MR * dimRowA;
   }
+  //printf("\nPack A (%d %d)\n",dimRowA,dimColA);
+  //for(int i=0;i<kc;++i){
+  //  for(int j=0;j<MC;++j){
+  //    printf(" %5.3f ",buffer_start[i*MC + j]);
+  //  }
+  //  printf("\n");
+  //}
+  //exit(0);
 }
 
 // Pack B which is traversed column wise (NC rows and KC columns)
@@ -61,12 +102,20 @@ void packB(int64_t kc, double *B, int64_t dimRowB, int64_t dimColB, double *buff
   for(int k=0;k<np;++k) {
     for(int i=0;i<kc;++i) {
       for(int j=0;j<NR;++j) {
-        buffer[j + i*NR] = B[j + i*dimColB];
+        buffer[j + i*NR] = B[j + i*dimRowB];
       }
     }
     buffer = buffer + NR * kc;
     B = B + NR;
   }
+  //printf("\nPack B (%d %d)\n",dimRowB,dimColB);
+  //for(int i=0;i<kc;++i){
+  //  for(int j=0;j<NR;++j){
+  //    printf(" %5.3f ",buffer_start[i*NR + j]);
+  //  }
+  //  printf("\n");
+  //}
+  //exit(0);
 }
 
 //void packA(int64_t kc, double *A, int64_t incRowA, int64_t incColA, double *buffer) {

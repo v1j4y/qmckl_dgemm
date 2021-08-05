@@ -45,7 +45,9 @@ static int  idxlist[64] = {
 
 
 unsigned long long rdtsc(void);
+void fill_matrix_random(double *dA, int64_t dM, int64_t dN);
 void fill_matrix_ones(double *A, int64_t dim);
+void fill_matrix_uniform(double *A, int64_t M, int64_t N);
 void fill_matrix_zeros(double *A, int64_t dim);
 void print_matrix(double *A, int64_t M, int64_t N);
 void print_diff_matrix(double *A, double *B, int64_t M, int64_t N);
