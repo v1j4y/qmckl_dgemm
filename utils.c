@@ -28,6 +28,15 @@ void print_matrix(double *A, int64_t M, int64_t N) {
     }
 }
 
+void print_diff_matrix(double *A, double *B, int64_t M, int64_t N) {
+    for(int j=0;j<N;++j) {
+        for(int i=0;i<M;++i) {
+            printf(" %5.3f ",abs(A[i + j*M] - B[i + j*M]));
+        }
+        printf("\n");
+    }
+}
+
 // Pack A which is traversed row wise (MC rows and KC columns)
 void packA(int64_t kc, double *A, int64_t dimRowA, int64_t dimColA, double *buffer) {
   int64_t mp = MC / MR;
@@ -39,8 +48,8 @@ void packA(int64_t kc, double *A, int64_t dimRowA, int64_t dimColA, double *buff
         buffer[j + i*MR] = A[j*dimColA + i];
       }
     }
-    buffer = buffer_start + MR * kc;
-    A = A_start + MR * dimColA;
+    buffer = buffer + MR * kc;
+    A = A + MR * dimColA;
   }
 }
 
@@ -55,8 +64,8 @@ void packB(int64_t kc, double *B, int64_t dimRowB, int64_t dimColB, double *buff
         buffer[j + i*NR] = B[j + i*dimColB];
       }
     }
-    buffer = buffer_start + NR * kc;
-    B = B_start + NR;
+    buffer = buffer + NR * kc;
+    B = B + NR;
   }
 }
 

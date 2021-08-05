@@ -478,7 +478,7 @@ void dgemm_kernel_avx512_asm(int64_t kc, double *A, double *B, double *C, int64_
   )
 
     // C = C + AB
-    for(int j=0;j<NR;++j) {
+    for(int j=0;j<MR;++j) {
       double *cidxj = C + j*incRowC;
       //int    *idxlstj = idxlist + j * MR;
         //for(int i=0;i<(MR-8);i=i+8) {
@@ -490,22 +490,20 @@ void dgemm_kernel_avx512_asm(int64_t kc, double *A, double *B, double *C, int64_
             //int idx6 = idxlstj[i + 5];
             //int idx7 = idxlstj[i + 6];
             //int idx8 = idxlstj[i + 7];
-            cidxj[ 0] = cidxj[ 0] + AB[ 0];
-            cidxj[ 1] = cidxj[ 1] + AB[ 1];
-            cidxj[ 2] = cidxj[ 2] + AB[ 2];
-            cidxj[ 3] = cidxj[ 3] + AB[ 3];
-            cidxj[ 4] = cidxj[ 4] + AB[ 4];
-            cidxj[ 5] = cidxj[ 5] + AB[ 5];
-            cidxj[ 6] = cidxj[ 6] + AB[ 6];
-            cidxj[ 7] = cidxj[ 7] + AB[ 7];
-            cidxj[ 8] = cidxj[ 8] + AB[ 8];
-            cidxj[ 9] = cidxj[ 9] + AB[ 9];
-            cidxj[10] = cidxj[10] + AB[10];
-            cidxj[11] = cidxj[11] + AB[11];
-            cidxj[12] = cidxj[12] + AB[12];
-            cidxj[13] = cidxj[13] + AB[13];
-            cidxj[14] = cidxj[14] + AB[14];
-            cidxj[15] = cidxj[15] + AB[15];
+            cidxj[ 0] = cidxj[ 0] + AB[0*16 + j];
+            cidxj[ 1] = cidxj[ 1] + AB[1*16 + j];
+            cidxj[ 2] = cidxj[ 2] + AB[2*16 + j];
+            cidxj[ 3] = cidxj[ 3] + AB[3*16 + j];
+            cidxj[ 4] = cidxj[ 4] + AB[4*16 + j];
+            cidxj[ 5] = cidxj[ 5] + AB[5*16 + j];
+            cidxj[ 6] = cidxj[ 6] + AB[6*16 + j];
+            cidxj[ 7] = cidxj[ 7] + AB[7*16 + j];
+            cidxj[ 8] = cidxj[ 8] + AB[8*16 + j];
+            cidxj[ 9] = cidxj[ 9] + AB[9*16 + j];
+            cidxj[10] = cidxj[10] + AB[10*16 + j];
+            cidxj[11] = cidxj[11] + AB[11*16 + j];
+            cidxj[12] = cidxj[12] + AB[12*16 + j];
+            cidxj[13] = cidxj[13] + AB[13*16 + j];
             //printf("(%d %d) %5.3f\n",i,j,AB[i + j*MR]);
         //}
     }
