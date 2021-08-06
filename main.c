@@ -98,7 +98,7 @@ int main() {
     fill_matrix_zeros  (D, M*N);
     //print_matrix(A,M,K);
 
-    int64_t rep = 1;
+    int64_t rep = 10;
 
     const uint64_t t0 = rdtsc();
 
