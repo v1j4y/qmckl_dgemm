@@ -29,14 +29,14 @@ int dgemm_main(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA, int6
             int64_t kc = KC;
             packB(kc, &B[k*KC*incRowB + i*NC*incColB], incRowB, incColB, _B);
 
-            idxi = i * NC * incColC;
+            idxi = i * NC * incRowC;
             idxk = k * KC * incColA;
 
             for(int j=0;j<mb;++j) {
               //printf("===(%d %d)===\n",k,j);
                 packA(kc, &A[idxk + j*MC*incRowA], incRowA, incColA, _A);
 
-                dgemm_macro_kernel(MC, KC, NC, &C[idxi + j*MC*incRowC], incRowC, incColC, _A, _B);
+                dgemm_macro_kernel(MC, KC, NC, &C[idxi + j*MC*incColC], incRowC, incColC, _A, _B);
             }
         }
     }
@@ -83,14 +83,14 @@ int main() {
     K = MAT_DIM;
     int64_t incRowA = K;
     int64_t incRowB = N;
-    int64_t incRowC = N;
+    int64_t incRowC = M;
 
     A = (double *)malloc( M * K * sizeof(double));
     B = (double *)malloc( K * N * sizeof(double));
     C = (double *)malloc( M * N * sizeof(double));
     D = (double *)malloc( M * N * sizeof(double));
 
-    //fill_matrix_uniform(A, M,K);
+    //fill_matrix_ones   (A, M*K);
     //fill_matrix_uniform(B, K, N);
     fill_matrix_random(A, M,K);
     fill_matrix_random(B, K, N);
@@ -98,7 +98,7 @@ int main() {
     fill_matrix_zeros  (D, M*N);
     //print_matrix(A,M,K);
 
-    int64_t rep = 10;
+    int64_t rep = 1;
 
     const uint64_t t0 = rdtsc();
 
@@ -127,7 +127,7 @@ int main() {
 
     //print_matrix(D, M, N);
     //printf("\n-------------diff-----------------\n");
-    //print_diff_matrix(C,D, M, N);
+    //print_diff_matrix_AT_B(C,D, M, N);
 
     free(A);
     free(B);

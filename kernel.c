@@ -309,36 +309,47 @@ void proto_dgemm_asm(double *vecA, double *vecB, double *vecC, int64_t dimA, dou
 }
 
 void dgemm_kernel_avx512_asm_store(double *C, double *AB, int64_t incRowC) {
-    // C = C + AB
-    for(int j=0;j<MR;++j) {
-      double *cidxj = C + j*incRowC;
-      //int    *idxlstj = idxlist + j * MR;
-        //for(int i=0;i<(MR-8);i=i+8) {
-            //int idx1 = idxlstj[i + 0];
-            //int idx2 = idxlstj[i + 1];
-            //int idx3 = idxlstj[i + 2];
-            //int idx4 = idxlstj[i + 3];
-            //int idx5 = idxlstj[i + 4];
-            //int idx6 = idxlstj[i + 5];
-            //int idx7 = idxlstj[i + 6];
-            //int idx8 = idxlstj[i + 7];
-            cidxj[ 0] = cidxj[ 0] + AB[0*16 + j];
-            cidxj[ 1] = cidxj[ 1] + AB[1*16 + j];
-            cidxj[ 2] = cidxj[ 2] + AB[2*16 + j];
-            cidxj[ 3] = cidxj[ 3] + AB[3*16 + j];
-            cidxj[ 4] = cidxj[ 4] + AB[4*16 + j];
-            cidxj[ 5] = cidxj[ 5] + AB[5*16 + j];
-            cidxj[ 6] = cidxj[ 6] + AB[6*16 + j];
-            cidxj[ 7] = cidxj[ 7] + AB[7*16 + j];
-            cidxj[ 8] = cidxj[ 8] + AB[8*16 + j];
-            cidxj[ 9] = cidxj[ 9] + AB[9*16 + j];
-            cidxj[10] = cidxj[10] + AB[10*16 + j];
-            cidxj[11] = cidxj[11] + AB[11*16 + j];
-            cidxj[12] = cidxj[12] + AB[12*16 + j];
-            cidxj[13] = cidxj[13] + AB[13*16 + j];
-            //printf("(%d %d) %5.3f\n",i,j,AB[i + j*MR]);
-        //}
+    double dummy14 = 0.0; 
+    double dummy15=0.0;
+    for(int j=0;j<NR;++j) {
+      //for(int i=0;i<MR;i = i+8) {
+        //int i = 0;
+        C[j*incRowC +  0] = C[j*incRowC +  0] + AB[j*MR +  0];
+        C[j*incRowC +  1] = C[j*incRowC +  1] + AB[j*MR +  1];
+        C[j*incRowC +  2] = C[j*incRowC +  2] + AB[j*MR +  2];
+        C[j*incRowC +  3] = C[j*incRowC +  3] + AB[j*MR +  3];
+        C[j*incRowC +  4] = C[j*incRowC +  4] + AB[j*MR +  4];
+        C[j*incRowC +  5] = C[j*incRowC +  5] + AB[j*MR +  5];
+        C[j*incRowC +  6] = C[j*incRowC +  6] + AB[j*MR +  6];
+        C[j*incRowC +  7] = C[j*incRowC +  7] + AB[j*MR +  7];
+        C[j*incRowC +  8] = C[j*incRowC +  8] + AB[j*MR +  8];
+        C[j*incRowC +  9] = C[j*incRowC +  9] + AB[j*MR +  9];
+        C[j*incRowC + 10] = C[j*incRowC + 10] + AB[j*MR + 10];
+        C[j*incRowC + 11] = C[j*incRowC + 11] + AB[j*MR + 11];
+        C[j*incRowC + 12] = C[j*incRowC + 12] + AB[j*MR + 12];
+        C[j*incRowC + 13] = C[j*incRowC + 13] + AB[j*MR + 13];
+        C[j*incRowC + 14] = C[j*incRowC + 14] + AB[j*MR + 14];
+        C[j*incRowC + 15] = C[j*incRowC + 15] + AB[j*MR + 15];
+      //}
     }
+    // C = C + AB
+    //for(int j=0;j<MR;++j) {
+    //  double *cidxj = C + j*incRowC;
+    //  cidxj[ 0] = cidxj[ 0] + AB[0*16 + j];
+    //  cidxj[ 1] = cidxj[ 1] + AB[1*16 + j];
+    //  cidxj[ 2] = cidxj[ 2] + AB[2*16 + j];
+    //  cidxj[ 3] = cidxj[ 3] + AB[3*16 + j];
+    //  cidxj[ 4] = cidxj[ 4] + AB[4*16 + j];
+    //  cidxj[ 5] = cidxj[ 5] + AB[5*16 + j];
+    //  cidxj[ 6] = cidxj[ 6] + AB[6*16 + j];
+    //  cidxj[ 7] = cidxj[ 7] + AB[7*16 + j];
+    //  cidxj[ 8] = cidxj[ 8] + AB[8*16 + j];
+    //  cidxj[ 9] = cidxj[ 9] + AB[9*16 + j];
+    //  cidxj[10] = cidxj[10] + AB[10*16 + j];
+    //  cidxj[11] = cidxj[11] + AB[11*16 + j];
+    //  cidxj[12] = cidxj[12] + AB[12*16 + j];
+    //  cidxj[13] = cidxj[13] + AB[13*16 + j];
+    //}
     //printf("\nMatrx A\n");
     //for(int i=0;i<kc;++i){
     //  for(int j=0;j<MR;++j){
@@ -615,6 +626,8 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
         VFMADD231PD(ZMM(14), ZMM( 0), ZMM( 3)) // FMA and save to C zmm4 - zmm7
         VFMADD231PD(ZMM(15), ZMM( 1), ZMM( 3)) // FMA and save to C zmm4 - zmm7
 
+        //PREFETCH(0, MEM(RAX, 16*8)) // Preload B 0 - 1
+
         VBROADCASTSD(ZMM( 2), MEM(RBX, 6*8)) // Preload B 0 - 1
         VBROADCASTSD(ZMM( 3), MEM(RBX, 7*8)) // Preload B 0 - 1
         VFMADD231PD(ZMM(16), ZMM( 0), ZMM( 2)) // FMA and save to C zmm4 - zmm7
@@ -628,6 +641,8 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
         VFMADD231PD(ZMM(21), ZMM( 1), ZMM( 2)) // FMA and save to C zmm4 - zmm7
         VFMADD231PD(ZMM(22), ZMM( 0), ZMM( 3)) // FMA and save to C zmm4 - zmm7
         VFMADD231PD(ZMM(23), ZMM( 1), ZMM( 3)) // FMA and save to C zmm4 - zmm7
+
+        //PREFETCH(0, MEM(RBX, 14*8)) // Preload B 0 - 1
 
         VBROADCASTSD(ZMM( 2), MEM(RBX,10*8)) // Preload B 0 - 1
         VBROADCASTSD(ZMM( 3), MEM(RBX,11*8)) // Preload B 0 - 1
@@ -670,6 +685,8 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
         VFMADD231PD(ZMM(14), ZMM( 0), ZMM( 3)) // FMA and save to C zmm4 - zmm7
         VFMADD231PD(ZMM(15), ZMM( 1), ZMM( 3)) // FMA and save to C zmm4 - zmm7
 
+        //PREFETCH(0, MEM(RAX, 16*8)) // Preload B 0 - 1
+
         VBROADCASTSD(ZMM( 2), MEM(RBX, 6*8)) // Preload B 0 - 1
         VBROADCASTSD(ZMM( 3), MEM(RBX, 7*8)) // Preload B 0 - 1
         VFMADD231PD(ZMM(16), ZMM( 0), ZMM( 2)) // FMA and save to C zmm4 - zmm7
@@ -683,6 +700,8 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
         VFMADD231PD(ZMM(21), ZMM( 1), ZMM( 2)) // FMA and save to C zmm4 - zmm7
         VFMADD231PD(ZMM(22), ZMM( 0), ZMM( 3)) // FMA and save to C zmm4 - zmm7
         VFMADD231PD(ZMM(23), ZMM( 1), ZMM( 3)) // FMA and save to C zmm4 - zmm7
+
+        //PREFETCH(0, MEM(RBX, 14*8)) // Preload B 0 - 1
 
         VBROADCASTSD(ZMM( 2), MEM(RBX,10*8)) // Preload B 0 - 1
         VBROADCASTSD(ZMM( 3), MEM(RBX,11*8)) // Preload B 0 - 1
@@ -761,6 +780,7 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
 void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C, int64_t incRowC, int64_t incColC) {
     // AB = A * B
     double AB[MR*NR] __attribute__ ((aligned(64)));
+    //double AB[MR*MR] __attribute__ ((aligned(64)));
     double *tmpA = A;
     double *tmpB = B;
     uint64_t kl = (kc >> 2);
@@ -1343,7 +1363,8 @@ void dgemm_macro_kernel(int64_t mc, int64_t kc, int64_t nc, double *C, int64_t i
             //dgemm_kernel(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[i*MR*incRowC + j*NR*incColC], incRowC, incColC);
             //dgemm_kernel_sse_asm(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[i*MR*incRowC + j*NR*incColC], incRowC, incColC);
             //dgemm_kernel_avx512_mipp(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[i*MR*incRowC + j*NR*incColC], incRowC, incColC);
-            dgemm_kernel_avx512_asm_unroll2(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[i*MR*incRowC + j*NR*incColC], incRowC, incColC);
+            //dgemm_kernel_avx512_asm_unroll0(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[j*NR*incRowC + i*MR*incColC], incRowC, incColC);
+            dgemm_kernel_avx512_asm_unroll4(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[i*MR*incRowC + j*NR*incColC], incRowC, incColC);
           //printf("(%d %d) %5.3f\n",i,j, C[0]);
         }
     }

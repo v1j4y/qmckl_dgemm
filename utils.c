@@ -70,6 +70,15 @@ void print_diff_matrix(double *A, double *B, int64_t M, int64_t N) {
     }
 }
 
+void print_diff_matrix_AT_B(double *A, double *B, int64_t M, int64_t N) {
+    for(int j=0;j<N;++j) {
+        for(int i=0;i<M;++i) {
+            printf(" %5.3f ",abs(A[j + i*N] - B[i + j*M]));
+        }
+        printf("\n");
+    }
+}
+
 // Pack A which is traversed row wise (MC rows and KC columns)
 void packA(int64_t kc, double *A, int64_t dimRowA, int64_t dimColA, double *buffer) {
   int64_t mp = MC / MR;
