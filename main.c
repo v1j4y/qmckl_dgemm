@@ -33,7 +33,7 @@ int dgemm_main(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA, int6
             idxk = k * KC * incColA;
 
             for(int j=0;j<mb;++j) {
-              //printf("===(%d %d)===\n",k,j);
+              //printf("===(%d %d %d)===\n",k,idxi,j*MC*incColC);
                 packA(kc, &A[idxk + j*MC*incRowA], incRowA, incColA, _A);
 
                 dgemm_macro_kernel(MC, KC, NC, &C[idxi + j*MC*incColC], incRowC, incColC, _A, _B);
@@ -90,15 +90,15 @@ int main() {
     C = (double *)malloc( M * N * sizeof(double));
     D = (double *)malloc( M * N * sizeof(double));
 
-    //fill_matrix_ones   (A, M*K);
-    //fill_matrix_uniform(B, K, N);
+    //fill_matrix_uniform(A, M,K);
+    //fill_matrix_ones   (B, K* N);
     fill_matrix_random(A, M,K);
     fill_matrix_random(B, K, N);
     fill_matrix_zeros  (C, M*N);
     fill_matrix_zeros  (D, M*N);
     //print_matrix(A,M,K);
 
-    int64_t rep = 1;
+    int64_t rep = 10;
 
     const uint64_t t0 = rdtsc();
 
@@ -114,7 +114,7 @@ int main() {
     const uint64_t dt = rdtsc() - t0;
     printf("MyDGEMM = %f\n", 1e-9 * dt/rep);
 
-    //print_matrix(C, M, N);
+    //print_matrix(C, N, M);
 
     const uint64_t bt0 = rdtsc();
 

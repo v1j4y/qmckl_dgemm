@@ -309,29 +309,90 @@ void proto_dgemm_asm(double *vecA, double *vecB, double *vecC, int64_t dimA, dou
 }
 
 void dgemm_kernel_avx512_asm_store(double *C, double *AB, int64_t incRowC) {
-    double dummy14 = 0.0; 
-    double dummy15=0.0;
-    for(int j=0;j<NR;++j) {
-      //for(int i=0;i<MR;i = i+8) {
-        //int i = 0;
-        C[j*incRowC +  0] = C[j*incRowC +  0] + AB[j*MR +  0];
-        C[j*incRowC +  1] = C[j*incRowC +  1] + AB[j*MR +  1];
-        C[j*incRowC +  2] = C[j*incRowC +  2] + AB[j*MR +  2];
-        C[j*incRowC +  3] = C[j*incRowC +  3] + AB[j*MR +  3];
-        C[j*incRowC +  4] = C[j*incRowC +  4] + AB[j*MR +  4];
-        C[j*incRowC +  5] = C[j*incRowC +  5] + AB[j*MR +  5];
-        C[j*incRowC +  6] = C[j*incRowC +  6] + AB[j*MR +  6];
-        C[j*incRowC +  7] = C[j*incRowC +  7] + AB[j*MR +  7];
-        C[j*incRowC +  8] = C[j*incRowC +  8] + AB[j*MR +  8];
-        C[j*incRowC +  9] = C[j*incRowC +  9] + AB[j*MR +  9];
-        C[j*incRowC + 10] = C[j*incRowC + 10] + AB[j*MR + 10];
-        C[j*incRowC + 11] = C[j*incRowC + 11] + AB[j*MR + 11];
-        C[j*incRowC + 12] = C[j*incRowC + 12] + AB[j*MR + 12];
-        C[j*incRowC + 13] = C[j*incRowC + 13] + AB[j*MR + 13];
-        C[j*incRowC + 14] = C[j*incRowC + 14] + AB[j*MR + 14];
-        C[j*incRowC + 15] = C[j*incRowC + 15] + AB[j*MR + 15];
-      //}
-    }
+    
+    uint64_t kl = ( NR >> 0);
+
+  BEGIN_ASM()
+
+    VXORPD(ZMM( 0), ZMM( 0), ZMM( 0))
+    VXORPD(ZMM( 1), ZMM( 1), ZMM( 1))
+
+    MOV(RSI, VAR(k)) // Loop id
+    MOV(RAX, VAR(a)) // Vec A
+    MOV(RBX, VAR(b)) // Vec B
+    MOV(RCX, VAR(s)) // incRowC
+
+    TEST(RSI, RSI)
+    JE(K_LOOP)
+
+      LABEL(LOOP1)
+
+        VMOVUPD(ZMM( 0), MEM(RAX, 0*8)) // AB -> ZMM
+        VADDPD(ZMM( 1), ZMM( 0), MEM(RBX, 0*8)) // ZMM -> C
+        VMOVUPD(MEM(RBX, 0*8), ZMM( 1)) // AB -> ZMM
+
+        LEA(RAX, MEM(RAX,8*8))
+        LEA(RBX, MEM(RBX,8*8))
+
+        VMOVUPD(ZMM( 0), MEM(RAX, 0*8)) // AB -> ZMM
+        VADDPD(ZMM( 1), ZMM( 0), MEM(RBX, 0*8)) // ZMM -> C
+        VMOVUPD(MEM(RBX, 0*8), ZMM( 1)) // AB -> ZMM
+
+        LEA(RAX, MEM(RAX,8*8))
+        LEA(RBX, MEM(RBX,RCX,8))
+
+      DEC(RSI)
+      JNE(LOOP1)
+
+    LABEL(K_LOOP)
+
+    VZEROUPPER()
+
+  END_ASM 
+  (
+   : // output
+   : // input
+   [k] "m"(kl),
+   [a] "m"(AB),
+   [b] "m"(C),
+   [s] "m"(incRowC-8)
+   : // clobber
+        "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8", "r9", "r10", "r11", "r12",
+          "r13", "r14", "r15", "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5",
+          "zmm6", "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
+          "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19", "zmm20", "zmm21",
+          "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
+          "zmm30", "zmm31", "memory"
+  )
+
+    //for(int j=0;j<NR;++j) {
+    //  //for(int i=0;i<MR;i = i+8) {
+    //    //int i = 0;
+    //    C[j*incRowC +  0] = C[j*incRowC +  0] + AB[j*MR +  0];
+    //    C[j*incRowC +  1] = C[j*incRowC +  1] + AB[j*MR +  1];
+    //    C[j*incRowC +  2] = C[j*incRowC +  2] + AB[j*MR +  2];
+    //    C[j*incRowC +  3] = C[j*incRowC +  3] + AB[j*MR +  3];
+    //    C[j*incRowC +  4] = C[j*incRowC +  4] + AB[j*MR +  4];
+    //    C[j*incRowC +  5] = C[j*incRowC +  5] + AB[j*MR +  5];
+    //    C[j*incRowC +  6] = C[j*incRowC +  6] + AB[j*MR +  6];
+    //    C[j*incRowC +  7] = C[j*incRowC +  7] + AB[j*MR +  7];
+    //    C[j*incRowC +  8] = C[j*incRowC +  8] + AB[j*MR +  8];
+    //    C[j*incRowC +  9] = C[j*incRowC +  9] + AB[j*MR +  9];
+    //    C[j*incRowC + 10] = C[j*incRowC + 10] + AB[j*MR + 10];
+    //    C[j*incRowC + 11] = C[j*incRowC + 11] + AB[j*MR + 11];
+    //    C[j*incRowC + 12] = C[j*incRowC + 12] + AB[j*MR + 12];
+    //    C[j*incRowC + 13] = C[j*incRowC + 13] + AB[j*MR + 13];
+    //    C[j*incRowC + 14] = C[j*incRowC + 14] + AB[j*MR + 14];
+    //    C[j*incRowC + 15] = C[j*incRowC + 15] + AB[j*MR + 15];
+    //  //}
+    //}
+    //for(int j=0;j<NR;++j) {
+    //  for(int i=0;i<MR;++i) {
+    //    printf(" %5.3f ",C[j*incRowC + i]);
+    //  }
+    //  printf("\n");
+    //}
+    //exit(0);
     // C = C + AB
     //for(int j=0;j<MR;++j) {
     //  double *cidxj = C + j*incRowC;
@@ -1364,7 +1425,7 @@ void dgemm_macro_kernel(int64_t mc, int64_t kc, int64_t nc, double *C, int64_t i
             //dgemm_kernel_sse_asm(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[i*MR*incRowC + j*NR*incColC], incRowC, incColC);
             //dgemm_kernel_avx512_mipp(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[i*MR*incRowC + j*NR*incColC], incRowC, incColC);
             //dgemm_kernel_avx512_asm_unroll0(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[j*NR*incRowC + i*MR*incColC], incRowC, incColC);
-            dgemm_kernel_avx512_asm_unroll4(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[i*MR*incRowC + j*NR*incColC], incRowC, incColC);
+            dgemm_kernel_avx512_asm_unroll4(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[i*MR*incColC + j*NR*incRowC], incRowC, incColC);
           //printf("(%d %d) %5.3f\n",i,j, C[0]);
         }
     }
