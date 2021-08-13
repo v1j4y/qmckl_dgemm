@@ -4,7 +4,7 @@ CC=${CC:-icpc}
 CCFLAGS=(
  -O3 
  -g
- -march=native
+ -xCORE-AVX512
  -qopt-zmm-usage=high
  -I/users/p18005/gopalchi/gemm_asm/MIPP/src -I.
 )

@@ -327,6 +327,7 @@ void dgemm_kernel_avx512_asm_store(double *C, double *AB, int64_t incRowC) {
 
       LABEL(LOOP1)
 
+        PREFETCH(1, MEM(RBX, RCX,8)) // Preload B 0 - 1
         VMOVUPD(ZMM( 0), MEM(RAX, 0*8)) // AB -> ZMM
         VADDPD(ZMM( 1), ZMM( 0), MEM(RBX, 0*8)) // ZMM -> C
         VMOVUPD(MEM(RBX, 0*8), ZMM( 1)) // AB -> ZMM
@@ -892,7 +893,9 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
     MOV(RSI, VAR(k)) // Loop id
     MOV(RAX, VAR(a)) // Vec A
     MOV(RBX, VAR(b)) // Vec B
-    MOV(RCX, VAR(c)) // Vec B
+    MOV(RCX, VAR(c)) // Vec C
+    MOV(RDX, VAR(d)) // Step C
+    MOV( R8, VAR(e)) // Step C
 
     TEST(RSI, RSI)
     JE(K_LOOP)
@@ -902,6 +905,7 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
         VMOVUPD(ZMM( 0), MEM(RAX, 0*8)) // Preload A 0 - 8
         VMOVUPD(ZMM( 1), MEM(RAX, 8*8)) // Preload A 9 - 15
 
+        //PREFETCH(0, MEM(RBX, 8*8)) // Preload B 0 - 1
         VBROADCASTSD(ZMM( 2), MEM(RBX, 0*8)) // Preload B 0 - 1
         VBROADCASTSD(ZMM( 3), MEM(RBX, 1*8)) // Preload B 0 - 1
         VFMADD231PD(ZMM( 4), ZMM( 0), ZMM( 2)) // FMA and save to C zmm4 - zmm7
@@ -930,6 +934,7 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
         VFMADD231PD(ZMM(18), ZMM( 0), ZMM( 3)) // FMA and save to C zmm4 - zmm7
         VFMADD231PD(ZMM(19), ZMM( 1), ZMM( 3)) // FMA and save to C zmm4 - zmm7
 
+        //PREFETCH(0, MEM(RBX, 16*8)) // Preload B 0 - 1
         VBROADCASTSD(ZMM( 2), MEM(RBX, 8*8)) // Preload B 0 - 1
         VBROADCASTSD(ZMM( 3), MEM(RBX, 9*8)) // Preload B 0 - 1
         VFMADD231PD(ZMM(20), ZMM( 0), ZMM( 2)) // FMA and save to C zmm4 - zmm7
@@ -964,6 +969,7 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
         VFMADD231PD(ZMM( 6), ZMM( 0), ZMM( 3)) // FMA and save to C zmm4 - zmm7
         VFMADD231PD(ZMM( 7), ZMM( 1), ZMM( 3)) // FMA and save to C zmm4 - zmm7
 
+        //PREFETCH(0, MEM(RBX, 10*8)) // Preload B 0 - 1
         VBROADCASTSD(ZMM( 2), MEM(RBX, 2*8)) // Preload B 0 - 1
         VBROADCASTSD(ZMM( 3), MEM(RBX, 3*8)) // Preload B 0 - 1
         VFMADD231PD(ZMM( 8), ZMM( 0), ZMM( 2)) // FMA and save to C zmm4 - zmm7
@@ -992,6 +998,7 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
         VFMADD231PD(ZMM(22), ZMM( 0), ZMM( 3)) // FMA and save to C zmm4 - zmm7
         VFMADD231PD(ZMM(23), ZMM( 1), ZMM( 3)) // FMA and save to C zmm4 - zmm7
 
+        //PREFETCH(0, MEM(RBX, 20*8)) // Preload B 0 - 1
         VBROADCASTSD(ZMM( 2), MEM(RBX,10*8)) // Preload B 0 - 1
         VBROADCASTSD(ZMM( 3), MEM(RBX,11*8)) // Preload B 0 - 1
         VFMADD231PD(ZMM(24), ZMM( 0), ZMM( 2)) // FMA and save to C zmm4 - zmm7
@@ -1026,6 +1033,7 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
         VFMADD231PD(ZMM(10), ZMM( 0), ZMM( 3)) // FMA and save to C zmm4 - zmm7
         VFMADD231PD(ZMM(11), ZMM( 1), ZMM( 3)) // FMA and save to C zmm4 - zmm7
 
+        //PREFETCH(0, MEM(RBX, 12*8)) // Preload B 0 - 1
         VBROADCASTSD(ZMM( 2), MEM(RBX, 4*8)) // Preload B 0 - 1
         VBROADCASTSD(ZMM( 3), MEM(RBX, 5*8)) // Preload B 0 - 1
         VFMADD231PD(ZMM(12), ZMM( 0), ZMM( 2)) // FMA and save to C zmm4 - zmm7
@@ -1054,6 +1062,7 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
         VFMADD231PD(ZMM(26), ZMM( 0), ZMM( 3)) // FMA and save to C zmm4 - zmm7
         VFMADD231PD(ZMM(27), ZMM( 1), ZMM( 3)) // FMA and save to C zmm4 - zmm7
 
+        //PREFETCH(0, MEM(RBX, 20*8)) // Preload B 0 - 1
         VBROADCASTSD(ZMM( 2), MEM(RBX,12*8)) // Preload B 0 - 1
         VBROADCASTSD(ZMM( 3), MEM(RBX,13*8)) // Preload B 0 - 1
         VFMADD231PD(ZMM(28), ZMM( 0), ZMM( 2)) // FMA and save to C zmm4 - zmm7
@@ -1088,6 +1097,7 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
         VFMADD231PD(ZMM(14), ZMM( 0), ZMM( 3)) // FMA and save to C zmm4 - zmm7
         VFMADD231PD(ZMM(15), ZMM( 1), ZMM( 3)) // FMA and save to C zmm4 - zmm7
 
+        //PREFETCH(0, MEM(RBX, 14*8)) // Preload B 0 - 1
         VBROADCASTSD(ZMM( 2), MEM(RBX, 6*8)) // Preload B 0 - 1
         VBROADCASTSD(ZMM( 3), MEM(RBX, 7*8)) // Preload B 0 - 1
         VFMADD231PD(ZMM(16), ZMM( 0), ZMM( 2)) // FMA and save to C zmm4 - zmm7
@@ -1124,34 +1134,152 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
 
     LABEL(K_LOOP)
 
-    VMOVUPD(MEM(RCX, 0*8), ZMM( 4)) // Store res in C
-    VMOVUPD(MEM(RCX, 8*8), ZMM( 5)) // Store res in C
-    VMOVUPD(MEM(RCX,16*8), ZMM( 6)) // Store res in C
-    VMOVUPD(MEM(RCX,24*8), ZMM( 7)) // Store res in C
-    VMOVUPD(MEM(RCX,32*8), ZMM( 8)) // Store res in C
-    VMOVUPD(MEM(RCX,40*8), ZMM( 9)) // Store res in C
-    VMOVUPD(MEM(RCX,48*8), ZMM(10)) // Store res in C
-    VMOVUPD(MEM(RCX,56*8), ZMM(11)) // Store res in C
-    VMOVUPD(MEM(RCX,64*8), ZMM(12)) // Store res in C
-    VMOVUPD(MEM(RCX,72*8), ZMM(13)) // Store res in C
-    VMOVUPD(MEM(RCX,80*8), ZMM(14)) // Store res in C
-    VMOVUPD(MEM(RCX,88*8), ZMM(15)) // Store res in C
-    VMOVUPD(MEM(RCX,96*8), ZMM(16)) // Store res in C
-    VMOVUPD(MEM(RCX,104*8), ZMM(17)) // Store res in C
-    VMOVUPD(MEM(RCX,112*8 +  0*8), ZMM(18)) // Store res in C
-    VMOVUPD(MEM(RCX,112*8 +  8*8), ZMM(19)) // Store res in C
-    VMOVUPD(MEM(RCX,112*8 + 16*8), ZMM(20)) // Store res in C
-    VMOVUPD(MEM(RCX,112*8 + 24*8), ZMM(21)) // Store res in C
-    VMOVUPD(MEM(RCX,112*8 + 32*8), ZMM(22)) // Store res in C
-    VMOVUPD(MEM(RCX,112*8 + 40*8), ZMM(23)) // Store res in C
-    VMOVUPD(MEM(RCX,112*8 + 48*8), ZMM(24)) // Store res in C
-    VMOVUPD(MEM(RCX,112*8 + 56*8), ZMM(25)) // Store res in C
-    VMOVUPD(MEM(RCX,112*8 + 64*8), ZMM(26)) // Store res in C
-    VMOVUPD(MEM(RCX,112*8 + 72*8), ZMM(27)) // Store res in C
-    VMOVUPD(MEM(RCX,112*8 + 80*8), ZMM(28)) // Store res in C
-    VMOVUPD(MEM(RCX,112*8 + 88*8), ZMM(29)) // Store res in C
-    VMOVUPD(MEM(RCX,112*8 + 96*8), ZMM(30)) // Store res in C
-    VMOVUPD(MEM(RCX,112*8 + 104*8), ZMM(31)) // Store res in C
+    //VMOVUPD(MEM(RCX, 0*8), ZMM( 4)) // Store res in C
+    //VMOVUPD(MEM(RCX, 8*8), ZMM( 5)) // Store res in C
+    //VMOVUPD(MEM(RCX,16*8), ZMM( 6)) // Store res in C
+    //VMOVUPD(MEM(RCX,24*8), ZMM( 7)) // Store res in C
+    //VMOVUPD(MEM(RCX,32*8), ZMM( 8)) // Store res in C
+    //VMOVUPD(MEM(RCX,40*8), ZMM( 9)) // Store res in C
+    //VMOVUPD(MEM(RCX,48*8), ZMM(10)) // Store res in C
+    //VMOVUPD(MEM(RCX,56*8), ZMM(11)) // Store res in C
+    //VMOVUPD(MEM(RCX,64*8), ZMM(12)) // Store res in C
+    //VMOVUPD(MEM(RCX,72*8), ZMM(13)) // Store res in C
+    //VMOVUPD(MEM(RCX,80*8), ZMM(14)) // Store res in C
+    //VMOVUPD(MEM(RCX,88*8), ZMM(15)) // Store res in C
+    //VMOVUPD(MEM(RCX,96*8), ZMM(16)) // Store res in C
+    //VMOVUPD(MEM(RCX,104*8), ZMM(17)) // Store res in C
+    //VMOVUPD(MEM(RCX,112*8 +  0*8), ZMM(18)) // Store res in C
+    //VMOVUPD(MEM(RCX,112*8 +  8*8), ZMM(19)) // Store res in C
+    //VMOVUPD(MEM(RCX,112*8 + 16*8), ZMM(20)) // Store res in C
+    //VMOVUPD(MEM(RCX,112*8 + 24*8), ZMM(21)) // Store res in C
+    //VMOVUPD(MEM(RCX,112*8 + 32*8), ZMM(22)) // Store res in C
+    //VMOVUPD(MEM(RCX,112*8 + 40*8), ZMM(23)) // Store res in C
+    //VMOVUPD(MEM(RCX,112*8 + 48*8), ZMM(24)) // Store res in C
+    //VMOVUPD(MEM(RCX,112*8 + 56*8), ZMM(25)) // Store res in C
+    //VMOVUPD(MEM(RCX,112*8 + 64*8), ZMM(26)) // Store res in C
+    //VMOVUPD(MEM(RCX,112*8 + 72*8), ZMM(27)) // Store res in C
+    //VMOVUPD(MEM(RCX,112*8 + 80*8), ZMM(28)) // Store res in C
+    //VMOVUPD(MEM(RCX,112*8 + 88*8), ZMM(29)) // Store res in C
+    //VMOVUPD(MEM(RCX,112*8 + 96*8), ZMM(30)) // Store res in C
+    //VMOVUPD(MEM(RCX,112*8 + 104*8), ZMM(31)) // Store res in C
+
+    PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
+    VADDPD(ZMM( 1), ZMM( 4), MEM(RCX, 0*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
+
+    VADDPD(ZMM( 1), ZMM( 5), MEM(RCX, 8*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
+
+    LEA(RCX, MEM(RCX,RDX,8))
+
+    VADDPD(ZMM( 1), ZMM( 6), MEM(RCX, 0*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
+
+    VADDPD(ZMM( 1), ZMM( 7), MEM(RCX, 8*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
+
+    LEA(RCX, MEM(RCX,RDX,8))
+
+    PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
+    VADDPD(ZMM( 1), ZMM( 8), MEM(RCX, 0*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
+
+    VADDPD(ZMM( 1), ZMM( 9), MEM(RCX, 8*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
+
+    LEA(RCX, MEM(RCX,RDX,8))
+
+    VADDPD(ZMM( 1), ZMM(10), MEM(RCX, 0*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
+
+    VADDPD(ZMM( 1), ZMM(11), MEM(RCX, 8*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
+
+    LEA(RCX, MEM(RCX,RDX,8))
+
+    PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
+    VADDPD(ZMM( 1), ZMM(12), MEM(RCX, 0*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
+
+    VADDPD(ZMM( 1), ZMM(13), MEM(RCX, 8*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
+
+    LEA(RCX, MEM(RCX,RDX,8))
+
+    VADDPD(ZMM( 1), ZMM(14), MEM(RCX, 0*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
+
+    VADDPD(ZMM( 1), ZMM(15), MEM(RCX, 8*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
+
+    LEA(RCX, MEM(RCX,RDX,8))
+
+    PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
+    VADDPD(ZMM( 1), ZMM(16), MEM(RCX, 0*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
+
+    VADDPD(ZMM( 1), ZMM(17), MEM(RCX, 8*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
+
+    LEA(RCX, MEM(RCX,RDX,8))
+
+    VADDPD(ZMM( 1), ZMM(18), MEM(RCX, 0*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
+
+    VADDPD(ZMM( 1), ZMM(19), MEM(RCX, 8*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
+
+    LEA(RCX, MEM(RCX,RDX,8))
+
+    PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
+    VADDPD(ZMM( 1), ZMM(20), MEM(RCX, 0*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
+
+    VADDPD(ZMM( 1), ZMM(21), MEM(RCX, 8*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
+
+    LEA(RCX, MEM(RCX,RDX,8))
+
+    VADDPD(ZMM( 1), ZMM(22), MEM(RCX, 0*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
+
+    VADDPD(ZMM( 1), ZMM(23), MEM(RCX, 8*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
+
+    LEA(RCX, MEM(RCX,RDX,8))
+
+    PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
+    VADDPD(ZMM( 1), ZMM(24), MEM(RCX, 0*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
+
+    VADDPD(ZMM( 1), ZMM(25), MEM(RCX, 8*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
+
+    LEA(RCX, MEM(RCX,RDX,8))
+
+    VADDPD(ZMM( 1), ZMM(26), MEM(RCX, 0*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
+
+    VADDPD(ZMM( 1), ZMM(27), MEM(RCX, 8*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
+
+    LEA(RCX, MEM(RCX,RDX,8))
+
+    PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
+    VADDPD(ZMM( 1), ZMM(28), MEM(RCX, 0*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
+
+    VADDPD(ZMM( 1), ZMM(29), MEM(RCX, 8*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
+
+    LEA(RCX, MEM(RCX,RDX,8))
+
+    VADDPD(ZMM( 1), ZMM(30), MEM(RCX, 0*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
+
+    VADDPD(ZMM( 1), ZMM(31), MEM(RCX, 8*8)) // ZMM -> C
+    VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
+
 
     VZEROUPPER()
 
@@ -1162,7 +1290,9 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
    [k] "m"(kl),
    [a] "m"(A),
    [b] "m"(B),
-   [c] "m"(AB)
+   [c] "m"(C),
+   [d] "m"(incRowC),
+   [e] "m"((incRowC)*2)
    : // clobber
         "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8", "r9", "r10", "r11", "r12",
           "r13", "r14", "r15", "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5",
@@ -1172,7 +1302,7 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
           "zmm30", "zmm31", "memory"
   )
 
-    dgemm_kernel_avx512_asm_store(C, AB, incRowC);
+    //dgemm_kernel_avx512_asm_store(C, AB, incRowC);
 
 }
 
