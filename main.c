@@ -23,8 +23,11 @@ int dgemm_main(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA, int6
     int64_t kb = K / KC;
     int64_t idxi = 0;
     int64_t idxk = 0;
+    int64_t nmbnb = 0;
+    int64_t nmbnb_prev = 0;
 
     for(int i=0;i<nb;++i) {
+        nmbnb_prev = nmbnb;
         for(int k=0;k<kb;++k) {
             int64_t kc = KC;
             packB(kc, &B[k*KC*incRowB + i*NC*incColB], incRowB, incColB, _B);
@@ -36,8 +39,11 @@ int dgemm_main(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA, int6
               //printf("===(%d %d %d)===\n",k,idxi,j*MC*incColC);
                 packA(kc, &A[idxk + j*MC*incRowA], incRowA, incColA, _A);
 
-                dgemm_macro_kernel(MC, KC, NC, &C[idxi + j*MC*incColC], incRowC, incColC, _A, _B);
+                //dgemm_macro_kernel(MC, KC, NC, &C[idxi + j*MC*incColC], incRowC, incColC, _A, _B);
+                dgemm_macro_kernel(MC, KC, NC, &C[nmbnb*NC*MC], incRowC, incColC, _A, _B);
+                nmbnb = nmbnb + 1;
             }
+            if(k < (kb-1)) nmbnb = nmbnb_prev;
         }
     }
 
@@ -90,15 +96,15 @@ int main() {
     C = (double *)malloc( M * N * sizeof(double));
     D = (double *)malloc( M * N * sizeof(double));
 
-    //fill_matrix_uniform(A, M,K);
-    //fill_matrix_ones   (B, K* N);
+    //fill_matrix_ones   (A, M*K);
+    //fill_matrix_uniform(B, K, N);
     fill_matrix_random(A, M,K);
     fill_matrix_random(B, K, N);
     fill_matrix_zeros  (C, M*N);
     fill_matrix_zeros  (D, M*N);
     //print_matrix(A,M,K);
 
-    int64_t rep = 10;
+    int64_t rep = 1;
 
     const uint64_t t0 = rdtsc();
 
@@ -114,7 +120,7 @@ int main() {
     const uint64_t dt = rdtsc() - t0;
     printf("MyDGEMM = %f\n", 1e-9 * dt/rep);
 
-    //print_matrix(C, N, M);
+    print_matrix_ASer(C, N, M);
 
     const uint64_t bt0 = rdtsc();
 
@@ -125,9 +131,10 @@ int main() {
     const uint64_t bdt = rdtsc() - bt0;
     printf("BLAS DGEMM = %f\n", 1e-9 * bdt/rep);
 
-    //print_matrix(D, M, N);
-    //printf("\n-------------diff-----------------\n");
+    print_matrix(D, M, N);
+    printf("\n-------------diff-----------------\n");
     //print_diff_matrix_AT_B(C,D, M, N);
+    print_diff_matrix_ASer_B(C,D, M, N);
 
     free(A);
     free(B);

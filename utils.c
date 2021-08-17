@@ -53,8 +53,8 @@ void fill_matrix_zeros(double *A, int64_t dim) {
 }
 
 void print_matrix(double *A, int64_t M, int64_t N) {
-    for(int j=0;j<M;++j) {
-        for(int i=0;i<N;++i) {
+    for(int i=0;i<N;++i) {
+        for(int j=0;j<M;++j) {
             printf(" %5.3f ",A[i + j*N]);
         }
         printf("\n");
@@ -70,10 +70,55 @@ void print_diff_matrix(double *A, double *B, int64_t M, int64_t N) {
     }
 }
 
+void print_matrix_ASer(double *A, int64_t M, int64_t N) {
+    int64_t mb = M / MC;
+    int64_t nb = N / NC;
+    int64_t mp = MC / MR;
+    int64_t np = NC / NR;
+    int64_t idx = 0;
+    for(int i=0;i<N;++i) {
+        for(int j=0;j<M;++j) {
+          int64_t kmc = ( j / MC );
+          int64_t lnc = ( i / NC );
+          int64_t kmr = ( j - kmc * MC ) / MR;
+          int64_t lnr = ( i - lnc * NC ) / NR;
+          int64_t k   = ( ( j - kmc * MC ) - ( kmr * MR ) );
+          int64_t l   = ( ( i - lnc * NC ) - ( lnr * NR ) );
+          //printf("\n (%d,%d) knc = %ld lmc = %ld\n",i,j, knc, lmc);
+          //printf(" knr = %ld lmr = %ld\n",knr, lmr);
+          //printf(" k   = %ld l   = %ld\n",k, l);
+          //printf(" id = %ld\n",(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k);
+          printf(" %5.3f ",A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k]);
+          //printf(" %5.3f ",A[idx]);
+          //idx = idx + 1;
+        }
+        printf("\n");
+    }
+}
+
 void print_diff_matrix_AT_B(double *A, double *B, int64_t M, int64_t N) {
     for(int j=0;j<N;++j) {
         for(int i=0;i<M;++i) {
             printf(" %5.3f ",abs(A[j + i*N] - B[i + j*M]));
+        }
+        printf("\n");
+    }
+}
+
+void print_diff_matrix_ASer_B(double *A, double *B, int64_t M, int64_t N) {
+    int64_t mb = M / MC;
+    int64_t nb = N / NC;
+    int64_t mp = MC / MR;
+    int64_t np = NC / NR;
+    for(int i=0;i<N;++i) {
+        for(int j=0;j<M;++j) {
+          int64_t kmc = ( j / MC );
+          int64_t lnc = ( i / NC );
+          int64_t kmr = ( j - kmc * MC ) / MR;
+          int64_t lnr = ( i - lnc * NC ) / NR;
+          int64_t k   = ( ( j - kmc * MC ) - ( kmr * MR ) );
+          int64_t l   = ( ( i - lnc * NC ) - ( lnr * NR ) );
+          printf(" %5.3f ",abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[i + j*N]));
         }
         printf("\n");
     }
