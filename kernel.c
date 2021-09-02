@@ -847,20 +847,9 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
     double *tmpB = B;
     uint64_t kl = (kc >> 2);
 
-    //for(int l=0;l<( MR * NR ) - 4;l = l + 4) {
-    //    AB[l + 0] = 0.0;
-    //    AB[l + 1] = 0.0;
-    //    AB[l + 2] = 0.0;
-    //    AB[l + 3] = 0.0;
-    //}
-
 
   BEGIN_ASM()
 
-    VXORPD(ZMM( 0), ZMM( 0), ZMM( 0))
-    VXORPD(ZMM( 1), ZMM( 1), ZMM( 1))
-    VXORPD(ZMM( 2), ZMM( 2), ZMM( 2))
-    VXORPD(ZMM( 3), ZMM( 3), ZMM( 3))
     VXORPD(ZMM( 4), ZMM( 4), ZMM( 4))
     VXORPD(ZMM( 5), ZMM( 5), ZMM( 5))
     VXORPD(ZMM( 6), ZMM( 6), ZMM( 6))
@@ -1134,36 +1123,7 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
 
     LABEL(K_LOOP)
 
-    //VMOVUPD(MEM(RCX, 0*8), ZMM( 4)) // Store res in C
-    //VMOVUPD(MEM(RCX, 8*8), ZMM( 5)) // Store res in C
-    //VMOVUPD(MEM(RCX,16*8), ZMM( 6)) // Store res in C
-    //VMOVUPD(MEM(RCX,24*8), ZMM( 7)) // Store res in C
-    //VMOVUPD(MEM(RCX,32*8), ZMM( 8)) // Store res in C
-    //VMOVUPD(MEM(RCX,40*8), ZMM( 9)) // Store res in C
-    //VMOVUPD(MEM(RCX,48*8), ZMM(10)) // Store res in C
-    //VMOVUPD(MEM(RCX,56*8), ZMM(11)) // Store res in C
-    //VMOVUPD(MEM(RCX,64*8), ZMM(12)) // Store res in C
-    //VMOVUPD(MEM(RCX,72*8), ZMM(13)) // Store res in C
-    //VMOVUPD(MEM(RCX,80*8), ZMM(14)) // Store res in C
-    //VMOVUPD(MEM(RCX,88*8), ZMM(15)) // Store res in C
-    //VMOVUPD(MEM(RCX,96*8), ZMM(16)) // Store res in C
-    //VMOVUPD(MEM(RCX,104*8), ZMM(17)) // Store res in C
-    //VMOVUPD(MEM(RCX,112*8 +  0*8), ZMM(18)) // Store res in C
-    //VMOVUPD(MEM(RCX,112*8 +  8*8), ZMM(19)) // Store res in C
-    //VMOVUPD(MEM(RCX,112*8 + 16*8), ZMM(20)) // Store res in C
-    //VMOVUPD(MEM(RCX,112*8 + 24*8), ZMM(21)) // Store res in C
-    //VMOVUPD(MEM(RCX,112*8 + 32*8), ZMM(22)) // Store res in C
-    //VMOVUPD(MEM(RCX,112*8 + 40*8), ZMM(23)) // Store res in C
-    //VMOVUPD(MEM(RCX,112*8 + 48*8), ZMM(24)) // Store res in C
-    //VMOVUPD(MEM(RCX,112*8 + 56*8), ZMM(25)) // Store res in C
-    //VMOVUPD(MEM(RCX,112*8 + 64*8), ZMM(26)) // Store res in C
-    //VMOVUPD(MEM(RCX,112*8 + 72*8), ZMM(27)) // Store res in C
-    //VMOVUPD(MEM(RCX,112*8 + 80*8), ZMM(28)) // Store res in C
-    //VMOVUPD(MEM(RCX,112*8 + 88*8), ZMM(29)) // Store res in C
-    //VMOVUPD(MEM(RCX,112*8 + 96*8), ZMM(30)) // Store res in C
-    //VMOVUPD(MEM(RCX,112*8 + 104*8), ZMM(31)) // Store res in C
-
-    //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM( 4), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1181,6 +1141,7 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
     LEA(RCX, MEM(RCX,16*8))
 
     //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM( 8), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1198,6 +1159,7 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
     LEA(RCX, MEM(RCX,16*8))
 
     //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(12), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1215,6 +1177,7 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
     LEA(RCX, MEM(RCX,16*8))
 
     //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(16), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1232,6 +1195,7 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
     LEA(RCX, MEM(RCX,16*8))
 
     //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(20), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1249,6 +1213,7 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
     LEA(RCX, MEM(RCX,16*8))
 
     //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(24), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1266,6 +1231,7 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
     LEA(RCX, MEM(RCX,16*8))
 
     //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(28), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1549,6 +1515,7 @@ void dgemm_macro_kernel(int64_t mc, int64_t kc, int64_t nc, double *C, int64_t i
     int64_t mp = MC / MR;
     int64_t np = NC / NR;
     int64_t nmcnc = 0;
+    int64_t MRNR = MR*NR;
 
     for(int j=0;j<np;++j) {
         for(int i=0;i<mp;++i) {
@@ -1556,7 +1523,7 @@ void dgemm_macro_kernel(int64_t mc, int64_t kc, int64_t nc, double *C, int64_t i
             //dgemm_kernel_sse_asm(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[i*MR*incRowC + j*NR*incColC], incRowC, incColC);
             //dgemm_kernel_avx512_mipp(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[i*MR*incRowC + j*NR*incColC], incRowC, incColC);
             //dgemm_kernel_avx512_asm_unroll0(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[j*NR*incRowC + i*MR*incColC], incRowC, incColC);
-            dgemm_kernel_avx512_asm_unroll4(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[nmcnc*MR*NR], incRowC, incColC);
+            dgemm_kernel_avx512_asm_unroll4(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[nmcnc*MRNR], incRowC, incColC);
             nmcnc = nmcnc + 1;
           //printf("(%d %d) %5.3f\n",i,j, C[0]);
         }

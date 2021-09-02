@@ -25,6 +25,7 @@ int dgemm_main(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA, int6
     int64_t idxk = 0;
     int64_t nmbnb = 0;
     int64_t nmbnb_prev = 0;
+    int64_t MCNC = MC*NC;
 
     for(int i=0;i<nb;++i) {
         nmbnb_prev = nmbnb;
@@ -40,7 +41,7 @@ int dgemm_main(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA, int6
                 packA(kc, &A[idxk + j*MC*incRowA], incRowA, incColA, _A);
 
                 //dgemm_macro_kernel(MC, KC, NC, &C[idxi + j*MC*incColC], incRowC, incColC, _A, _B);
-                dgemm_macro_kernel(MC, KC, NC, &C[nmbnb*NC*MC], incRowC, incColC, _A, _B);
+                dgemm_macro_kernel(MC, KC, NC, &C[nmbnb*MCNC], incRowC, incColC, _A, _B);
                 nmbnb = nmbnb + 1;
             }
             if(k < (kb-1)) nmbnb = nmbnb_prev;
@@ -84,6 +85,10 @@ int main() {
     int64_t incColB = 1;
     int64_t incColC = 1;
 
+    /*
+     * We work only in factors of 16 * 14
+     */
+
     M = MAT_DIM;
     N = MAT_DIM;
     K = MAT_DIM;
@@ -104,7 +109,7 @@ int main() {
     fill_matrix_zeros  (D, M*N);
     //print_matrix(A,M,K);
 
-    int64_t rep = 1;
+    int64_t rep = 10;
 
     const uint64_t t0 = rdtsc();
 
@@ -120,7 +125,7 @@ int main() {
     const uint64_t dt = rdtsc() - t0;
     printf("MyDGEMM = %f\n", 1e-9 * dt/rep);
 
-    print_matrix_ASer(C, N, M);
+    //print_matrix_ASer(C, N, M);
 
     const uint64_t bt0 = rdtsc();
 
@@ -131,10 +136,10 @@ int main() {
     const uint64_t bdt = rdtsc() - bt0;
     printf("BLAS DGEMM = %f\n", 1e-9 * bdt/rep);
 
-    print_matrix(D, M, N);
-    printf("\n-------------diff-----------------\n");
+    //print_matrix(D, M, N);
+    //printf("\n-------------diff-----------------\n");
     //print_diff_matrix_AT_B(C,D, M, N);
-    print_diff_matrix_ASer_B(C,D, M, N);
+    //print_diff_matrix_ASer_B(C,D, M, N);
 
     free(A);
     free(B);
