@@ -72,7 +72,7 @@ void print_diff_matrix(double *A, double *B, int64_t M, int64_t N) {
 
 void print_matrix_ASer(double *A, int64_t M, int64_t N) {
     int64_t mb = M / MC;
-    int64_t nb = N / NC;
+    int64_t nb = N / N;
     int64_t mp = MC / MR;
     int64_t np = NC / NR;
     int64_t idx = 0;
@@ -105,7 +105,7 @@ void print_diff_matrix_AT_B(double *A, double *B, int64_t M, int64_t N) {
     }
 }
 
-void print_diff_matrix_ASer_B(double *A, double *B, int64_t M, int64_t N) {
+void print_diff_matrix_ASer_BT(double *A, double *B, int64_t M, int64_t N) {
     int64_t mb = M / MC;
     int64_t nb = N / NC;
     int64_t mp = MC / MR;
@@ -121,6 +121,30 @@ void print_diff_matrix_ASer_B(double *A, double *B, int64_t M, int64_t N) {
           printf(" %5.3f ",abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[i + j*N]));
         }
         printf("\n");
+    }
+}
+
+void print_diff_matrix_ASer_B(double *A, double *B, int64_t M, int64_t N) {
+    int64_t mb = M / MC;
+    int64_t nb = N / NC;
+    int64_t mp = MC / MR;
+    int64_t np = NC / NR;
+    for(int i=0;i<N;++i) {
+        for(int j=0;j<M;++j) {
+          int64_t kmc = ( j / MC );
+          int64_t lnc = ( i / NC );
+          int64_t kmr = ( j - kmc * MC ) / MR;
+          int64_t lnr = ( i - lnc * NC ) / NR;
+          int64_t k   = ( ( j - kmc * MC ) - ( kmr * MR ) );
+          int64_t l   = ( ( i - lnc * NC ) - ( lnr * NR ) );
+          //printf(" %5.3f ",abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[i + j*N]));
+          if(abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[i + j*N]) > 1e-13){
+            printf(" %20.10e ",abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[i + j*N]));
+            printf("Fail\n");
+            return;
+          };
+        }
+        //printf("\n");
     }
 }
 
@@ -163,10 +187,14 @@ void packB(int64_t kc, double *B, int64_t dimRowB, int64_t dimColB, double *buff
     B = B + NR;
   }
   //printf("\nPack B (%d %d)\n",dimRowB,dimColB);
+  //for(int k=0;k<np;++k){
   //for(int i=0;i<kc;++i){
   //  for(int j=0;j<NR;++j){
-  //    printf(" %5.3f ",buffer_start[i*NR + j]);
+  //    printf(" %5.3f ",buffer_start[k*(NR*kc) + i*NR + j]);
   //  }
+  //  printf("\n");
+  //}
+  //  printf("\n");
   //  printf("\n");
   //}
   //exit(0);
