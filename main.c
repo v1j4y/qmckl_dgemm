@@ -144,7 +144,7 @@ int main() {
     fill_matrix_zeros  (DBlas, MBlas*NBlas);
     //print_matrix(B,N,K);
 
-    int64_t rep = 1;
+    int64_t rep = 4;
 
     const uint64_t t0 = rdtsc();
 
@@ -172,9 +172,9 @@ int main() {
     printf("BLAS DGEMM = %f\n", 1e-9 * bdt/rep);
 
     //print_matrix(DBlas, M, N);
-    printf("\n-------------diff-----------------\n");
+    //printf("\n-------------diff-----------------\n");
     //print_diff_matrix_AT_B(C,D, M, N);
-    print_diff_matrix_ASer_B(C,DBlas, M, N);
+    //print_diff_matrix_ASer_B(C,DBlas, M, N);
 
     free(A);
     free(B);

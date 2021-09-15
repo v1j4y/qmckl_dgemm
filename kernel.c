@@ -1705,126 +1705,141 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
 
     LABEL(K_LOOP)
 
-    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 192*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM( 4), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
+    //PREFETCH(0, MEM(RCX,320*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM( 5), MEM(RCX, 8*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
 
     LEA(RCX, MEM(RCX,16*8))
 
+    PREFETCH(0, MEM(RCX, 192*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM( 6), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
+    //PREFETCH(0, MEM(RCX,320*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM( 7), MEM(RCX, 8*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
 
     LEA(RCX, MEM(RCX,16*8))
 
-    //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
-    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 192*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM( 8), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
+    //PREFETCH(0, MEM(RCX,320*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM( 9), MEM(RCX, 8*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
 
     LEA(RCX, MEM(RCX,16*8))
 
+    PREFETCH(0, MEM(RCX, 192*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(10), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
+    //PREFETCH(0, MEM(RCX,320*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(11), MEM(RCX, 8*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
 
     LEA(RCX, MEM(RCX,16*8))
 
-    //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
-    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 192*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(12), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
+    //PREFETCH(0, MEM(RCX,320*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(13), MEM(RCX, 8*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
 
     LEA(RCX, MEM(RCX,16*8))
 
+    PREFETCH(0, MEM(RCX, 192*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(14), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
+    //PREFETCH(0, MEM(RCX,320*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(15), MEM(RCX, 8*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
 
     LEA(RCX, MEM(RCX,16*8))
 
-    //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
-    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 192*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(16), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
+    //PREFETCH(0, MEM(RCX,320*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(17), MEM(RCX, 8*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
 
     LEA(RCX, MEM(RCX,16*8))
 
+    PREFETCH(0, MEM(RCX, 192*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(18), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
+    //PREFETCH(0, MEM(RCX,320*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(19), MEM(RCX, 8*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
 
     LEA(RCX, MEM(RCX,16*8))
 
-    //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
-    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 192*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(20), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
+    //PREFETCH(0, MEM(RCX,320*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(21), MEM(RCX, 8*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
 
     LEA(RCX, MEM(RCX,16*8))
 
+    PREFETCH(0, MEM(RCX, 192*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(22), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
+    //PREFETCH(0, MEM(RCX,320*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(23), MEM(RCX, 8*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
 
     LEA(RCX, MEM(RCX,16*8))
 
-    //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
-    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 192*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(24), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
+    //PREFETCH(0, MEM(RCX,320*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(25), MEM(RCX, 8*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
 
     LEA(RCX, MEM(RCX,16*8))
 
+    PREFETCH(0, MEM(RCX, 192*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(26), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
+    //PREFETCH(0, MEM(RCX,320*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(27), MEM(RCX, 8*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
 
     LEA(RCX, MEM(RCX,16*8))
 
-    //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
-    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 192*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(28), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
+    //PREFETCH(0, MEM(RCX,320*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(29), MEM(RCX, 8*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
 
     LEA(RCX, MEM(RCX,16*8))
 
+    PREFETCH(0, MEM(RCX, 192*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(30), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
+    //PREFETCH(0, MEM(RCX,320*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(31), MEM(RCX, 8*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 8*8), ZMM( 1)) // AB -> ZMM
 

@@ -5,8 +5,8 @@ CCFLAGS=(
  -O3 
  -g
  -xCORE-AVX512
- -qopt-zmm-usage=high
  -DMKL_DIRECT_CALL_SEQ_JIT
+ -qopt-zmm-usage=high
  -I/users/p18005/gopalchi/gemm_asm/MIPP/src -I.
 )
 MKL_PATH=/usr/local/intel/2020.0.015/compilers_and_libraries/linux/mkl
