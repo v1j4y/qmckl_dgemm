@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "mipp.h"
+//#include "mipp.h"
 
 #if !defined(MAT_DIM)
 #define MAT_DIM 1024
