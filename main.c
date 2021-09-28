@@ -14,8 +14,8 @@
 //static double _B[NR*KC] __attribute__ ((aligned(64)));
 //static double _C[1024*4] __attribute__ ((aligned(64)));
 
-int dgemm_main(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA, int64_t incColA,
-                                                double *B, int64_t incRowB, int64_t incColB,
+int dgemm_main(int64_t M, int64_t N, int64_t K, double *A_tile, int64_t incRowA, int64_t incColA,
+                                                double *B_tile, int64_t incRowB, int64_t incColB,
                                                 double *C, int64_t incRowC, int64_t incColC) {
 
     int64_t mb = M / MC;
@@ -27,24 +27,79 @@ int dgemm_main(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA, int6
     int64_t nmbnb_prev = 0;
     int64_t MCNC = MC*N;
 
+    int64_t i_tile_b, i_tile_a;
+
+    // Initialize indices
+    i_tile_b = 0;
+    i_tile_a = 0;
+
     for(int i=0;i<nb;++i) {
         nmbnb_prev = nmbnb;
+        i_tile_a = 0;
         for(int k=0;k<kb;++k) {
             int64_t kc = KC;
-            packB(kc, &B[k*KC*incRowB + i*N*incColB], incRowB, incColB, _B);
+
 
             idxi = i * N * incRowC;
             idxk = k * KC * incColA;
 
             for(int j=0;j<mb;++j) {
-              //printf("[%d %d %d]===(%d %d %d)===\n",i,k,j,k,idxi,j*MC*incColC);
-                packA(kc, &A[idxk + j*MC*incRowA], incRowA, incColA, _A);
-
-                //dgemm_macro_kernel(MC, KC, NC, &C[idxi + j*MC*incColC], incRowC, incColC, _A, _B);
-                dgemm_macro_kernel(MC, KC, N, &C[nmbnb*MCNC], incRowC, incColC, _A, _B);
+                dgemm_macro_kernel(MC, KC, N, &C[nmbnb*MCNC], incRowC, incColC, A_tile + i_tile_a * (MC*KC), B_tile + i_tile_b * (NC*KC));
                 nmbnb = nmbnb + 1;
+                i_tile_a += 1;
             }
             if(k < (kb-1)) nmbnb = nmbnb_prev;
+            i_tile_b += 1;
+        }
+    }
+
+    return 1;
+}
+
+int tile_matrix(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA, int64_t incColA,
+                                                double *B, int64_t incRowB, int64_t incColB,
+                                                double *C, int64_t incRowC, int64_t incColC, double *A_tile, double *B_tile) {
+
+    int64_t mb = M / MC;
+    int64_t nb = N / N;
+    int64_t kb = K / KC;
+    int64_t idxi = 0;
+    int64_t idxk = 0;
+    int64_t nmbnb = 0;
+    int64_t nmbnb_prev = 0;
+    int64_t MCNC = MC*N;
+    int64_t i_tile_b, i_tile_a;
+
+    // Initialize indices
+    i_tile_b = 0;
+    i_tile_a = 0;
+
+    for(int i=0;i<nb;++i) {
+        for(int k=0;k<kb;++k) {
+            int64_t kc = KC;
+            packB(kc, &B[k*KC*incRowB + i*N*incColB], incRowB, incColB, _B);
+
+            // Write to tiled matrix to B
+            for(int ii=0;ii<NC*KC;++ii) {
+              B_tile[i_tile_b * (NC*KC) + ii] = _B[ii];
+            }
+            i_tile_b += 1;
+        }
+    }
+
+    for(int k=0;k<kb;++k) {
+        int64_t kc = KC;
+
+        idxk = k * KC * incColA;
+
+        for(int j=0;j<mb;++j) {
+            packA(kc, &A[idxk + j*MC*incRowA], incRowA, incColA, _A);
+
+            // Write to tiled matrix to A
+            for(int ii=0;ii<MC*KC;++ii) {
+              A_tile[i_tile_a * (MC*KC) + ii] = _A[ii];
+            }
+            i_tile_a += 1;
         }
     }
 
@@ -79,6 +134,8 @@ int main() {
     double *A;
     double *B;
     double *C;
+    double *A_tile;
+    double *B_tile;
     double *ABlas;
     double *BBlas;
     double *DBlas;
@@ -126,6 +183,8 @@ int main() {
     A = (double *)malloc( M * K * sizeof(double));
     B = (double *)malloc( K * N * sizeof(double));
     C = (double *)malloc( M * N * sizeof(double));
+    A_tile = (double *)malloc( M * K * sizeof(double));
+    B_tile = (double *)malloc( K * N * sizeof(double));
 
     ABlas = (double *)malloc( MBlas * KBlas * sizeof(double));
     BBlas = (double *)malloc( KBlas * NBlas * sizeof(double));
@@ -144,17 +203,19 @@ int main() {
     fill_matrix_zeros  (DBlas, MBlas*NBlas);
     //print_matrix(B,N,K);
 
+    // Tile A and B
+    tile_matrix(M, N, K, A_tile, incRowA, incColA,
+               B_tile, incRowB, incColB,
+               C, incRowC, incColC, A_tile, B_tile);
+
     int64_t rep = 4;
 
     const uint64_t t0 = rdtsc();
 
     for(int i=0;i<rep;++i) {
-        dgemm_main(M, N, K, A, incRowA, incColA,
-                   B, incRowB, incColB,
+        dgemm_main(M, N, K, A_tile, incRowA, incColA,
+                   B_tile, incRowB, incColB,
                    C, incRowC, incColC);
-        //dgemm_naive(M, N, K, A, incRowA, incColA,
-        //           B, incRowB, incColB,
-        //           C, incRowC, incColC);
     }
 
     const uint64_t dt = rdtsc() - t0;
