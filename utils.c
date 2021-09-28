@@ -15,7 +15,8 @@ void fill_matrix_ones(double *A, int64_t dim) {
 
 void fill_matrix_random(double *dA, int64_t dM, int64_t dN) {
     double count=0.0;
-    srand ( time ( NULL));
+    //srand ( time ( NULL));
+    srand (0);
     for(int i=0;i<dM;++i) {
       for(int j=0;j<dN;++j) {
         double random_value = (double)rand()/RAND_MAX*2.0-1.0;//float in range -1 to 1

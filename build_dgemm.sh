@@ -9,8 +9,9 @@ CCFLAGS=(
  -qopt-zmm-usage=high
  -I/users/p18005/gopalchi/gemm_asm/MIPP/src -I.
 )
-MKL_PATH=/usr/local/intel/2020.0.015/compilers_and_libraries/linux/mkl
-OMP_PATH=/usr/local/intel/2019.0.015/compilers_and_libraries/linux/lib/intel64
+/share/apps/intel/oneapi/mkl/2021.1.1/lib/intel64/libmkl_intel_lp64.a
+MKL_PATH=/share/apps/intel/oneapi/mkl/2021.1.1/
+OMP_PATH=/share/apps/intel/oneapi/mkl/2021.1.1/
 MKL_LIB="-Wl,--start-group ${MKL_PATH}/lib/intel64/libmkl_intel_lp64.a ${MKL_PATH}/lib/intel64/libmkl_intel_thread.a ${MKL_PATH}/lib/intel64/libmkl_core.a -Wl,--end-group"
 echo $MKL_PATH
 echo $MKL_LIB

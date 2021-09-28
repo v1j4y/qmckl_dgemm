@@ -1869,244 +1869,244 @@ void dgemm_kernel_avx512_asm_unroll4(int64_t kc, double *A, double *B, double *C
 
 }
 
-void dgemm_kernel_avx512_mipp(int64_t kc, double *A, double *B, double *C, int64_t incRowC, int64_t incColC) {
-    // AB = A * B
-    double AB[MR*NR] __attribute__ ((aligned(64)));
-    double *tmpA = A;
-    double *tmpB = B;
-
-    for(int l=0;l<( MR * NR ) - 4;l = l + 4) {
-        AB[l + 0] = 0.0;
-        AB[l + 1] = 0.0;
-        AB[l + 2] = 0.0;
-        AB[l + 3] = 0.0;
-    }
-
-    // Cols of AB in SSE registers
-    __m512d   ab_00;
-    __m512d   ab_01;
-    __m512d   ab_02;
-    __m512d   ab_03;
-    __m512d   ab_04;
-    __m512d   ab_05;
-    //mipp::Reg<double>   ab_00;
-    //mipp::Reg<double>   ab_01;
-    //mipp::Reg<double>   ab_02;
-    //mipp::Reg<double>   ab_03;
-    //mipp::Reg<double>   ab_04;
-    //mipp::Reg<double>   ab_05;
-    //mipp::Reg<double>   ab_06;
-    //mipp::Reg<double>   ab_07;
-    //mipp::Reg<double>   ab_08;
-    //mipp::Reg<double>   ab_09;
-    //mipp::Reg<double>   ab_10;
-    //mipp::Reg<double>   ab_11;
-    //mipp::Reg<double>   ab_12;
-    //mipp::Reg<double>   ab_13;
-    //mipp::Reg<double>   ab_14;
-    //mipp::Reg<double>   ab_15;
-    //mipp::Reg<double>   ab_16;
-    //mipp::Reg<double>   ab_17;
-    //mipp::Reg<double>   ab_18;
-    //mipp::Reg<double>   ab_19;
-    //mipp::Reg<double>   ab_20;
-    //mipp::Reg<double>   ab_21;
-    //mipp::Reg<double>   ab_22;
-    //mipp::Reg<double>   ab_23;
-    //mipp::Reg<double>   ab_24;
-    //mipp::Reg<double>   ab_25;
-    //mipp::Reg<double>   ab_26;
-    //mipp::Reg<double>   ab_27;
-
-    __m512d   a_00;
-    __m512d   a_01;
-    __m512d   tmp1, tmp2;
-    __m512d   tmp3;//, tmp4;
-    //mipp::Reg<double>   a_00;
-    //mipp::Reg<double>   a_01;
-    //mipp::Reg<double>   tmp1, tmp2;
-    //mipp::Reg<double>   tmp3;//, tmp4;
-    //mipp::Reg<double>   tmp5, tmp6;
-    //mipp::Reg<double>   tmp7, tmp8;
-    //mipp::Reg<double>   tmp9, tmp10;
-    //mipp::Reg<double>   tmp11, tmp12;
-    //mipp::Reg<double>   tmp13, tmp14;
-    //mipp::Reg<double>   tmp15, tmp16;
-
-    int rD = mipp::N<double>();
-
-    // Set them to 0
-    ab_00 = _mm512_setzero_pd();
-    ab_01 = _mm512_setzero_pd();
-    ab_02 = _mm512_setzero_pd();
-    ab_03 = _mm512_setzero_pd();
-    ab_04 = _mm512_setzero_pd();
-    ab_05 = _mm512_setzero_pd();
-    //ab_00 = 0.0;
-    //ab_01 = 0.0;
-    //ab_02 = 0.0;
-    //ab_03 = 0.0;
-    //ab_04 = 0.0;
-    //ab_05 = 0.0;
-    //ab_06 = 0.0;
-    //ab_07 = 0.0;
-    //ab_08 = 0.0;
-    //ab_09 = 0.0;
-    //ab_10 = 0.0;
-    //ab_11 = 0.0;
-    //ab_12 = 0.0;
-    //ab_13 = 0.0;
-    //ab_14 = 0.0;
-    //ab_15 = 0.0;
-    //ab_16 = 0.0;
-    //ab_17 = 0.0;
-    //ab_18 = 0.0;
-    //ab_19 = 0.0;
-    //ab_20 = 0.0;
-    //ab_21 = 0.0;
-    //ab_22 = 0.0;
-    //ab_23 = 0.0;
-    //ab_24 = 0.0;
-    //ab_25 = 0.0;
-    //ab_26 = 0.0;
-    //ab_27 = 0.0;
-
-    for(int k=0;k<(kc);++k) {
-        a_00 = _mm512_load_pd(A + 0); // Preload A 0 - 8
-        a_01 = _mm512_load_pd(A + 8); // Preload A 9 - 15
-        //a_00.load(A + 0); // Preload A 0 - 8
-        //a_01.load(A + 8); // Preload A 9 - 15
-
-        //tmp1 = B[0]; // Preload B 0 - 1
-        //tmp2 = B[1]; // Preload B 0 - 1
-        tmp1 = _mm512_set1_pd(B[0]); // Preload B 0 - 1
-        tmp2 = _mm512_set1_pd(B[1]); // Preload B 0 - 1
-        //ab_00 = mipp::fmadd(a_00, tmp1, ab_00); // FMA and save to C zmm4 - zmm7
-        //ab_01 = mipp::fmadd(a_01, tmp1, ab_01); // FMA and save to C zmm4 - zmm7
-        //ab_02 = mipp::fmadd(a_00, tmp2, ab_02); // FMA and save to C zmm4 - zmm7
-        //ab_03 = mipp::fmadd(a_01, tmp2, ab_03); // FMA and save to C zmm4 - zmm7
-        ab_00 = _mm512_fmadd_pd(a_00, tmp1, ab_00); // FMA and save to C zmm4 - zmm7
-        ab_01 = _mm512_fmadd_pd(a_01, tmp1, ab_01); // FMA and save to C zmm4 - zmm7
-        ab_02 = _mm512_fmadd_pd(a_00, tmp2, ab_02); // FMA and save to C zmm4 - zmm7
-        ab_03 = _mm512_fmadd_pd(a_01, tmp2, ab_03); // FMA and save to C zmm4 - zmm7
-
-        //tmp3 = B[2]; // Preload B 0 - 1
-        tmp3 = _mm512_set1_pd(B[2]); // Preload B 0 - 1
-        //tmp4 = B[3]; // Preload B 0 - 1
-        //ab_04 = mipp::fmadd(a_00, tmp3, ab_04); // FMA and save to C zmm4 - zmm7
-        //ab_05 = mipp::fmadd(a_01, tmp3, ab_05); // FMA and save to C zmm4 - zmm7
-        ab_04 = _mm512_fmadd_pd(a_00, tmp3, ab_04); // FMA and save to C zmm4 - zmm7
-        ab_05 = _mm512_fmadd_pd(a_01, tmp3, ab_05); // FMA and save to C zmm4 - zmm7
-        //ab_06 = mipp::fmadd(a_00, tmp4, ab_06); // FMA and save to C zmm4 - zmm7
-        //ab_07 = mipp::fmadd(a_01, tmp4, ab_07); // FMA and save to C zmm4 - zmm7
-
-        //tmp1 = B[4]; // Preload B 0 - 1
-        //tmp2 = B[5]; // Preload B 0 - 1
-        //ab_08 = mipp::fmadd(a_00, tmp1, ab_08); // FMA and save to C zmm4 - zmm7
-        //ab_09 = mipp::fmadd(a_01, tmp1, ab_09); // FMA and save to C zmm4 - zmm7
-        //ab_10 = mipp::fmadd(a_00, tmp2, ab_10); // FMA and save to C zmm4 - zmm7
-        //ab_11 = mipp::fmadd(a_01, tmp2, ab_11); // FMA and save to C zmm4 - zmm7
-
-        //tmp1 = B[6]; // Preload B 0 - 1
-        //tmp2 = B[7]; // Preload B 0 - 1
-        //ab_12 = mipp::fmadd(a_00, tmp1, ab_12); // FMA and save to C zmm4 - zmm7
-        //ab_13 = mipp::fmadd(a_01, tmp1, ab_13); // FMA and save to C zmm4 - zmm7
-        //ab_14 = mipp::fmadd(a_00, tmp2, ab_14); // FMA and save to C zmm4 - zmm7
-        //ab_15 = mipp::fmadd(a_01, tmp2, ab_15); // FMA and save to C zmm4 - zmm7
-
-        //tmp1 = B[8]; // Preload B 0 - 1
-        //tmp2 = B[9]; // Preload B 0 - 1
-        //ab_16 = mipp::fmadd(a_00, tmp1, ab_16); // FMA and save to C zmm4 - zmm7
-        //ab_17 = mipp::fmadd(a_01, tmp1, ab_17); // FMA and save to C zmm4 - zmm7
-        //ab_18 = mipp::fmadd(a_00, tmp2, ab_18); // FMA and save to C zmm4 - zmm7
-        //ab_19 = mipp::fmadd(a_01, tmp2, ab_19); // FMA and save to C zmm4 - zmm7
-
-        //tmp1 = B[10]; // Preload B 0 - 1
-        //tmp2 = B[11]; // Preload B 0 - 1
-        //ab_20 = mipp::fmadd(a_00, tmp1, ab_20); // FMA and save to C zmm4 - zmm7
-        //ab_21 = mipp::fmadd(a_01, tmp1, ab_21); // FMA and save to C zmm4 - zmm7
-        //ab_22 = mipp::fmadd(a_00, tmp2, ab_22); // FMA and save to C zmm4 - zmm7
-        //ab_23 = mipp::fmadd(a_01, tmp2, ab_23); // FMA and save to C zmm4 - zmm7
-
-        //tmp1 = B[12]; // Preload B 0 - 1
-        //tmp2 = B[13]; // Preload B 0 - 1
-        //ab_24 = mipp::fmadd(a_00, tmp1, ab_24); // FMA and save to C zmm4 - zmm7
-        //ab_25 = mipp::fmadd(a_01, tmp1, ab_25); // FMA and save to C zmm4 - zmm7
-        //ab_26 = mipp::fmadd(a_00, tmp2, ab_26); // FMA and save to C zmm4 - zmm7
-        //ab_27 = mipp::fmadd(a_01, tmp2, ab_27); // FMA and save to C zmm4 - zmm7
-
-      A = A + 16;
-      B = B + 14;
-    }
-
-
-    _mm512_store_pd(AB +  0, ab_00); // Store res in C
-    _mm512_store_pd(AB +  8, ab_01); // Store res in C
-    _mm512_store_pd(AB + 16, ab_02); // Store res in C
-    _mm512_store_pd(AB + 24, ab_03); // Store res in C
-    _mm512_store_pd(AB + 32, ab_04); // Store res in C
-    _mm512_store_pd(AB + 40, ab_05); // Store res in C
-    //ab_00.store(AB +  0); // Store res in C
-    //ab_01.store(AB +  8); // Store res in C
-    //ab_02.store(AB + 16); // Store res in C
-    //ab_03.store(AB + 24); // Store res in C
-    //ab_04.store(AB + 32); // Store res in C
-    //ab_05.store(AB + 40); // Store res in C
-    //ab_06.store(AB + 48); // Store res in C
-    //ab_07.store(AB + 56); // Store res in C
-    //ab_08.store(AB + 64); // Store res in C
-    //ab_09.store(AB + 72); // Store res in C
-    //ab_10.store(AB + 80); // Store res in C
-    //ab_11.store(AB + 88); // Store res in C
-    //ab_12.store(AB + 96); // Store res in C
-    //ab_13.store(AB + 104); // Store res in C
-    //ab_14.store(AB + 112 +  0); // Store res in C
-    //ab_15.store(AB + 112 +  8); // Store res in C
-    //ab_16.store(AB + 112 + 16); // Store res in C
-    //ab_17.store(AB + 112 + 24); // Store res in C
-    //ab_18.store(AB + 112 + 32); // Store res in C
-    //ab_19.store(AB + 112 + 40); // Store res in C
-    //ab_20.store(AB + 112 + 48); // Store res in C
-    //ab_21.store(AB + 112 + 56); // Store res in C
-    //ab_22.store(AB + 112 + 64); // Store res in C
-    //ab_23.store(AB + 112 + 72); // Store res in C
-    //ab_24.store(AB + 112 + 80); // Store res in C
-    //ab_25.store(AB + 112 + 88); // Store res in C
-    //ab_26.store(AB + 112 + 96); // Store res in C
-    //ab_27.store(AB + 112 + 104); // Store res in C
-
-
-    // C = C + AB
-    for(int j=0;j<MR;++j) {
-      double *cidxj = C + j*incRowC;
-      //int    *idxlstj = idxlist + j * MR;
-        //for(int i=0;i<(MR-8);i=i+8) {
-            //int idx1 = idxlstj[i + 0];
-            //int idx2 = idxlstj[i + 1];
-            //int idx3 = idxlstj[i + 2];
-            //int idx4 = idxlstj[i + 3];
-            //int idx5 = idxlstj[i + 4];
-            //int idx6 = idxlstj[i + 5];
-            //int idx7 = idxlstj[i + 6];
-            //int idx8 = idxlstj[i + 7];
-            cidxj[ 0] = cidxj[ 0] + AB[0*16 + j];
-            cidxj[ 1] = cidxj[ 1] + AB[1*16 + j];
-            cidxj[ 2] = cidxj[ 2] + AB[2*16 + j];
-            cidxj[ 3] = cidxj[ 3] + AB[3*16 + j];
-            cidxj[ 4] = cidxj[ 4] + AB[4*16 + j];
-            cidxj[ 5] = cidxj[ 5] + AB[5*16 + j];
-            cidxj[ 6] = cidxj[ 6] + AB[6*16 + j];
-            cidxj[ 7] = cidxj[ 7] + AB[7*16 + j];
-            cidxj[ 8] = cidxj[ 8] + AB[8*16 + j];
-            cidxj[ 9] = cidxj[ 9] + AB[9*16 + j];
-            cidxj[10] = cidxj[10] + AB[10*16 + j];
-            cidxj[11] = cidxj[11] + AB[11*16 + j];
-            cidxj[12] = cidxj[12] + AB[12*16 + j];
-            cidxj[13] = cidxj[13] + AB[13*16 + j];
-            //printf("(%d %d) %5.3f\n",i,j,AB[i + j*MR]);
-        //}
-    }
-}
+//void dgemm_kernel_avx512_mipp(int64_t kc, double *A, double *B, double *C, int64_t incRowC, int64_t incColC) {
+//    // AB = A * B
+//    double AB[MR*NR] __attribute__ ((aligned(64)));
+//    double *tmpA = A;
+//    double *tmpB = B;
+//
+//    for(int l=0;l<( MR * NR ) - 4;l = l + 4) {
+//        AB[l + 0] = 0.0;
+//        AB[l + 1] = 0.0;
+//        AB[l + 2] = 0.0;
+//        AB[l + 3] = 0.0;
+//    }
+//
+//    // Cols of AB in SSE registers
+//    __m512d   ab_00;
+//    __m512d   ab_01;
+//    __m512d   ab_02;
+//    __m512d   ab_03;
+//    __m512d   ab_04;
+//    __m512d   ab_05;
+//    //mipp::Reg<double>   ab_00;
+//    //mipp::Reg<double>   ab_01;
+//    //mipp::Reg<double>   ab_02;
+//    //mipp::Reg<double>   ab_03;
+//    //mipp::Reg<double>   ab_04;
+//    //mipp::Reg<double>   ab_05;
+//    //mipp::Reg<double>   ab_06;
+//    //mipp::Reg<double>   ab_07;
+//    //mipp::Reg<double>   ab_08;
+//    //mipp::Reg<double>   ab_09;
+//    //mipp::Reg<double>   ab_10;
+//    //mipp::Reg<double>   ab_11;
+//    //mipp::Reg<double>   ab_12;
+//    //mipp::Reg<double>   ab_13;
+//    //mipp::Reg<double>   ab_14;
+//    //mipp::Reg<double>   ab_15;
+//    //mipp::Reg<double>   ab_16;
+//    //mipp::Reg<double>   ab_17;
+//    //mipp::Reg<double>   ab_18;
+//    //mipp::Reg<double>   ab_19;
+//    //mipp::Reg<double>   ab_20;
+//    //mipp::Reg<double>   ab_21;
+//    //mipp::Reg<double>   ab_22;
+//    //mipp::Reg<double>   ab_23;
+//    //mipp::Reg<double>   ab_24;
+//    //mipp::Reg<double>   ab_25;
+//    //mipp::Reg<double>   ab_26;
+//    //mipp::Reg<double>   ab_27;
+//
+//    __m512d   a_00;
+//    __m512d   a_01;
+//    __m512d   tmp1, tmp2;
+//    __m512d   tmp3;//, tmp4;
+//    //mipp::Reg<double>   a_00;
+//    //mipp::Reg<double>   a_01;
+//    //mipp::Reg<double>   tmp1, tmp2;
+//    //mipp::Reg<double>   tmp3;//, tmp4;
+//    //mipp::Reg<double>   tmp5, tmp6;
+//    //mipp::Reg<double>   tmp7, tmp8;
+//    //mipp::Reg<double>   tmp9, tmp10;
+//    //mipp::Reg<double>   tmp11, tmp12;
+//    //mipp::Reg<double>   tmp13, tmp14;
+//    //mipp::Reg<double>   tmp15, tmp16;
+//
+//    int rD = mipp::N<double>();
+//
+//    // Set them to 0
+//    ab_00 = _mm512_setzero_pd();
+//    ab_01 = _mm512_setzero_pd();
+//    ab_02 = _mm512_setzero_pd();
+//    ab_03 = _mm512_setzero_pd();
+//    ab_04 = _mm512_setzero_pd();
+//    ab_05 = _mm512_setzero_pd();
+//    //ab_00 = 0.0;
+//    //ab_01 = 0.0;
+//    //ab_02 = 0.0;
+//    //ab_03 = 0.0;
+//    //ab_04 = 0.0;
+//    //ab_05 = 0.0;
+//    //ab_06 = 0.0;
+//    //ab_07 = 0.0;
+//    //ab_08 = 0.0;
+//    //ab_09 = 0.0;
+//    //ab_10 = 0.0;
+//    //ab_11 = 0.0;
+//    //ab_12 = 0.0;
+//    //ab_13 = 0.0;
+//    //ab_14 = 0.0;
+//    //ab_15 = 0.0;
+//    //ab_16 = 0.0;
+//    //ab_17 = 0.0;
+//    //ab_18 = 0.0;
+//    //ab_19 = 0.0;
+//    //ab_20 = 0.0;
+//    //ab_21 = 0.0;
+//    //ab_22 = 0.0;
+//    //ab_23 = 0.0;
+//    //ab_24 = 0.0;
+//    //ab_25 = 0.0;
+//    //ab_26 = 0.0;
+//    //ab_27 = 0.0;
+//
+//    for(int k=0;k<(kc);++k) {
+//        a_00 = _mm512_load_pd(A + 0); // Preload A 0 - 8
+//        a_01 = _mm512_load_pd(A + 8); // Preload A 9 - 15
+//        //a_00.load(A + 0); // Preload A 0 - 8
+//        //a_01.load(A + 8); // Preload A 9 - 15
+//
+//        //tmp1 = B[0]; // Preload B 0 - 1
+//        //tmp2 = B[1]; // Preload B 0 - 1
+//        tmp1 = _mm512_set1_pd(B[0]); // Preload B 0 - 1
+//        tmp2 = _mm512_set1_pd(B[1]); // Preload B 0 - 1
+//        //ab_00 = mipp::fmadd(a_00, tmp1, ab_00); // FMA and save to C zmm4 - zmm7
+//        //ab_01 = mipp::fmadd(a_01, tmp1, ab_01); // FMA and save to C zmm4 - zmm7
+//        //ab_02 = mipp::fmadd(a_00, tmp2, ab_02); // FMA and save to C zmm4 - zmm7
+//        //ab_03 = mipp::fmadd(a_01, tmp2, ab_03); // FMA and save to C zmm4 - zmm7
+//        ab_00 = _mm512_fmadd_pd(a_00, tmp1, ab_00); // FMA and save to C zmm4 - zmm7
+//        ab_01 = _mm512_fmadd_pd(a_01, tmp1, ab_01); // FMA and save to C zmm4 - zmm7
+//        ab_02 = _mm512_fmadd_pd(a_00, tmp2, ab_02); // FMA and save to C zmm4 - zmm7
+//        ab_03 = _mm512_fmadd_pd(a_01, tmp2, ab_03); // FMA and save to C zmm4 - zmm7
+//
+//        //tmp3 = B[2]; // Preload B 0 - 1
+//        tmp3 = _mm512_set1_pd(B[2]); // Preload B 0 - 1
+//        //tmp4 = B[3]; // Preload B 0 - 1
+//        //ab_04 = mipp::fmadd(a_00, tmp3, ab_04); // FMA and save to C zmm4 - zmm7
+//        //ab_05 = mipp::fmadd(a_01, tmp3, ab_05); // FMA and save to C zmm4 - zmm7
+//        ab_04 = _mm512_fmadd_pd(a_00, tmp3, ab_04); // FMA and save to C zmm4 - zmm7
+//        ab_05 = _mm512_fmadd_pd(a_01, tmp3, ab_05); // FMA and save to C zmm4 - zmm7
+//        //ab_06 = mipp::fmadd(a_00, tmp4, ab_06); // FMA and save to C zmm4 - zmm7
+//        //ab_07 = mipp::fmadd(a_01, tmp4, ab_07); // FMA and save to C zmm4 - zmm7
+//
+//        //tmp1 = B[4]; // Preload B 0 - 1
+//        //tmp2 = B[5]; // Preload B 0 - 1
+//        //ab_08 = mipp::fmadd(a_00, tmp1, ab_08); // FMA and save to C zmm4 - zmm7
+//        //ab_09 = mipp::fmadd(a_01, tmp1, ab_09); // FMA and save to C zmm4 - zmm7
+//        //ab_10 = mipp::fmadd(a_00, tmp2, ab_10); // FMA and save to C zmm4 - zmm7
+//        //ab_11 = mipp::fmadd(a_01, tmp2, ab_11); // FMA and save to C zmm4 - zmm7
+//
+//        //tmp1 = B[6]; // Preload B 0 - 1
+//        //tmp2 = B[7]; // Preload B 0 - 1
+//        //ab_12 = mipp::fmadd(a_00, tmp1, ab_12); // FMA and save to C zmm4 - zmm7
+//        //ab_13 = mipp::fmadd(a_01, tmp1, ab_13); // FMA and save to C zmm4 - zmm7
+//        //ab_14 = mipp::fmadd(a_00, tmp2, ab_14); // FMA and save to C zmm4 - zmm7
+//        //ab_15 = mipp::fmadd(a_01, tmp2, ab_15); // FMA and save to C zmm4 - zmm7
+//
+//        //tmp1 = B[8]; // Preload B 0 - 1
+//        //tmp2 = B[9]; // Preload B 0 - 1
+//        //ab_16 = mipp::fmadd(a_00, tmp1, ab_16); // FMA and save to C zmm4 - zmm7
+//        //ab_17 = mipp::fmadd(a_01, tmp1, ab_17); // FMA and save to C zmm4 - zmm7
+//        //ab_18 = mipp::fmadd(a_00, tmp2, ab_18); // FMA and save to C zmm4 - zmm7
+//        //ab_19 = mipp::fmadd(a_01, tmp2, ab_19); // FMA and save to C zmm4 - zmm7
+//
+//        //tmp1 = B[10]; // Preload B 0 - 1
+//        //tmp2 = B[11]; // Preload B 0 - 1
+//        //ab_20 = mipp::fmadd(a_00, tmp1, ab_20); // FMA and save to C zmm4 - zmm7
+//        //ab_21 = mipp::fmadd(a_01, tmp1, ab_21); // FMA and save to C zmm4 - zmm7
+//        //ab_22 = mipp::fmadd(a_00, tmp2, ab_22); // FMA and save to C zmm4 - zmm7
+//        //ab_23 = mipp::fmadd(a_01, tmp2, ab_23); // FMA and save to C zmm4 - zmm7
+//
+//        //tmp1 = B[12]; // Preload B 0 - 1
+//        //tmp2 = B[13]; // Preload B 0 - 1
+//        //ab_24 = mipp::fmadd(a_00, tmp1, ab_24); // FMA and save to C zmm4 - zmm7
+//        //ab_25 = mipp::fmadd(a_01, tmp1, ab_25); // FMA and save to C zmm4 - zmm7
+//        //ab_26 = mipp::fmadd(a_00, tmp2, ab_26); // FMA and save to C zmm4 - zmm7
+//        //ab_27 = mipp::fmadd(a_01, tmp2, ab_27); // FMA and save to C zmm4 - zmm7
+//
+//      A = A + 16;
+//      B = B + 14;
+//    }
+//
+//
+//    _mm512_store_pd(AB +  0, ab_00); // Store res in C
+//    _mm512_store_pd(AB +  8, ab_01); // Store res in C
+//    _mm512_store_pd(AB + 16, ab_02); // Store res in C
+//    _mm512_store_pd(AB + 24, ab_03); // Store res in C
+//    _mm512_store_pd(AB + 32, ab_04); // Store res in C
+//    _mm512_store_pd(AB + 40, ab_05); // Store res in C
+//    //ab_00.store(AB +  0); // Store res in C
+//    //ab_01.store(AB +  8); // Store res in C
+//    //ab_02.store(AB + 16); // Store res in C
+//    //ab_03.store(AB + 24); // Store res in C
+//    //ab_04.store(AB + 32); // Store res in C
+//    //ab_05.store(AB + 40); // Store res in C
+//    //ab_06.store(AB + 48); // Store res in C
+//    //ab_07.store(AB + 56); // Store res in C
+//    //ab_08.store(AB + 64); // Store res in C
+//    //ab_09.store(AB + 72); // Store res in C
+//    //ab_10.store(AB + 80); // Store res in C
+//    //ab_11.store(AB + 88); // Store res in C
+//    //ab_12.store(AB + 96); // Store res in C
+//    //ab_13.store(AB + 104); // Store res in C
+//    //ab_14.store(AB + 112 +  0); // Store res in C
+//    //ab_15.store(AB + 112 +  8); // Store res in C
+//    //ab_16.store(AB + 112 + 16); // Store res in C
+//    //ab_17.store(AB + 112 + 24); // Store res in C
+//    //ab_18.store(AB + 112 + 32); // Store res in C
+//    //ab_19.store(AB + 112 + 40); // Store res in C
+//    //ab_20.store(AB + 112 + 48); // Store res in C
+//    //ab_21.store(AB + 112 + 56); // Store res in C
+//    //ab_22.store(AB + 112 + 64); // Store res in C
+//    //ab_23.store(AB + 112 + 72); // Store res in C
+//    //ab_24.store(AB + 112 + 80); // Store res in C
+//    //ab_25.store(AB + 112 + 88); // Store res in C
+//    //ab_26.store(AB + 112 + 96); // Store res in C
+//    //ab_27.store(AB + 112 + 104); // Store res in C
+//
+//
+//    // C = C + AB
+//    for(int j=0;j<MR;++j) {
+//      double *cidxj = C + j*incRowC;
+//      //int    *idxlstj = idxlist + j * MR;
+//        //for(int i=0;i<(MR-8);i=i+8) {
+//            //int idx1 = idxlstj[i + 0];
+//            //int idx2 = idxlstj[i + 1];
+//            //int idx3 = idxlstj[i + 2];
+//            //int idx4 = idxlstj[i + 3];
+//            //int idx5 = idxlstj[i + 4];
+//            //int idx6 = idxlstj[i + 5];
+//            //int idx7 = idxlstj[i + 6];
+//            //int idx8 = idxlstj[i + 7];
+//            cidxj[ 0] = cidxj[ 0] + AB[0*16 + j];
+//            cidxj[ 1] = cidxj[ 1] + AB[1*16 + j];
+//            cidxj[ 2] = cidxj[ 2] + AB[2*16 + j];
+//            cidxj[ 3] = cidxj[ 3] + AB[3*16 + j];
+//            cidxj[ 4] = cidxj[ 4] + AB[4*16 + j];
+//            cidxj[ 5] = cidxj[ 5] + AB[5*16 + j];
+//            cidxj[ 6] = cidxj[ 6] + AB[6*16 + j];
+//            cidxj[ 7] = cidxj[ 7] + AB[7*16 + j];
+//            cidxj[ 8] = cidxj[ 8] + AB[8*16 + j];
+//            cidxj[ 9] = cidxj[ 9] + AB[9*16 + j];
+//            cidxj[10] = cidxj[10] + AB[10*16 + j];
+//            cidxj[11] = cidxj[11] + AB[11*16 + j];
+//            cidxj[12] = cidxj[12] + AB[12*16 + j];
+//            cidxj[13] = cidxj[13] + AB[13*16 + j];
+//            //printf("(%d %d) %5.3f\n",i,j,AB[i + j*MR]);
+//        //}
+//    }
+//}
 
 void dgemm_macro_kernel(int64_t mc, int64_t kc, int64_t nc, double *C, int64_t incRowC, int64_t incColC, double *_A, double *_B) {
     int64_t mp = MC / MR;
