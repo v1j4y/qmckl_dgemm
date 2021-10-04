@@ -14,8 +14,8 @@
 //static double _B[NR*KC] __attribute__ ((aligned(64)));
 //static double _C[1024*4] __attribute__ ((aligned(64)));
 
-int dgemm_main(int64_t M, int64_t N, int64_t K, double *A_tile, int64_t incRowA, int64_t incColA,
-                                                double *B_tile, int64_t incRowB, int64_t incColB,
+int dgemm_main(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA, int64_t incColA,
+                                                double *B, int64_t incRowB, int64_t incColB,
                                                 double *C, int64_t incRowC, int64_t incColC) {
 
     int64_t mb = M / MC;
@@ -34,17 +34,20 @@ int dgemm_main(int64_t M, int64_t N, int64_t K, double *A_tile, int64_t incRowA,
     i_tile_a = 0;
 
     for(int i=0;i<nb;++i) {
-        nmbnb_prev = nmbnb;
+        nmbnb_prev = i*mb;
         i_tile_a = 0;
         for(int k=0;k<kb;++k) {
             int64_t kc = KC;
-
-
+            packB(kc, &B[k*KC*incRowB + i*N*incColB], incRowB, incColB, _B);
+    
+    
             idxi = i * N * incRowC;
             idxk = k * KC * incColA;
-
+    
             for(int j=0;j<mb;++j) {
-                dgemm_macro_kernel(MC, KC, N, &C[nmbnb*MCNC], incRowC, incColC, A_tile + i_tile_a * (MC*KC), B_tile + i_tile_b * (NC*KC));
+                packA(kc, &A[idxk + j*MC*incRowA], incRowA, incColA, _A);
+
+                dgemm_macro_kernel(MC, KC, N, &C[(i*mb + j)*MCNC], incRowC, incColC, _A, _B);
                 nmbnb = nmbnb + 1;
                 i_tile_a += 1;
             }
@@ -52,6 +55,59 @@ int dgemm_main(int64_t M, int64_t N, int64_t K, double *A_tile, int64_t incRowA,
             i_tile_b += 1;
         }
     }
+
+    return 1;
+}
+
+int dgemm_main_tiled(int64_t M, int64_t N, int64_t K, double *A_tile, int64_t incRowA, int64_t incColA,
+                                                double *B_tile, int64_t incRowB, int64_t incColB,
+                                                double *C, int64_t incRowC, int64_t incColC) {
+
+    int64_t mb = M / MC;
+    int64_t nb = N / N;
+    int64_t kb = K / KC;
+    int64_t idxi = 0;
+    int64_t idxk = 0;
+    int64_t nmbnb = 0;
+    int64_t nmbnb_prev = 0;
+    int64_t MCNC = MC*N;
+
+    int64_t i_tile_b, i_tile_a;
+    double *A_tile_p;
+    double *B_tile_p;
+    double *C_tile_p;
+
+    // Initialize indices
+    i_tile_b = 0;
+    i_tile_a = 0;
+
+#pragma omp parallel
+{
+    for(int i=0;i<nb;++i) {
+        nmbnb_prev = i*mb;
+        i_tile_a = 0;
+#pragma omp single
+        for(int k=0;k<kb;++k) {
+            int64_t kc = KC;
+
+            idxi = i * N * incRowC;
+            idxk = k * KC * incColA;
+
+            B_tile_p = B_tile + i_tile_b * (NC*KC);
+
+            for(int j=0;j<mb;++j) {
+                A_tile_p = A_tile + i_tile_a * (MC*KC);
+                C_tile_p = C + (i*mb + j) * MCNC;
+                #pragma omp task
+                dgemm_macro_kernel(MC, KC, N, C_tile_p, incRowC, incColC, A_tile_p, B_tile_p);
+                nmbnb = nmbnb + 1;
+                i_tile_a += 1;
+            }
+            if(k < (kb-1)) nmbnb = nmbnb_prev;
+            i_tile_b += 1;
+        }
+    }
+}
 
     return 1;
 }
@@ -170,7 +226,7 @@ int main() {
     else{
       N = MAT_DIM_N;
     }
-    printf("M=%ld K=%ld N=%ld | MC=%ld KC=%ld NC=%ld\n",M,K,N,MC,KC,NC);
+    printf("M=%ld K=%ld N=%ld | MC=%ld KC=%ld NC=%ld\n",(long)M,(long)K,(long)N,(long)MC,(long)KC,(long)NC);
 
     MBlas = M;
     NBlas = N;
@@ -203,17 +259,34 @@ int main() {
     fill_matrix_zeros  (DBlas, MBlas*NBlas);
     //print_matrix(B,N,K);
 
-    // Tile A and B
-    tile_matrix(M, N, K, A_tile, incRowA, incColA,
-               B_tile, incRowB, incColB,
-               C, incRowC, incColC, A_tile, B_tile);
+    int64_t rep = 10;
 
-    int64_t rep = 4;
+    // Warm up
+    //for(int i=0;i<rep;++i) {
+    //    asm volatile ("" : : : "memory");
+    //    dgemm_main(M, N, K, A, incRowA, incColA,
+    //               B, incRowB, incColB,
+    //               C, incRowC, incColC);
+    //    //dgemm_main_tiled(M, N, K, A_tile, incRowA, incColA,
+    //    //           B_tile, incRowB, incColB,
+    //    //           C, incRowC, incColC);
+    //}
+
+    //fill_matrix_zeros  (C, M*N);
+
+    // Tile A and B
+    tile_matrix(M, N, K, A, incRowA, incColA,
+               B, incRowB, incColB,
+               C, incRowC, incColC, A_tile, B_tile);
 
     const uint64_t t0 = rdtsc();
 
     for(int i=0;i<rep;++i) {
-        dgemm_main(M, N, K, A_tile, incRowA, incColA,
+        asm volatile ("" : : : "memory");
+        //dgemm_main(M, N, K, A, incRowA, incColA,
+        //           B, incRowB, incColB,
+        //           C, incRowC, incColC);
+        dgemm_main_tiled(M, N, K, A_tile, incRowA, incColA,
                    B_tile, incRowB, incColB,
                    C, incRowC, incColC);
     }
@@ -223,9 +296,16 @@ int main() {
 
     //print_matrix_ASer(C, M, N);
 
+    // Warm up
+    //for(int i=0;i<rep;++i) {
+    //    asm volatile ("" : : : "memory");
+    //    cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
+    //}
+
     const uint64_t bt0 = rdtsc();
 
     for(int i=0;i<rep;++i) {
+        asm volatile ("" : : : "memory");
         cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
     }
 
@@ -240,6 +320,8 @@ int main() {
     free(A);
     free(B);
     free(C);
+    free(A_tile);
+    free(B_tile);
     free(ABlas);
     free(BBlas);
     free(DBlas);

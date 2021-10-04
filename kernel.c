@@ -1272,7 +1272,7 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
 
     LABEL(K_LOOP)
 
-    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 256*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM( 4), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1281,6 +1281,7 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
 
     LEA(RCX, MEM(RCX,16*8))
 
+    PREFETCH(0, MEM(RCX, 256*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM( 6), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1289,8 +1290,7 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
 
     LEA(RCX, MEM(RCX,16*8))
 
-    //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
-    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 256*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM( 8), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1299,6 +1299,7 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
 
     LEA(RCX, MEM(RCX,16*8))
 
+    PREFETCH(0, MEM(RCX, 256*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(10), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1307,8 +1308,7 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
 
     LEA(RCX, MEM(RCX,16*8))
 
-    //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
-    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 256*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(12), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1317,6 +1317,7 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
 
     LEA(RCX, MEM(RCX,16*8))
 
+    PREFETCH(0, MEM(RCX, 256*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(14), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1325,8 +1326,7 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
 
     LEA(RCX, MEM(RCX,16*8))
 
-    //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
-    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 256*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(16), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1335,6 +1335,7 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
 
     LEA(RCX, MEM(RCX,16*8))
 
+    PREFETCH(0, MEM(RCX, 256*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(18), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1343,8 +1344,7 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
 
     LEA(RCX, MEM(RCX,16*8))
 
-    //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
-    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 256*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(20), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1353,6 +1353,7 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
 
     LEA(RCX, MEM(RCX,16*8))
 
+    PREFETCH(0, MEM(RCX, 256*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(22), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1361,8 +1362,7 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
 
     LEA(RCX, MEM(RCX,16*8))
 
-    //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
-    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 256*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(24), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1371,6 +1371,7 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
 
     LEA(RCX, MEM(RCX,16*8))
 
+    PREFETCH(0, MEM(RCX, 256*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(26), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1379,8 +1380,7 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
 
     LEA(RCX, MEM(RCX,16*8))
 
-    //PREFETCH(1, MEM(RCX,  R8,8)) // Preload B 0 - 1
-    PREFETCH(0, MEM(RCX, 32*8)) // Preload B 0 - 1
+    PREFETCH(0, MEM(RCX, 256*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(28), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 
@@ -1389,6 +1389,7 @@ void dgemm_kernel_avx512_asm_unroll2(int64_t kc, double *A, double *B, double *C
 
     LEA(RCX, MEM(RCX,16*8))
 
+    PREFETCH(0, MEM(RCX, 256*8)) // Preload B 0 - 1
     VADDPD(ZMM( 1), ZMM(30), MEM(RCX, 0*8)) // ZMM -> C
     VMOVUPD(MEM(RCX, 0*8), ZMM( 1)) // AB -> ZMM
 

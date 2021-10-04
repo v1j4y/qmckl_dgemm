@@ -7,11 +7,13 @@ CCFLAGS=(
  -xCORE-AVX512
  -DMKL_DIRECT_CALL_SEQ_JIT
  -qopt-zmm-usage=high
- -I/home/vijayc/gemm_asm/MIPP/src -I.
 )
+# -DMKL_DIRECT_CALL_PAR_JIT
+#-I/home/vijayc/gemm_asm/MIPP/src -I.
 MKL_PATH=/share/apps/intel/oneapi/mkl/2021.1.1/
 OMP_PATH=/share/apps/intel/oneapi/mkl/2021.1.1/
 MKL_LIB="-Wl,--start-group ${MKL_PATH}/lib/intel64/libmkl_intel_lp64.a ${MKL_PATH}/lib/intel64/libmkl_intel_thread.a ${MKL_PATH}/lib/intel64/libmkl_core.a -Wl,--end-group"
+MKL_LIB = "-mkl=sequential"
 echo $MKL_PATH
 echo $MKL_LIB
 
