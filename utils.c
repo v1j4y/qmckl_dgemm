@@ -8,17 +8,19 @@ unsigned long long rdtsc(void)
 }
 
 void fill_matrix_ones(double *A, int64_t dim) {
-    for(int i=0;i<dim;++i) {
+  int i;
+    for(i=0;i<dim;++i) {
         A[i] = 1.0;
     }
 }
 
 void fill_matrix_random(double *dA, int64_t dM, int64_t dN) {
     double count=0.0;
+    int i,j;
     //srand ( time ( NULL));
     srand ( 1024 );
-    for(int i=0;i<dM;++i) {
-      for(int j=0;j<dN;++j) {
+    for(i=0;i<dM;++i) {
+      for(j=0;j<dN;++j) {
         double random_value = (double)rand()/RAND_MAX*2.0-1.0;//float in range -1 to 1
         dA[i*dN + j] = random_value;
       }
@@ -27,9 +29,10 @@ void fill_matrix_random(double *dA, int64_t dM, int64_t dN) {
 
 void fill_matrix_uniform(double *dA, int64_t dM, int64_t dN) {
     double count=0.0;
-    for(int i=0;i<dM;++i) {
+    int i,j;
+    for(i=0;i<dM;++i) {
       count = 0.0;
-      for(int j=0;j<dN;++j) {
+      for(j=0;j<dN;++j) {
         dA[i*dN + j] = count;
         count += 1.0;
       }
@@ -38,9 +41,10 @@ void fill_matrix_uniform(double *dA, int64_t dM, int64_t dN) {
 
 void fill_matrix_uniform_2(double *dA, int64_t dM, int64_t dN) {
     double count=0.0;
-    for(int i=0;i<dN;++i) {
+    int i,j;
+    for(i=0;i<dN;++i) {
       count = 0.0;
-      for(int j=0;j<dM;++j) {
+      for(j=0;j<dM;++j) {
         dA[j*dN + i] = count;
         count += 1.0;
       }
@@ -48,14 +52,16 @@ void fill_matrix_uniform_2(double *dA, int64_t dM, int64_t dN) {
 }
 
 void fill_matrix_zeros(double *A, int64_t dim) {
-    for(int i=0;i<dim;++i) {
+  int i;
+    for(i=0;i<dim;++i) {
         A[i] = 0.0;
     }
 }
 
 void print_matrix(double *A, int64_t M, int64_t N) {
-    for(int i=0;i<N;++i) {
-        for(int j=0;j<M;++j) {
+  int i,j;
+    for(i=0;i<N;++i) {
+        for(j=0;j<M;++j) {
             printf(" %5.3f ",A[i + j*N]);
         }
         printf("\n");
@@ -63,8 +69,9 @@ void print_matrix(double *A, int64_t M, int64_t N) {
 }
 
 void print_diff_matrix(double *A, double *B, int64_t M, int64_t N) {
-    for(int j=0;j<N;++j) {
-        for(int i=0;i<M;++i) {
+  int i,j;
+    for(j=0;j<N;++j) {
+        for(i=0;i<M;++i) {
             printf(" %5.3f ",abs(A[i + j*M] - B[i + j*M]));
         }
         printf("\n");
@@ -77,8 +84,9 @@ void print_matrix_ASer(double *A, int64_t M, int64_t N) {
     int64_t mp = MC / MR;
     int64_t np = NC / NR;
     int64_t idx = 0;
-    for(int i=0;i<N;++i) {
-        for(int j=0;j<M;++j) {
+    int i,j;
+    for(i=0;i<N;++i) {
+        for(j=0;j<M;++j) {
           int64_t kmc = ( j / MC );
           int64_t lnc = ( i / NC );
           int64_t kmr = ( j - kmc * MC ) / MR;
@@ -98,8 +106,9 @@ void print_matrix_ASer(double *A, int64_t M, int64_t N) {
 }
 
 void print_diff_matrix_AT_B(double *A, double *B, int64_t M, int64_t N) {
-    for(int j=0;j<N;++j) {
-        for(int i=0;i<M;++i) {
+  int i,j;
+    for(j=0;j<N;++j) {
+        for(i=0;i<M;++i) {
             printf(" %5.3f ",abs(A[j + i*N] - B[i + j*M]));
         }
         printf("\n");
@@ -111,8 +120,9 @@ void print_diff_matrix_ASer_BT(double *A, double *B, int64_t M, int64_t N) {
     int64_t nb = N / NC;
     int64_t mp = MC / MR;
     int64_t np = NC / NR;
-    for(int i=0;i<N;++i) {
-        for(int j=0;j<M;++j) {
+    int i,j;
+    for(i=0;i<N;++i) {
+        for(j=0;j<M;++j) {
           int64_t kmc = ( j / MC );
           int64_t lnc = ( i / NC );
           int64_t kmr = ( j - kmc * MC ) / MR;
@@ -130,8 +140,9 @@ void print_diff_matrix_ASer_B(double *A, double *B, int64_t M, int64_t N) {
     int64_t nb = N / NC;
     int64_t mp = MC / MR;
     int64_t np = NC / NR;
-    for(int i=0;i<N;++i) {
-        for(int j=0;j<M;++j) {
+    int i,j;
+    for(i=0;i<N;++i) {
+        for(j=0;j<M;++j) {
           int64_t kmc = ( j / MC );
           int64_t lnc = ( i / NC );
           int64_t kmr = ( j - kmc * MC ) / MR;
@@ -154,9 +165,10 @@ void packA(int64_t kc, double *A, int64_t dimRowA, int64_t dimColA, double *buff
   int64_t mp = MC / MR;
   double *buffer_start = buffer;
   double *A_start = A;
-  for(int k=0;k<mp;++k) {
-    for(int j=0;j<MR;++j) {
-      for(int i=0;i<kc;++i) {
+  int k,j,i;
+  for(k=0;k<mp;++k) {
+    for(j=0;j<MR;++j) {
+      for(i=0;i<kc;++i) {
         buffer[j + i*MR] = A[j*dimRowA + i];
       }
     }
@@ -164,8 +176,8 @@ void packA(int64_t kc, double *A, int64_t dimRowA, int64_t dimColA, double *buff
     A = A + MR * dimRowA;
   }
   //printf("\nPack A (%d %d)\n",dimRowA,dimColA);
-  //for(int i=0;i<kc;++i){
-  //  for(int j=0;j<MC;++j){
+  //for(i=0;i<kc;++i){
+  //  for(j=0;j<MC;++j){
   //    printf(" %5.3f ",buffer_start[i*MC + j]);
   //  }
   //  printf("\n");
@@ -178,9 +190,10 @@ void packB(int64_t kc, double *B, int64_t dimRowB, int64_t dimColB, double *buff
   int64_t np = NC / NR;
   double *buffer_start = buffer;
   double *B_start = B;
-  for(int k=0;k<np;++k) {
-    for(int i=0;i<kc;++i) {
-      for(int j=0;j<NR;++j) {
+  int k,j,i;
+  for(k=0;k<np;++k) {
+    for(i=0;i<kc;++i) {
+      for(j=0;j<NR;++j) {
         buffer[j + i*NR] = B[j + i*dimRowB];
       }
     }
@@ -188,9 +201,9 @@ void packB(int64_t kc, double *B, int64_t dimRowB, int64_t dimColB, double *buff
     B = B + NR;
   }
   //printf("\nPack B (%d %d)\n",dimRowB,dimColB);
-  //for(int k=0;k<np;++k){
-  //for(int i=0;i<kc;++i){
-  //  for(int j=0;j<NR;++j){
+  //for(k=0;k<np;++k){
+  //for(i=0;i<kc;++i){
+  //  for(j=0;j<NR;++j){
   //    printf(" %5.3f ",buffer_start[k*(NR*kc) + i*NR + j]);
   //  }
   //  printf("\n");
@@ -208,9 +221,9 @@ void packB(int64_t kc, double *B, int64_t dimRowB, int64_t dimColB, double *buff
 //    printf("PackA \n");
 //    printf("(%d %d) mp=%d\n",incRowA, incColA,mp);
 //    const uint64_t t0 = rdtsc();
-//    for(int k=0;k<mp;++k) {
-//        for(int i=0;i<(kc - 0);i = i + 1) {
-//            //for(int j=0;j<(MR - 4);j = j + 4) {
+//    for(k=0;k<mp;++k) {
+//        for(i=0;i<(kc - 0);i = i + 1) {
+//            //for(j=0;j<(MR - 4);j = j + 4) {
 //                buffer[0] = A[0*incRowA];
 //                buffer[1] = A[1*incRowA];
 //                buffer[2] = A[2*incRowA];
@@ -240,8 +253,8 @@ void packB(int64_t kc, double *B, int64_t dimRowB, int64_t dimColB, double *buff
 //    const uint64_t t0 = rdtsc();
 //    //incRowB = incColB;
 //    //incColB = 1;
-//    for(int k=0;k<np;++k) {
-//        for(int i=0;i<(kc - 0);i = i + 1) {
+//    for(k=0;k<np;++k) {
+//        for(i=0;i<(kc - 0);i = i + 1) {
 //                buffer[0] = B[0]; // incColB == 1
 //                buffer[1] = B[1]; // incColB == 1
 //                buffer[2] = B[2]; // incColB == 1
@@ -259,7 +272,7 @@ void packB(int64_t kc, double *B, int64_t dimRowB, int64_t dimColB, double *buff
 //        //        buffer[13] = B[5*incColB + 1]; // incColB == 1
 //        //        buffer[14] = B[6*incColB + 1]; // incColB == 1
 //        //        buffer[15] = B[7*incColB + 1]; // incColB == 1
-//        //    //for(int j=0;j<(NR - 4);j = j + 4) {
+//        //    //for(j=0;j<(NR - 4);j = j + 4) {
 //        //        buffer[16] = B[0*incColB + 2]; // incColB == 1
 //        //        buffer[17] = B[1*incColB + 2]; // incColB == 1
 //        //        buffer[18] = B[2*incColB + 2]; // incColB == 1
@@ -295,7 +308,7 @@ void packB(int64_t kc, double *B, int64_t dimRowB, int64_t dimColB, double *buff
 //        //        buffer[45] = B[5*incColB + 5]; // incColB == 1
 //        //        buffer[46] = B[6*incColB + 5]; // incColB == 1
 //        //        buffer[47] = B[7*incColB + 5]; // incColB == 1
-//        //    //for(int j=0;j<(NR - 4);j = j + 4) {
+//        //    //for(j=0;j<(NR - 4);j = j + 4) {
 //        //        buffer[48] = B[0*incColB + 6]; // incColB == 1
 //        //        buffer[49] = B[1*incColB + 6]; // incColB == 1
 //        //        buffer[50] = B[2*incColB + 6]; // incColB == 1

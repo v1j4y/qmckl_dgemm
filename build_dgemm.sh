@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CC=${CC:-icpc}
+CC=${CC:-icc}
 CCFLAGS=(
  -O3 
  -g
@@ -13,7 +13,7 @@ CCFLAGS=(
 MKL_PATH=/share/apps/intel/oneapi/mkl/2021.1.1/
 OMP_PATH=/share/apps/intel/oneapi/mkl/2021.1.1/
 MKL_LIB="-Wl,--start-group ${MKL_PATH}/lib/intel64/libmkl_intel_lp64.a ${MKL_PATH}/lib/intel64/libmkl_intel_thread.a ${MKL_PATH}/lib/intel64/libmkl_core.a -Wl,--end-group"
-MKL_LIB = "-mkl=sequential"
+MKL_LIB="-mkl=sequential"
 echo $MKL_PATH
 echo $MKL_LIB
 
