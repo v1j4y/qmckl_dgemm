@@ -1,19 +1,21 @@
 #!/bin/bash
 
-CC=${CC:-icc}
+CC=${CC:-icpc}
 CCFLAGS=(
  -O3 
  -g
  -xCORE-AVX512
- -DMKL_DIRECT_CALL_SEQ_JIT
+ -DMKL_DIRECT_CALL_PAR_JIT
  -qopt-zmm-usage=high
+ -mcmodel=medium
+ -i-dynamic
 )
-# -DMKL_DIRECT_CALL_PAR_JIT
+# -DMKL_DIRECT_CALL_SEQ_JIT
 #-I/home/vijayc/gemm_asm/MIPP/src -I.
 MKL_PATH=/share/apps/intel/oneapi/mkl/2021.1.1/
 OMP_PATH=/share/apps/intel/oneapi/mkl/2021.1.1/
 MKL_LIB="-Wl,--start-group ${MKL_PATH}/lib/intel64/libmkl_intel_lp64.a ${MKL_PATH}/lib/intel64/libmkl_intel_thread.a ${MKL_PATH}/lib/intel64/libmkl_core.a -Wl,--end-group"
-MKL_LIB="-mkl=sequential"
+MKL_LIB="-mkl=parallel"
 echo $MKL_PATH
 echo $MKL_LIB
 
