@@ -7,9 +7,13 @@ CCFLAGS=(
  -xCORE-AVX512
  -DMKL_DIRECT_CALL_PAR_JIT
  -qopt-zmm-usage=high
- -mcmodel=medium
- -i-dynamic
+ -finline
+ -finline-functions
+ -inline-forceinline
+ -ipo
 )
+# -restrict
+# -mcmodel=medium
 # -DMKL_DIRECT_CALL_SEQ_JIT
 #-I/home/vijayc/gemm_asm/MIPP/src -I.
 MKL_PATH=/share/apps/intel/oneapi/mkl/2021.1.1/

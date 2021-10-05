@@ -74,7 +74,8 @@ int dgemm_main_tiled(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA
     int64_t MCNC = MC*N;
     size_t szeA = MC*KC*sizeof(double);
     size_t szeB = NC*KC*sizeof(double);
-    int i,j,k;
+    int i,j,k,imb;
+    int MCKC = MC*KC;
 
     int64_t i_tile_b, i_tile_a;
     double *A_tile_p __attribute__ ((aligned(64)));
@@ -90,6 +91,7 @@ int dgemm_main_tiled(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA
     for(i=0;i<nb;++i) {
         nmbnb_prev = i*mb;
         i_tile_a = 0;
+        imb = i*mb;
 //#pragma omp single
         for(k=0;k<kb;++k) {
             int64_t kc = KC;
@@ -98,16 +100,18 @@ int dgemm_main_tiled(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA
             idxk = k * KC * incColA;
 
             B_tile_p = _B_tile + i_tile_b * (NC*KC);
+            C_tile_p = C + (imb-1) * MCNC;
+            A_tile_p = _A_tile;
 
             for(j=0;j<mb;++j) {
-                A_tile_p = _A_tile + i_tile_a * (MC*KC);
-                C_tile_p = C + (i*mb + j) * MCNC;
-//              #pragma omp task 
+                A_tile_p += (MCKC);
+                C_tile_p +=  MCNC;
+                #pragma forceinline
                 dgemm_macro_kernel(MC, KC, N, C_tile_p, incRowC, incColC, A_tile_p, B_tile_p);
-                nmbnb = nmbnb + 1;
+                //nmbnb = nmbnb + 1;
                 i_tile_a += 1;
             }
-            if(k < (kb-1)) nmbnb = nmbnb_prev;
+            //if(k < (kb-1)) nmbnb = nmbnb_prev;
             i_tile_b += 1;
         }
     }
@@ -267,7 +271,7 @@ int main() {
     fill_matrix_zeros  (DBlas, MBlas*NBlas);
     //print_matrix(B,N,K);
 
-    int64_t rep = 50;
+    int64_t rep = 4;
     int i;
 
     // Warm up
@@ -303,14 +307,6 @@ int main() {
     const uint64_t dt = rdtsc() - t0;
     printf("MyDGEMM = %f\n", 1e-9 * dt/rep);
 
-    //print_matrix_ASer(C, M, N);
-
-    // Warm up
-    //for(i=0;i<rep;++i) {
-    //    asm volatile ("" : : : "memory");
-    //    cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
-    //}
-
     const uint64_t bt0 = rdtsc();
 
     for(i=0;i<rep;++i) {
@@ -320,6 +316,14 @@ int main() {
 
     const uint64_t bdt = rdtsc() - bt0;
     printf("BLAS DGEMM = %f\n", 1e-9 * bdt/rep);
+
+    //print_matrix_ASer(C, M, N);
+
+    // Warm up
+    //for(i=0;i<rep;++i) {
+    //    asm volatile ("" : : : "memory");
+    //    cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
+    //}
 
     //print_matrix(DBlas, M, N);
     //printf("\n-------------diff-----------------\n");
