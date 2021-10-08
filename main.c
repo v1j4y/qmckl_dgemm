@@ -91,6 +91,7 @@ int dgemm_main_tiled(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA
     for(i=0;i<nb;++i) {
         nmbnb_prev = i*mb;
         i_tile_a = 0;
+        A_tile_p = _A_tile;
         imb = i*mb;
 //#pragma omp single
         for(k=0;k<kb;++k) {
@@ -100,14 +101,13 @@ int dgemm_main_tiled(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA
             idxk = k * KC * incColA;
 
             B_tile_p = _B_tile + i_tile_b * (NC*KC);
-            C_tile_p = C + (imb-1) * MCNC;
-            A_tile_p = _A_tile;
+            C_tile_p = C + (imb) * MCNC;
 
             for(j=0;j<mb;++j) {
-                A_tile_p += (MCKC);
-                C_tile_p +=  MCNC;
                 #pragma forceinline
                 dgemm_macro_kernel(MC, KC, N, C_tile_p, incRowC, incColC, A_tile_p, B_tile_p);
+                A_tile_p += (MCKC);
+                C_tile_p +=  MCNC;
                 //nmbnb = nmbnb + 1;
                 i_tile_a += 1;
             }
@@ -271,7 +271,7 @@ int main() {
     fill_matrix_zeros  (DBlas, MBlas*NBlas);
     //print_matrix(B,N,K);
 
-    int64_t rep = 4;
+    int64_t rep = 1;
     int i;
 
     // Warm up
@@ -326,9 +326,9 @@ int main() {
     //}
 
     //print_matrix(DBlas, M, N);
-    //printf("\n-------------diff-----------------\n");
+    printf("\n-------------diff-----------------\n");
     //print_diff_matrix_AT_B(C,D, M, N);
-    //print_diff_matrix_ASer_B(C,DBlas, M, N);
+    print_diff_matrix_ASer_B(C,DBlas, M, N);
 
     free(A);
     free(B);
