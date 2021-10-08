@@ -271,7 +271,7 @@ int main() {
     fill_matrix_zeros  (DBlas, MBlas*NBlas);
     //print_matrix(B,N,K);
 
-    int64_t rep = 1;
+    int64_t rep = 50;
     int i;
 
     // Warm up
@@ -326,9 +326,9 @@ int main() {
     //}
 
     //print_matrix(DBlas, M, N);
-    printf("\n-------------diff-----------------\n");
+    //printf("\n-------------diff-----------------\n");
     //print_diff_matrix_AT_B(C,D, M, N);
-    print_diff_matrix_ASer_B(C,DBlas, M, N);
+    //print_diff_matrix_ASer_B(C,DBlas, M, N);
 
     free(A);
     free(B);
