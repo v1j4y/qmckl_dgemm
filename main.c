@@ -272,7 +272,7 @@ int main() {
     //print_matrix(B,N,K);
 
     int64_t rep = 50;
-    int i;
+    int i,j=rep;
 
     // Warm up
     //for(i=0;i<rep;++i) {
@@ -292,30 +292,41 @@ int main() {
                B, incRowB, incColB,
                C, incRowC, incColC, _A_tile, _B_tile);
 
-    const uint64_t t0 = rdtsc();
+          dgemm_main_tiled(M, N, K, A, incRowA, incColA,
+                     B, incRowB, incColB,
+                     C, incRowC, incColC);
 
-    for(i=0;i<rep;++i) {
-        //asm volatile ("" : : : "memory");
-        //dgemm_main(M, N, K, A, incRowA, incColA,
-        //           B, incRowB, incColB,
-        //           C, incRowC, incColC);
-        dgemm_main_tiled(M, N, K, A, incRowA, incColA,
-                   B, incRowB, incColB,
-                   C, incRowC, incColC);
-    }
+      const uint64_t t0 = rdtsc();
 
-    const uint64_t dt = rdtsc() - t0;
-    printf("MyDGEMM = %f\n", 1e-9 * dt/rep);
+      for(i=0;i<j;++i) {
+          //asm volatile ("" : : : "memory");
+          //dgemm_main(M, N, K, A, incRowA, incColA,
+          //           B, incRowB, incColB,
+          //           C, incRowC, incColC);
+          dgemm_main_tiled(M, N, K, A, incRowA, incColA,
+                     B, incRowB, incColB,
+                     C, incRowC, incColC);
+      }
 
-    const uint64_t bt0 = rdtsc();
+      const uint64_t dt = rdtsc() - t0;
+      //printf("(%d) - MyDGEMM = %f\n", j, 1e-9 * dt/j);
+      printf("MyDGEMM = %f\n", 1e-9 * dt/j);
 
-    for(i=0;i<rep;++i) {
-        //asm volatile ("" : : : "memory");
-        cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
-    }
+          cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
 
-    const uint64_t bdt = rdtsc() - bt0;
-    printf("BLAS DGEMM = %f\n", 1e-9 * bdt/rep);
+      const uint64_t bt0 = rdtsc();
+
+      for(i=0;i<j;++i) {
+          //asm volatile ("" : : : "memory");
+          cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
+      }
+
+      const uint64_t bdt = rdtsc() - bt0;
+      //printf("(%d) - BLAS DGEMM = %f\n", j, 1e-9 * bdt/j);
+      printf("BLAS DGEMM = %f\n", 1e-9 * bdt/j);
+      //printf("(%d) - DGEMM/MKL = %f\n", j, 200 - (1e-9 * dt/j) *100/ (1e-9 * bdt/j));
+      //printf("(%d) - MKL/DGEMM = %f\n", j, (double)bdt/dt);
+
 
     //print_matrix_ASer(C, M, N);
 

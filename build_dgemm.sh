@@ -5,7 +5,7 @@ CCFLAGS=(
  -O3 
  -g
  -xCORE-AVX512
- -DMKL_DIRECT_CALL_PAR_JIT
+ -DMKL_DIRECT_CALL_SEQ_JIT
  -qopt-zmm-usage=high
  -finline
  -finline-functions
