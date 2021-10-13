@@ -310,7 +310,9 @@ int main() {
 
       const uint64_t dt = rdtsc() - t0;
       //printf("(%d) - MyDGEMM = %f\n", j, 1e-9 * dt/j);
-      printf("MyDGEMM = %f\n", 1e-9 * dt/j);
+      printf("MyDGEMM = %f\n", 1e-9 * dt/1);
+
+    //print_matrix_ASer(C, M, N);
 
           cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
 
@@ -323,12 +325,10 @@ int main() {
 
       const uint64_t bdt = rdtsc() - bt0;
       //printf("(%d) - BLAS DGEMM = %f\n", j, 1e-9 * bdt/j);
-      printf("BLAS DGEMM = %f\n", 1e-9 * bdt/j);
+      printf("BLAS DGEMM = %f\n", 1e-9 * bdt/1);
       //printf("(%d) - DGEMM/MKL = %f\n", j, 200 - (1e-9 * dt/j) *100/ (1e-9 * bdt/j));
       //printf("(%d) - MKL/DGEMM = %f\n", j, (double)bdt/dt);
 
-
-    //print_matrix_ASer(C, M, N);
 
     // Warm up
     //for(i=0;i<rep;++i) {

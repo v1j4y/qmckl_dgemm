@@ -7,11 +7,11 @@ CCFLAGS=(
  -xCORE-AVX512
  -DMKL_DIRECT_CALL_SEQ_JIT
  -qopt-zmm-usage=high
- -finline
- -finline-functions
- -inline-forceinline
- -ipo
 )
+# -finline
+# -finline-functions
+# -inline-forceinline
+# -ipo
 # -restrict
 # -mcmodel=medium
 # -DMKL_DIRECT_CALL_SEQ_JIT

@@ -1013,11 +1013,15 @@ void dgemm_macro_kernel(int64_t mc, int64_t kc, int64_t nc, double *C, int64_t i
     int64_t MRNR = MR*NR;
     int64_t MRKC = MR*KC;
     int64_t NRKC = NR*KC;
-    int64_t MRKC64;
-    int64_t NRKC64;
     int64_t KC64 = (KC/64) * 64;
     int64_t KC32 = ((kc - KC64)/32) * 32;
     int64_t KC16 = ((kc - KC64 - KC32)/16) * 16;
+    int64_t MRKC64 = MR * KC64;
+    int64_t NRKC64 = NR * KC64;
+    int64_t MRKC32 = MR * KC32;
+    int64_t NRKC32 = NR * KC32;
+    int64_t MRKC16 = MR * KC16;
+    int64_t NRKC16 = NR * KC16;
     double *_A_p;
     double *_B_p;
     double *_C_p;
@@ -1107,7 +1111,7 @@ void dgemm_macro_kernel(int64_t mc, int64_t kc, int64_t nc, double *C, int64_t i
 
                   dgemm_kernel_avx512_asm_unroll4(KC64, &_A[i*MRKC], &_B[j*NRKC], _C_p, incRowC, incColC);
 
-                  dgemm_kernel_avx512_asm_unroll2(KC32, &_A[i*MRKC + KC64*MR], &_B[j*NRKC + KC64*NR], _C_p, incRowC, incColC);
+                  dgemm_kernel_avx512_asm_unroll2(KC32, &_A[i*MRKC + MRKC64], &_B[j*NRKC + NRKC64], _C_p, incRowC, incColC);
 
                   nmcnc = nmcnc + 1;
               }
