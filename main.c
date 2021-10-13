@@ -14,6 +14,10 @@
 //static double _B[NR*KC] __attribute__ ((aligned(64)));
 //static double _C[1024*4] __attribute__ ((aligned(64)));
 
+// DIRECT JIT MKL
+void *jitter;
+
+
 int dgemm_main(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA, int64_t incColA,
                                                 double *B, int64_t incRowB, int64_t incColB,
                                                 double *C, int64_t incRowC, int64_t incColC) {
@@ -271,7 +275,7 @@ int main() {
     fill_matrix_zeros  (DBlas, MBlas*NBlas);
     //print_matrix(B,N,K);
 
-    int64_t rep = 50;
+    int64_t rep =150;
     int i,j=rep;
 
     // Warm up
@@ -295,6 +299,9 @@ int main() {
           dgemm_main_tiled(M, N, K, A, incRowA, incColA,
                      B, incRowB, incColB,
                      C, incRowC, incColC);
+          //dgemm_main(M, N, K, A, incRowA, incColA,
+          //           B, incRowB, incColB,
+          //           C, incRowC, incColC);
 
       const uint64_t t0 = rdtsc();
 
@@ -314,13 +321,24 @@ int main() {
 
     //print_matrix_ASer(C, M, N);
 
-          cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
+    // MKL
+    mkl_jit_status_t status = mkl_jit_create_dgemm(&jitter, MKL_ROW_MAJOR, MKL_NOTRANS, MKL_NOTRANS, MBlas, NBlas, KBlas, 1.0, KBlas, NBlas, 0.0, NBlas);
+    if(MKL_JIT_ERROR == status){
+      printf("Error in MKL\n");
+      return(1);
+    }
+    dgemm_jit_kernel_t mkl_dgemm = mkl_jit_get_dgemm_ptr(jitter);
+
+    mkl_dgemm(jitter,ABlas,BBlas,DBlas);
+
+          //cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
 
       const uint64_t bt0 = rdtsc();
 
       for(i=0;i<j;++i) {
           //asm volatile ("" : : : "memory");
-          cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
+          //cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
+          mkl_dgemm(jitter,ABlas,BBlas,DBlas);
       }
 
       const uint64_t bdt = rdtsc() - bt0;
