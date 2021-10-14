@@ -362,7 +362,7 @@ int main() {
           //asm volatile ("" : : : "memory");
           //cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
           //mkl_dgemm(jitter,ABlas,BBlas,DBlas);
-          dgemm_compute("P","N",&MB,&NB,&KB,ABlasp,&KB,BBlas,&NB,&beta,DBlas,&NB);
+          dgemm_compute("P","P",&MB,&NB,&KB,ABlasp,&KB,BBlasp,&NB,&beta,DBlas,&NB);
       }
 
       const uint64_t bdt = rdtsc() - bt0;
