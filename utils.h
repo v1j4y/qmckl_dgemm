@@ -8,10 +8,6 @@
 #define MAT_DIM 1024
 #endif
 
-#if !defined(MAT_DIM)
-#define MAT_DIM 1024
-#endif
-
 #if !defined(MAT_DIM_M)
 #define MAT_DIM_M MAT_DIM
 #endif

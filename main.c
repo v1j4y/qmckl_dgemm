@@ -296,12 +296,12 @@ int main() {
                B, incRowB, incColB,
                C, incRowC, incColC, _A_tile, _B_tile);
 
-          dgemm_main_tiled(M, N, K, A, incRowA, incColA,
-                     B, incRowB, incColB,
-                     C, incRowC, incColC);
           //dgemm_main(M, N, K, A, incRowA, incColA,
           //           B, incRowB, incColB,
           //           C, incRowC, incColC);
+          dgemm_main_tiled(M, N, K, A, incRowA, incColA,
+                     B, incRowB, incColB,
+                     C, incRowC, incColC);
 
       const uint64_t t0 = rdtsc();
 
