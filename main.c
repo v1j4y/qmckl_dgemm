@@ -322,23 +322,47 @@ int main() {
     //print_matrix_ASer(C, M, N);
 
     // MKL
-    mkl_jit_status_t status = mkl_jit_create_dgemm(&jitter, MKL_ROW_MAJOR, MKL_NOTRANS, MKL_NOTRANS, MBlas, NBlas, KBlas, 1.0, KBlas, NBlas, 0.0, NBlas);
-    if(MKL_JIT_ERROR == status){
-      printf("Error in MKL\n");
-      return(1);
-    }
-    dgemm_jit_kernel_t mkl_dgemm = mkl_jit_get_dgemm_ptr(jitter);
+    //mkl_jit_status_t status = mkl_jit_create_dgemm(&jitter, MKL_ROW_MAJOR, MKL_NOTRANS, MKL_NOTRANS, MBlas, NBlas, KBlas, 1.0, KBlas, NBlas, 0.0, NBlas);
+    //if(MKL_JIT_ERROR == status){
+    //  printf("Error in MKL\n");
+    //  return(1);
+    //}
+    //dgemm_jit_kernel_t mkl_dgemm = mkl_jit_get_dgemm_ptr(jitter);
 
-    mkl_dgemm(jitter,ABlas,BBlas,DBlas);
+    //mkl_dgemm(jitter,ABlas,BBlas,DBlas);
+
+    const int MB = MBlas;
+    const int NB = NBlas;
+    const int KB = KBlas;
+    const double alpha=1.0;
+    const double beta=0.0;
+    double *ABlasp;
+    double *BBlasp;
+
+    // Get size of packed A
+    size_t ABlasp_size = dgemm_pack_get_size("A",&MB,&NB,&KB);
+    ABlasp = (double *)mkl_malloc(ABlasp_size,64);
+
+    // Pack
+    dgemm_pack("A","N",&MB,&NB,&KB,&alpha,ABlas,&KB,ABlasp);
+
+    // Get size of packed B
+    size_t BBlasp_size = dgemm_pack_get_size("B",&MB,&NB,&KB);
+    BBlasp = (double *)mkl_malloc(BBlasp_size,64);
+
+    // Pack
+    dgemm_pack("B","N",&MB,&NB,&KB,&alpha,BBlas,&NB,BBlasp);
 
           //cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
+          dgemm_compute("P","P",&MB,&NB,&KB,ABlasp,&KB,BBlasp,&NB,&beta,DBlas,&NB);
 
       const uint64_t bt0 = rdtsc();
 
       for(i=0;i<j;++i) {
           //asm volatile ("" : : : "memory");
           //cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
-          mkl_dgemm(jitter,ABlas,BBlas,DBlas);
+          //mkl_dgemm(jitter,ABlas,BBlas,DBlas);
+          dgemm_compute("P","N",&MB,&NB,&KB,ABlasp,&KB,BBlas,&NB,&beta,DBlas,&NB);
       }
 
       const uint64_t bdt = rdtsc() - bt0;
@@ -359,6 +383,7 @@ int main() {
     //print_diff_matrix_AT_B(C,D, M, N);
     //print_diff_matrix_ASer_B(C,DBlas, M, N);
 
+    mkl_free(ABlasp);
     free(A);
     free(B);
     free(C);
