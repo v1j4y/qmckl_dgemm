@@ -275,7 +275,7 @@ int main() {
     fill_matrix_zeros  (DBlas, MBlas*NBlas);
     //print_matrix(B,N,K);
 
-    int64_t rep =  0;
+    int64_t rep =150;
     int i,j=rep;
 
     // Warm up
@@ -319,7 +319,7 @@ int main() {
       //printf("(%d) - MyDGEMM = %f\n", j, 1e-9 * dt/j);
       printf("MyDGEMM = %f\n", 1e-9 * dt/1);
 
-    print_matrix_ASer(C, M, N);
+    //print_matrix_ASer(C, M, N);
 
     // MKL
     //mkl_jit_status_t status = mkl_jit_create_dgemm(&jitter, MKL_ROW_MAJOR, MKL_NOTRANS, MKL_NOTRANS, MBlas, NBlas, KBlas, 1.0, KBlas, NBlas, 0.0, NBlas);
@@ -378,10 +378,10 @@ int main() {
     //    cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
     //}
 
-    print_matrix(DBlas, M, N);
-    printf("\n-------------diff-----------------\n");
+    //print_matrix(DBlas, M, N);
+    //printf("\n-------------diff-----------------\n");
     //print_diff_matrix_AT_B(C,D, M, N);
-    print_diff_matrix_ASer_BT(C,DBlas, M, N);
+    //print_diff_matrix_ASer_BT(C,DBlas, M, N);
 
     //mkl_free(ABlasp);
     free(A);
