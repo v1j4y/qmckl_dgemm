@@ -129,9 +129,13 @@ void print_diff_matrix_ASer_BT(double *A, double *B, int64_t M, int64_t N) {
           int64_t lnr = ( i - lnc * NC ) / NR;
           int64_t k   = ( ( j - kmc * MC ) - ( kmr * MR ) );
           int64_t l   = ( ( i - lnc * NC ) - ( lnr * NR ) );
-          printf(" %5.3f ",abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[i + j*N]));
+          if(abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[j + i*M]) > 1e-13){
+            printf(" %20.10e ",abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[j + i*M]));
+            printf("Fail\n");
+            return;
+          };
         }
-        printf("\n");
+        //printf("\n");
     }
 }
 

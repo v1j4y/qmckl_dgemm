@@ -262,20 +262,20 @@ int main() {
     BBlas = (double *)malloc( KBlas * NBlas * sizeof(double));
     DBlas = (double *)malloc( MBlas * NBlas * sizeof(double));
 
-    //fill_matrix_ones   (A, M*K);
-    //fill_matrix_uniform(B, K, N);
-    fill_matrix_random(A, M,K);
-    fill_matrix_random(B, K, N);
+    fill_matrix_ones   (A, M*K);
+    fill_matrix_uniform(B, K, N);
+    //fill_matrix_random(A, M,K);
+    //fill_matrix_random(B, K, N);
     fill_matrix_zeros  (C, M*N);
 
-    //fill_matrix_ones   (ABlas, MBlas*KBlas);
-    //fill_matrix_uniform(BBlas, KBlas, NBlas);
-    fill_matrix_random(ABlas, MBlas,KBlas);
-    fill_matrix_random(BBlas, KBlas, NBlas);
+    fill_matrix_ones   (ABlas, MBlas*KBlas);
+    fill_matrix_uniform(BBlas, KBlas, NBlas);
+    //fill_matrix_random(ABlas, MBlas,KBlas);
+    //fill_matrix_random(BBlas, KBlas, NBlas);
     fill_matrix_zeros  (DBlas, MBlas*NBlas);
     //print_matrix(B,N,K);
 
-    int64_t rep =150;
+    int64_t rep =  0;
     int i,j=rep;
 
     // Warm up
@@ -319,7 +319,7 @@ int main() {
       //printf("(%d) - MyDGEMM = %f\n", j, 1e-9 * dt/j);
       printf("MyDGEMM = %f\n", 1e-9 * dt/1);
 
-    //print_matrix_ASer(C, M, N);
+    print_matrix_ASer(C, M, N);
 
     // MKL
     //mkl_jit_status_t status = mkl_jit_create_dgemm(&jitter, MKL_ROW_MAJOR, MKL_NOTRANS, MKL_NOTRANS, MBlas, NBlas, KBlas, 1.0, KBlas, NBlas, 0.0, NBlas);
@@ -351,7 +351,7 @@ int main() {
     BBlasp = (double *)mkl_malloc(BBlasp_size,64);
 
     // Pack
-    dgemm_pack("B","N",&MB,&NB,&KB,&alpha,BBlas,&NB,BBlasp);
+    dgemm_pack("B","T",&MB,&NB,&KB,&alpha,BBlas,&NB,BBlasp);
 
           //cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
           dgemm_compute("P","P",&MB,&NB,&KB,ABlasp,&KB,BBlasp,&NB,&beta,DBlas,&NB);
@@ -378,12 +378,12 @@ int main() {
     //    cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
     //}
 
-    //print_matrix(DBlas, M, N);
-    //printf("\n-------------diff-----------------\n");
+    print_matrix(DBlas, M, N);
+    printf("\n-------------diff-----------------\n");
     //print_diff_matrix_AT_B(C,D, M, N);
-    //print_diff_matrix_ASer_B(C,DBlas, M, N);
+    print_diff_matrix_ASer_BT(C,DBlas, M, N);
 
-    mkl_free(ABlasp);
+    //mkl_free(ABlasp);
     free(A);
     free(B);
     free(C);
