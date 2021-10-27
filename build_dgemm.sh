@@ -4,15 +4,16 @@ CC=${CC:-icpc}
 CCFLAGS=(
  -O3 
  -g
- -xCORE-AVX512
+ -march=native
  -DMKL_DIRECT_CALL_SEQ_JIT
- -qopt-zmm-usage=high
  -finline
  -finline-functions
  -inline-forceinline
  -ipo
  -restrict
 )
+# -xCORE-AVX2
+# -qopt-zmm-usage=high
 # -mcmodel=medium
 # -DMKL_DIRECT_CALL_SEQ_JIT
 #-I/home/vijayc/gemm_asm/MIPP/src -I.
@@ -27,24 +28,28 @@ OBJ_CMD="-c "${CCFLAGS[@]}" utils.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}"
 echo $CC $OBJ_CMD
 $CC $OBJ_CMD
 
-OBJ_CMD="-c "${CCFLAGS[@]}" kernel.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread  "${LFLAGS[@]}" "${@}
+#OBJ_CMD="-c "${CCFLAGS[@]}" kernel.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread  "${LFLAGS[@]}" "${@}
+#echo $CC $OBJ_CMD
+#$CC $OBJ_CMD
+
+OBJ_CMD="-c "${CCFLAGS[@]}" kernel_sse2_8regs.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread  "${LFLAGS[@]}" "${@}
 echo $CC $OBJ_CMD
 $CC $OBJ_CMD
 
-OBJ_CMD="-c "${CCFLAGS[@]}" kernel_sse2_16regs.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread  "${LFLAGS[@]}" "${@}
-echo $CC $OBJ_CMD
-$CC $OBJ_CMD
+#OBJ_CMD="-c "${CCFLAGS[@]}" kernel_sse2_16regs.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread  "${LFLAGS[@]}" "${@}
+#echo $CC $OBJ_CMD
+#$CC $OBJ_CMD
 
 OBJ_CMD="-c "${CCFLAGS[@]}" kernel_avx2_16regs.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread  "${LFLAGS[@]}" "${@}
 echo $CC $OBJ_CMD
 $CC $OBJ_CMD
 
-OBJ_CMD="-c "${CCFLAGS[@]}" kernel_avx2_32regs.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread  "${LFLAGS[@]}" "${@}
-echo $CC $OBJ_CMD
-$CC $OBJ_CMD
+#OBJ_CMD="-c "${CCFLAGS[@]}" kernel_avx2_32regs.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread  "${LFLAGS[@]}" "${@}
+#echo $CC $OBJ_CMD
+#$CC $OBJ_CMD
 
 OBJ_CMD="-c "${CCFLAGS[@]}" main.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread  "${LFLAGS[@]}" "${@}
-BUILD_CMD="-o xtest "${CCFLAGS[@]}" main.c kernel.o kernel_sse2_16regs.o kernel_avx2_16regs.o kernel_avx2_32regs.o utils.o -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp  -lpthread "${LFLAGS[@]}" "${@}
+BUILD_CMD="-o xtest "${CCFLAGS[@]}" main.c kernel_sse2_8regs.o kernel_avx2_16regs.o utils.o -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp  -lpthread "${LFLAGS[@]}" "${@}
 echo $CC $OBJ_CMD
 echo $CC $BUILD_CMD
 $CC $OBJ_CMD
