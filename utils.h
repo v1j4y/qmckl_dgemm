@@ -40,6 +40,22 @@
 #define NR 14
 #endif
 
+#if !defined(MR2)
+#define MR2 8
+#endif
+
+#if !defined(NR2)
+#define NR2 6
+#endif
+
+#if !defined(MR1)
+#define MR1 4
+#endif
+
+#if !defined(NR1)
+#define NR1 6
+#endif
+
 static double _A[MC*KC] __attribute__ ((aligned(64)));
 static double _B[NC*KC] __attribute__ ((aligned(64)));
 
