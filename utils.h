@@ -49,16 +49,17 @@
 #endif
 
 #if !defined(MR1)
-#define MR1 4
+#define MR1 8
 #endif
 
 #if !defined(NR1)
-#define NR1 6
+#define NR1 2
 #endif
 
 static double _A[MC*KC] __attribute__ ((aligned(64)));
 static double _B[NC*KC] __attribute__ ((aligned(64)));
 
+//static double _A_tile[MAT_DIM_M*MAT_DIM_K] __attribute__ ((aligned(64)));
 static double _A_tile[MAT_DIM_M*MAT_DIM_K] __attribute__ ((aligned(64)));
 static double _B_tile[NC*MAT_DIM_K] __attribute__ ((aligned(64)));
 
