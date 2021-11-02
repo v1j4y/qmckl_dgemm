@@ -312,6 +312,18 @@ void dgemm_macro_kernel_avx2_8regs(int64_t mc, int64_t kc, int64_t nc, double *C
     double *_C_p;
     int i,j,k,l;
 
+#pragma omp parallel 
+{
+#pragma omp for private(i)
+          for(j=0;j<np;++j) {
+              for(i=0;i<mp;++i) {
+                  #pragma forceinline
+                  dgemm_kernel_avx2_8regs_asm_unroll4(kc  , &_A[i*MR1KC], &_B[j*NR1KC], &C[(j*mp + i)*MR1NR1], incRowC, incColC);
+              }
+          }
+}
+    return;
+
     switch (KC64){
       case 0:
         switch (KC32){

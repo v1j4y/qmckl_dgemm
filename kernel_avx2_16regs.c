@@ -487,34 +487,6 @@ VMOVUPD(MEM(RCX, 4*8), YMM( 1))
 }
 
 
-//void dgemm_macro_kernel_avx2(int64_t mc, int64_t kc, int64_t nc, double *C, int64_t incRowC, int64_t incColC, double *_A, double *_B) {
-//    int64_t mp = MC / MR;
-//    int64_t np = nc / NR;
-//    int64_t nmcnc = 0;
-//    int64_t MRNR = MR*NR;
-//
-//    for(int j=0;j<np;++j) {
-//        for(int i=0;i<mp;++i) {
-//            switch (KC/16){
-//              case 1:
-//                dgemm_kernel_avx2_asm_unroll0(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[nmcnc*MRNR], incRowC, incColC);
-//                break;
-//              case 2:
-//                dgemm_kernel_avx2_asm_unroll2(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[nmcnc*MRNR], incRowC, incColC);
-//                break;
-//              case 3:
-//                dgemm_kernel_avx2_asm_unroll0(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[nmcnc*MRNR], incRowC, incColC);
-//                break;
-//              default:
-//                dgemm_kernel_avx2_asm_unroll4(kc, &_A[i*MR*kc], &_B[j*NR*kc], &C[nmcnc*MRNR], incRowC, incColC);
-//                break;
-//
-//            }
-//            nmcnc = nmcnc + 1;
-//        }
-//    }
-//}
-
 void dgemm_macro_kernel_avx2_16regs(int64_t mc, int64_t kc, int64_t nc, double *C, int64_t incRowC, int64_t incColC, double *  _A, double *  _B) {
     int64_t mp = MC / MR2;
     int64_t np = nc / NR2;
@@ -535,6 +507,18 @@ void dgemm_macro_kernel_avx2_16regs(int64_t mc, int64_t kc, int64_t nc, double *
     double *_B_p;
     double *_C_p;
     int i,j,k;
+
+#pragma omp parallel 
+{
+#pragma omp for private(i)
+          for(j=0;j<np;++j) {
+              for(i=0;i<mp;++i) {
+                  #pragma forceinline
+                  dgemm_kernel_avx2_16regs_asm_unroll2(kc  , &_A[i*MR2KC], &_B[j*NR2KC], &C[(j*mp + i)*MR2NR2], incRowC, incColC);
+              }
+          }
+}
+    return;
 
     switch (KC64){
       case 0:

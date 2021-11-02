@@ -477,20 +477,20 @@ int main() {
     //const uint64_t dt = rdtsc() - t0;
     //printf("MyDGEMM(AVX512) = %f\n", 1e-9 * dt/1);
 
-    dgemm_main_tiled_avx2(M, N, K, A, incRowA, incColA,
-               B, incRowB, incColB,
-               C, incRowC, incColC);
+    //dgemm_main_tiled_avx2(M, N, K, A, incRowA, incColA,
+    //           B, incRowB, incColB,
+    //           C, incRowC, incColC);
 
-    const uint64_t avx2t0 = rdtsc();
+    //const uint64_t avx2t0 = rdtsc();
 
-    for(i=0;i<j;++i) {
-        dgemm_main_tiled_avx2(M, N, K, A, incRowA, incColA,
-                   B, incRowB, incColB,
-                   C, incRowC, incColC);
-    }
+    //for(i=0;i<j;++i) {
+    //    dgemm_main_tiled_avx2(M, N, K, A, incRowA, incColA,
+    //               B, incRowB, incColB,
+    //               C, incRowC, incColC);
+    //}
 
-    const uint64_t avx2dt = rdtsc() - avx2t0;
-    printf("MyDGEMM(AVX2_16) = %f\n", 1e-9 * avx2dt/1);
+    //const uint64_t avx2dt = rdtsc() - avx2t0;
+    //printf("MyDGEMM(AVX2_16) = %f\n", 1e-9 * avx2dt/1);
 
     dgemm_main_tiled_avx2_8regs(M, N, K, A, incRowA, incColA,
                B, incRowB, incColB,
@@ -506,6 +506,21 @@ int main() {
 
     const uint64_t sse2dt = rdtsc() - sse2t0;
     printf("MyDGEMM(AVX2_8) = %f\n", 1e-9 * sse2dt/1);
+
+    //dgemm_main_tiled_sse2(M, N, K, A, incRowA, incColA,
+    //           B, incRowB, incColB,
+    //           C, incRowC, incColC);
+
+    //const uint64_t sse2t0 = rdtsc();
+
+    //for(i=0;i<j;++i) {
+    //    dgemm_main_tiled_sse2(M, N, K, A, incRowA, incColA,
+    //               B, incRowB, incColB,
+    //               C, incRowC, incColC);
+    //}
+
+    //const uint64_t sse2dt = rdtsc() - sse2t0;
+    //printf("MyDGEMM(AVX2_16) = %f\n", 1e-9 * sse2dt/1);
 
     //print_matrix_ASer(C, M, N);
 
