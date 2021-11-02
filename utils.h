@@ -61,7 +61,7 @@ static double _B[NC*KC] __attribute__ ((aligned(64)));
 
 //static double _A_tile[MAT_DIM_M*MAT_DIM_K] __attribute__ ((aligned(64)));
 static double _A_tile[MAT_DIM_M*MAT_DIM_K] __attribute__ ((aligned(64)));
-static double _B_tile[NC*MAT_DIM_K] __attribute__ ((aligned(64)));
+static double _B_tile[MAT_DIM_N*MAT_DIM_K] __attribute__ ((aligned(64)));
 
 static int  idxlist[64] = {
       0 + 0, 8 + 1, 16 + 2, 24 + 3, 32 + 4, 40 + 5, 48 + 6, 54 + 7,

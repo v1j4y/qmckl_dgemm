@@ -133,17 +133,18 @@ int dgemm_main_tiled_avx2(int64_t M, int64_t N, int64_t K, double *A, int64_t in
                                                 double *C, int64_t incRowC, int64_t incColC) {
 
     int64_t mb = M / MC;
-    int64_t nb = N / N;
+    int64_t nb = N / NC;
     int64_t kb = K / KC;
     int64_t idxi = 0;
     int64_t idxk = 0;
     int64_t nmbnb = 0;
     int64_t nmbnb_prev = 0;
-    int64_t MCNC = MC*N;
+    int64_t MCNC = MC*NC;
     size_t szeA = MC*KC*sizeof(double);
     size_t szeB = NC*KC*sizeof(double);
     int i,j,k,imb;
     int MCKC = MC*KC;
+    int NCKC = NC*KC;
 
     int64_t i_tile_b, i_tile_a;
     double *A_tile_p __attribute__ ((aligned(64)));
@@ -160,6 +161,7 @@ int dgemm_main_tiled_avx2(int64_t M, int64_t N, int64_t K, double *A, int64_t in
         nmbnb_prev = i*mb;
         i_tile_a = 0;
         A_tile_p = _A_tile;
+        B_tile_p = _B_tile + i*kb*(NCKC);
         imb = i*mb;
 //#pragma omp single
         for(k=0;k<kb;++k) {
@@ -168,18 +170,19 @@ int dgemm_main_tiled_avx2(int64_t M, int64_t N, int64_t K, double *A, int64_t in
             idxi = i * N * incRowC;
             idxk = k * KC * incColA;
 
-            B_tile_p = _B_tile + i_tile_b * (NC*KC);
+            //B_tile_p = _B_tile + i_tile_b * (NCKC);
             C_tile_p = C + (imb) * MCNC;
 
             for(j=0;j<mb;++j) {
                 #pragma forceinline
-                dgemm_macro_kernel_avx2_16regs(MC, KC, N, C_tile_p, incRowC, incColC, A_tile_p, B_tile_p);
+                dgemm_macro_kernel_avx2_16regs(MC, KC, NC, C_tile_p, incRowC, incColC, A_tile_p, B_tile_p);
                 A_tile_p += (MCKC);
                 C_tile_p +=  MCNC;
                 //nmbnb = nmbnb + 1;
                 i_tile_a += 1;
             }
             //if(k < (kb-1)) nmbnb = nmbnb_prev;
+            B_tile_p += (NCKC);
             i_tile_b += 1;
         }
     }
@@ -314,13 +317,14 @@ int tile_matrix(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA, int
                                                 double *C, int64_t incRowC, int64_t incColC, double *A_tile, double *B_tile) {
 
     int64_t mb = M / MC;
-    int64_t nb = N / N;
+    int64_t nb = N / NC;
     int64_t kb = K / KC;
     int64_t idxi = 0;
     int64_t idxk = 0;
     int64_t nmbnb = 0;
     int64_t nmbnb_prev = 0;
-    int64_t MCNC = MC*N;
+    int64_t MCNC = MC*NC;
+    int64_t NCKC = NC*KC;
     int64_t i_tile_b, i_tile_a;
     int i,j,k,ii;
 
@@ -331,11 +335,11 @@ int tile_matrix(int64_t M, int64_t N, int64_t K, double *A, int64_t incRowA, int
     for(i=0;i<nb;++i) {
         for(k=0;k<kb;++k) {
             int64_t kc = KC;
-            packB(kc, &B[k*KC*incRowB + i*N*incColB], incRowB, incColB, _B);
+            packB(kc, &B[k*KC*incRowB + i*NC*incColB], incRowB, incColB, _B);
 
             // Write to tiled matrix to B
-            for(ii=0;ii<NC*KC;++ii) {
-              _B_tile[i_tile_b * (NC*KC) + ii] = _B[ii];
+            for(ii=0;ii<NCKC;++ii) {
+              _B_tile[i_tile_b * (NCKC) + ii] = _B[ii];
             }
             i_tile_b += 1;
         }
@@ -454,7 +458,7 @@ int main() {
     fill_matrix_zeros  (DBlas, MBlas*NBlas);
     //print_matrix(B,N,K);
 
-    int64_t rep =150;
+    int64_t rep =  0;
     int i,j=rep;
 
     // Tile A and B
@@ -477,35 +481,37 @@ int main() {
     //const uint64_t dt = rdtsc() - t0;
     //printf("MyDGEMM(AVX512) = %f\n", 1e-9 * dt/1);
 
-    //dgemm_main_tiled_avx2(M, N, K, A, incRowA, incColA,
-    //           B, incRowB, incColB,
-    //           C, incRowC, incColC);
-
-    //const uint64_t avx2t0 = rdtsc();
-
-    //for(i=0;i<j;++i) {
-    //    dgemm_main_tiled_avx2(M, N, K, A, incRowA, incColA,
-    //               B, incRowB, incColB,
-    //               C, incRowC, incColC);
-    //}
-
-    //const uint64_t avx2dt = rdtsc() - avx2t0;
-    //printf("MyDGEMM(AVX2_16) = %f\n", 1e-9 * avx2dt/1);
-
-    dgemm_main_tiled_avx2_8regs(M, N, K, A, incRowA, incColA,
+    dgemm_main_tiled_avx2(M, N, K, A, incRowA, incColA,
                B, incRowB, incColB,
                C, incRowC, incColC);
 
-    const uint64_t sse2t0 = rdtsc();
+    const uint64_t avx2t0 = rdtsc();
 
     for(i=0;i<j;++i) {
-        dgemm_main_tiled_avx2_8regs(M, N, K, A, incRowA, incColA,
+        dgemm_main_tiled_avx2(M, N, K, A, incRowA, incColA,
                    B, incRowB, incColB,
                    C, incRowC, incColC);
     }
 
-    const uint64_t sse2dt = rdtsc() - sse2t0;
-    printf("MyDGEMM(AVX2_8) = %f\n", 1e-9 * sse2dt/1);
+    const uint64_t avx2dt = rdtsc() - avx2t0;
+    printf("MyDGEMM(AVX2_16) = %f\n", 1e-9 * avx2dt/1);
+
+    //print_matrix_ASer(C, M, N);
+
+    //dgemm_main_tiled_avx2_8regs(M, N, K, A, incRowA, incColA,
+    //           B, incRowB, incColB,
+    //           C, incRowC, incColC);
+
+    //const uint64_t sse2t0 = rdtsc();
+
+    //for(i=0;i<j;++i) {
+    //    dgemm_main_tiled_avx2_8regs(M, N, K, A, incRowA, incColA,
+    //               B, incRowB, incColB,
+    //               C, incRowC, incColC);
+    //}
+
+    //const uint64_t sse2dt = rdtsc() - sse2t0;
+    //printf("MyDGEMM(AVX2_8) = %f\n", 1e-9 * sse2dt/1);
 
     //dgemm_main_tiled_sse2(M, N, K, A, incRowA, incColA,
     //           B, incRowB, incColB,
@@ -521,8 +527,6 @@ int main() {
 
     //const uint64_t sse2dt = rdtsc() - sse2t0;
     //printf("MyDGEMM(AVX2_16) = %f\n", 1e-9 * sse2dt/1);
-
-    //print_matrix_ASer(C, M, N);
 
     // MKL
     //mkl_jit_status_t status = mkl_jit_create_dgemm(&jitter, MKL_ROW_MAJOR, MKL_NOTRANS, MKL_NOTRANS, MBlas, NBlas, KBlas, 1.0, KBlas, NBlas, 0.0, NBlas);
@@ -547,7 +551,7 @@ int main() {
     ABlasp = (double *)mkl_malloc(ABlasp_size,64);
 
     // Pack
-    dgemm_pack("A","N",&MB,&NB,&KB,&alpha,ABlas,&KB,ABlasp);
+    dgemm_pack("A","N",&MB,&NB,&KB,&alpha,ABlas,&MB,ABlasp);
 
     // Get size of packed B
     size_t BBlasp_size = dgemm_pack_get_size("B",&MB,&NB,&KB);
@@ -557,20 +561,20 @@ int main() {
     dgemm_pack("B","T",&MB,&NB,&KB,&alpha,BBlas,&NB,BBlasp);
 
     //cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
-    dgemm_compute("P","P",&MB,&NB,&KB,ABlasp,&KB,BBlasp,&NB,&beta,DBlas,&NB);
+    dgemm_compute("P","P",&MB,&NB,&KB,ABlasp,&KB,BBlasp,&NB,&beta,DBlas,&MB);
 
     const uint64_t bt0 = rdtsc();
 
     for(i=0;i<j;++i) {
-        dgemm_compute("P","P",&MB,&NB,&KB,ABlasp,&KB,BBlasp,&NB,&beta,DBlas,&NB);
+        dgemm_compute("P","P",&MB,&NB,&KB,ABlasp,&KB,BBlasp,&NB,&beta,DBlas,&MB);
     }
 
     const uint64_t bdt = rdtsc() - bt0;
     printf("BLAS DGEMM = %f\n", 1e-9 * bdt/1);
     //print_matrix(DBlas, M, N);
-    //printf("\n-------------diff-----------------\n");
+    printf("\n-------------diff-----------------\n");
     //print_diff_matrix_AT_B(C,D, M, N);
-    //print_diff_matrix_ASer_BT(C,DBlas, M, N);
+    print_diff_matrix_ASer_BT(C,DBlas, M, N);
 
     mkl_free(ABlasp);
     mkl_free(BBlasp);

@@ -488,12 +488,12 @@ VMOVUPD(MEM(RCX, 4*8), YMM( 1))
 
 
 void dgemm_macro_kernel_avx2_16regs(int64_t mc, int64_t kc, int64_t nc, double *C, int64_t incRowC, int64_t incColC, double *  _A, double *  _B) {
-    int64_t mp = MC / MR2;
+    int64_t mp = mc / MR2;
     int64_t np = nc / NR2;
     int64_t nmcnc = 0;
     int64_t MR2NR2 = MR2*NR2;
-    int64_t MR2KC = MR2*KC;
-    int64_t NR2KC = NR2*KC;
+    int64_t MR2KC = MR2*kc;
+    int64_t NR2KC = NR2*kc;
     int64_t KC64 = (KC/64) * 64;
     int64_t KC32 = ((kc - KC64)/32) * 32;
     int64_t KC16 = ((kc - KC64 - KC32)/16) * 16;
