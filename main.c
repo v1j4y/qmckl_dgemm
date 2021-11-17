@@ -167,7 +167,7 @@ int dgemm_main_tiled_avx2(int64_t M, int64_t N, int64_t K, double *A, int64_t in
         for(k=0;k<kb;++k) {
             int64_t kc = KC;
 
-            idxi = i * N * incRowC;
+            idxi = i * NC * incRowC;
             idxk = k * KC * incColA;
 
             //B_tile_p = _B_tile + i_tile_b * (NCKC);
@@ -196,13 +196,13 @@ int dgemm_main_tiled_avx2_8regs(int64_t M, int64_t N, int64_t K, double *A, int6
                                                 double *C, int64_t incRowC, int64_t incColC) {
 
     int64_t mb = M / MC;
-    int64_t nb = N / N;
+    int64_t nb = N / NC;
     int64_t kb = K / KC;
     int64_t idxi = 0;
     int64_t idxk = 0;
     int64_t nmbnb = 0;
     int64_t nmbnb_prev = 0;
-    int64_t MCNC = MC*N;
+    int64_t MCNC = MC*NC;
     size_t szeA = MC*KC*sizeof(double);
     size_t szeB = NC*KC*sizeof(double);
     int i,j,k,imb;
@@ -228,7 +228,7 @@ int dgemm_main_tiled_avx2_8regs(int64_t M, int64_t N, int64_t K, double *A, int6
         for(k=0;k<kb;++k) {
             int64_t kc = KC;
 
-            idxi = i * N * incRowC;
+            idxi = i * NC * incRowC;
             idxk = k * KC * incColA;
 
             B_tile_p = _B_tile + i_tile_b * (NC*KC);
@@ -236,7 +236,7 @@ int dgemm_main_tiled_avx2_8regs(int64_t M, int64_t N, int64_t K, double *A, int6
 
             for(j=0;j<mb;++j) {
                 #pragma forceinline
-                dgemm_macro_kernel_avx2_8regs(MC, KC, N, C_tile_p, incRowC, incColC, A_tile_p, B_tile_p);
+                dgemm_macro_kernel_avx2_8regs(MC, KC, NC, C_tile_p, incRowC, incColC, A_tile_p, B_tile_p);
                 A_tile_p += (MCKC);
                 C_tile_p +=  MCNC;
                 //nmbnb = nmbnb + 1;
@@ -257,13 +257,13 @@ int dgemm_main_tiled_sse2(int64_t M, int64_t N, int64_t K, double *A, int64_t in
                                                 double *C, int64_t incRowC, int64_t incColC) {
 
     int64_t mb = M / MC;
-    int64_t nb = N / N;
+    int64_t nb = N / NC;
     int64_t kb = K / KC;
     int64_t idxi = 0;
     int64_t idxk = 0;
     int64_t nmbnb = 0;
     int64_t nmbnb_prev = 0;
-    int64_t MCNC = MC*N;
+    int64_t MCNC = MC*NC;
     size_t szeA = MC*KC*sizeof(double);
     size_t szeB = NC*KC*sizeof(double);
     int i,j,k,imb;
@@ -289,7 +289,7 @@ int dgemm_main_tiled_sse2(int64_t M, int64_t N, int64_t K, double *A, int64_t in
         for(k=0;k<kb;++k) {
             int64_t kc = KC;
 
-            idxi = i * N * incRowC;
+            idxi = i * NC * incRowC;
             idxk = k * KC * incColA;
 
             B_tile_p = _B_tile + i_tile_b * (NC*KC);
@@ -297,7 +297,7 @@ int dgemm_main_tiled_sse2(int64_t M, int64_t N, int64_t K, double *A, int64_t in
 
             for(j=0;j<mb;++j) {
                 #pragma forceinline
-                dgemm_macro_kernel_sse2_8regs(MC, KC, N, C_tile_p, incRowC, incColC, A_tile_p, B_tile_p);
+                dgemm_macro_kernel_sse2_8regs(MC, KC, NC, C_tile_p, incRowC, incColC, A_tile_p, B_tile_p);
                 A_tile_p += (MCKC);
                 C_tile_p +=  MCNC;
                 //nmbnb = nmbnb + 1;
@@ -458,7 +458,7 @@ int main() {
     fill_matrix_zeros  (DBlas, MBlas*NBlas);
     //print_matrix(B,N,K);
 
-    int64_t rep =  0;
+    int64_t rep =150;
     int i,j=rep;
 
     // Tile A and B
@@ -572,9 +572,9 @@ int main() {
     const uint64_t bdt = rdtsc() - bt0;
     printf("BLAS DGEMM = %f\n", 1e-9 * bdt/1);
     //print_matrix(DBlas, M, N);
-    printf("\n-------------diff-----------------\n");
+    //printf("\n-------------diff-----------------\n");
     //print_diff_matrix_AT_B(C,D, M, N);
-    print_diff_matrix_ASer_BT(C,DBlas, M, N);
+    //print_diff_matrix_ASer_BT(C,DBlas, M, N);
 
     mkl_free(ABlasp);
     mkl_free(BBlasp);
