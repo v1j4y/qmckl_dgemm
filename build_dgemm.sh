@@ -51,12 +51,16 @@ OBJ_CMD="-c "${CCFLAGS[@]}" kernel_avx2_16regs.c -I"${MKL_PATH}" "${MKL_LIB}" -L
 echo $CC $OBJ_CMD
 $CC $OBJ_CMD
 
+OBJ_CMD="-c "${CCFLAGS[@]}" kernel_avx2_12x4_16regs.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread "${LFLAGS[@]}" "${@}
+echo $CC $OBJ_CMD
+$CC $OBJ_CMD
+
 #OBJ_CMD="-c "${CCFLAGS[@]}" kernel_avx2_32regs.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread  "${LFLAGS[@]}" "${@}
 #echo $CC $OBJ_CMD
 #$CC $OBJ_CMD
 
 OBJ_CMD="-c "${CCFLAGS[@]}" main.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread "${LFLAGS[@]}" "${@}
-BUILD_CMD="-o xtest "${CCFLAGS[@]}" main.c kernel_sse2_8regs.o kernel_avx2_8regs.o kernel_avx2_16regs.o utils.o -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread "${LFLAGS[@]}" "${@}
+BUILD_CMD="-o xtest "${CCFLAGS[@]}" main.c kernel_avx2_8regs.o kernel_sse2_8regs.o kernel_avx2_12x4_16regs.o kernel_avx2_16regs.o utils.o -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread "${LFLAGS[@]}" "${@}
 echo $CC $OBJ_CMD
 echo $CC $BUILD_CMD
 $CC $OBJ_CMD

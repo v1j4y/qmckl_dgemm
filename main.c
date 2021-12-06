@@ -175,7 +175,8 @@ int dgemm_main_tiled_avx2(int64_t M, int64_t N, int64_t K, double *A, int64_t in
 
             for(j=0;j<mb;++j) {
                 #pragma forceinline
-                dgemm_macro_kernel_avx2_16regs(MC, KC, NC, C_tile_p, incRowC, incColC, A_tile_p, B_tile_p);
+                dgemm_macro_kernel_avx2_12x4_16regs(MC, KC, NC, C_tile_p, incRowC, incColC, A_tile_p, B_tile_p);
+                //dgemm_macro_kernel_avx2_16regs(MC, KC, NC, C_tile_p, incRowC, incColC, A_tile_p, B_tile_p);
                 A_tile_p += (MCKC);
                 C_tile_p +=  MCNC;
                 //nmbnb = nmbnb + 1;
