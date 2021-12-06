@@ -1,6 +1,7 @@
 #!/bin/bash
 
-CC=${CC:-icpc}
+#CC=${CC:-icpc}
+CC=icpc
 CCFLAGS=(
  -O3 
  -g
@@ -21,11 +22,12 @@ CCFLAGS=(
 MKL_PATH=/share/apps/intel/oneapi/mkl/2021.1.1/
 OMP_PATH=/share/apps/intel/oneapi/mkl/2021.1.1/
 MKL_LIB="-Wl,--start-group ${MKL_PATH}/lib/intel64/libmkl_intel_lp64.a ${MKL_PATH}/lib/intel64/libmkl_intel_thread.a ${MKL_PATH}/lib/intel64/libmkl_core.a -Wl,--end-group"
-MKL_LIB="-mkl=parallel"
+MKL_LIB="-mkl -static-intel -no-intel-extensions -qopenmp-link=static -static-libgcc -static-libstdc++ -Wl,--start-group ${MKL_PATH}/lib/intel64/libmkl_intel_lp64.a ${MKL_PATH}/lib/intel64/libmkl_intel_thread.a ${MKL_PATH}/lib/intel64/libmkl_core.a -Wl,--end-group"
+#MKL_LIB="-mkl=sequential"
 echo $MKL_PATH
 echo $MKL_LIB
 
-OBJ_CMD="-c "${CCFLAGS[@]}" utils.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread  "${LFLAGS[@]}" "${@}
+OBJ_CMD="-c "${CCFLAGS[@]}" utils.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread "${LFLAGS[@]}" "${@}
 echo $CC $OBJ_CMD
 $CC $OBJ_CMD
 
@@ -33,11 +35,11 @@ $CC $OBJ_CMD
 #echo $CC $OBJ_CMD
 #$CC $OBJ_CMD
 
-OBJ_CMD="-c "${CCFLAGS[@]}" kernel_sse2_8regs.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread  "${LFLAGS[@]}" "${@}
+OBJ_CMD="-c "${CCFLAGS[@]}" kernel_sse2_8regs.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread "${LFLAGS[@]}" "${@}
 echo $CC $OBJ_CMD
 $CC $OBJ_CMD
 
-OBJ_CMD="-c "${CCFLAGS[@]}" kernel_avx2_8regs.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread  "${LFLAGS[@]}" "${@}
+OBJ_CMD="-c "${CCFLAGS[@]}" kernel_avx2_8regs.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread "${LFLAGS[@]}" "${@}
 echo $CC $OBJ_CMD
 $CC $OBJ_CMD
 
@@ -45,7 +47,7 @@ $CC $OBJ_CMD
 #echo $CC $OBJ_CMD
 #$CC $OBJ_CMD
 
-OBJ_CMD="-c "${CCFLAGS[@]}" kernel_avx2_16regs.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread  "${LFLAGS[@]}" "${@}
+OBJ_CMD="-c "${CCFLAGS[@]}" kernel_avx2_16regs.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread "${LFLAGS[@]}" "${@}
 echo $CC $OBJ_CMD
 $CC $OBJ_CMD
 
@@ -53,8 +55,8 @@ $CC $OBJ_CMD
 #echo $CC $OBJ_CMD
 #$CC $OBJ_CMD
 
-OBJ_CMD="-c "${CCFLAGS[@]}" main.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread  "${LFLAGS[@]}" "${@}
-BUILD_CMD="-o xtest "${CCFLAGS[@]}" main.c kernel_sse2_8regs.o kernel_avx2_8regs.o kernel_avx2_16regs.o utils.o -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp  -lpthread "${LFLAGS[@]}" "${@}
+OBJ_CMD="-c "${CCFLAGS[@]}" main.c -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread "${LFLAGS[@]}" "${@}
+BUILD_CMD="-o xtest "${CCFLAGS[@]}" main.c kernel_sse2_8regs.o kernel_avx2_8regs.o kernel_avx2_16regs.o utils.o -I"${MKL_PATH}" "${MKL_LIB}" -L"${OMP_PATH}" -qopenmp -lpthread "${LFLAGS[@]}" "${@}
 echo $CC $OBJ_CMD
 echo $CC $BUILD_CMD
 $CC $OBJ_CMD

@@ -458,7 +458,7 @@ int main() {
     fill_matrix_zeros  (DBlas, MBlas*NBlas);
     //print_matrix(B,N,K);
 
-    int64_t rep =150;
+    int64_t rep =400050;
     int i,j=rep;
 
     // Tile A and B
