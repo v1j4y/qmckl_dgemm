@@ -439,7 +439,8 @@ int main() {
 
     A = (double *)malloc( M * K * sizeof(double));
     B = (double *)malloc( K * N * sizeof(double));
-    C = (double *)malloc( M * N * sizeof(double));
+    //C = (double *)malloc( M * N * sizeof(double));
+    C = (double *)aligned_alloc( 64, M * N * sizeof(double));
 
     ABlas = (double *)malloc( MBlas * KBlas * sizeof(double));
     BBlas = (double *)malloc( KBlas * NBlas * sizeof(double));
