@@ -21,6 +21,7 @@ CCFLAGS=(
 #-I/home/vijayc/gemm_asm/MIPP/src -I.
 MKL_PATH=/share/apps/intel/oneapi/mkl/2021.1.1/
 OMP_PATH=/share/apps/intel/oneapi/mkl/2021.1.1/
+MKL_PATH=/opt/intel/compilers_and_libraries_2019.3.199/linux/mkl
 MKL_LIB="-Wl,--start-group ${MKL_PATH}/lib/intel64/libmkl_intel_lp64.a ${MKL_PATH}/lib/intel64/libmkl_intel_thread.a ${MKL_PATH}/lib/intel64/libmkl_core.a -Wl,--end-group"
 MKL_LIB="-mkl -static-intel -no-intel-extensions -qopenmp-link=static -static-libgcc -static-libstdc++ -Wl,--start-group ${MKL_PATH}/lib/intel64/libmkl_intel_lp64.a ${MKL_PATH}/lib/intel64/libmkl_intel_thread.a ${MKL_PATH}/lib/intel64/libmkl_core.a -Wl,--end-group"
 #MKL_LIB="-mkl=sequential"

@@ -118,9 +118,7 @@ VMOVUPD(MEM(RCX, 4*8), YMM( 1))
    [k] "m"(kl),
    [a] "m"(A),
    [b] "m"(B),
-   [c] "m"(C),
-   [d] "m"(incRowC),
-   [e] "m"((incRowC)*2)
+   [c] "m"(C)
    : // clobber
         "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8", "r9", "r10", "r11", "r12",
           "r13", "r14", "r15", "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6", "ymm7", "ymm8", "ymm9", "ymm10", "ymm11", "ymm12", "ymm13", "ymm14", "ymm15",  "memory"
@@ -270,9 +268,7 @@ VMOVUPD(MEM(RCX, 4*8), YMM( 1))
    [k] "m"(kl),
    [a] "m"(A),
    [b] "m"(B),
-   [c] "m"(C),
-   [d] "m"(incRowC),
-   [e] "m"((incRowC)*2)
+   [c] "m"(C)
    : // clobber
         "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8", "r9", "r10", "r11", "r12",
           "r13", "r14", "r15", "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6", "ymm7", "ymm8", "ymm9", "ymm10", "ymm11", "ymm12", "ymm13", "ymm14", "ymm15",  "memory"
@@ -474,9 +470,7 @@ VMOVUPD(MEM(RCX, 4*8), YMM( 1))
    [k] "m"(kl),
    [a] "m"(A),
    [b] "m"(B),
-   [c] "m"(C),
-   [d] "m"(incRowC),
-   [e] "m"((incRowC)*2)
+   [c] "m"(C)
    : // clobber
         "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8", "r9", "r10", "r11", "r12",
           "r13", "r14", "r15", "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6", "ymm7", "ymm8", "ymm9", "ymm10", "ymm11", "ymm12", "ymm13", "ymm14", "ymm15",  "memory"
@@ -508,11 +502,42 @@ void dgemm_macro_kernel_avx2_16regs(int64_t mc, int64_t kc, int64_t nc, double *
     double *_C_p;
     int i,j,k;
 
+   _B_p = &(_B[(0+0)*NR2KC]);
+   _A_p = &(_A[(0+0)*NR2KC]);
+  BEGIN_ASM()
+  MOV(RBX,VAR(b))
+  MOV(RAX,VAR(a))
+  PREFETCH(0, MEM(RBX, 0*8))
+  PREFETCH(0, MEM(RAX, 0*8))
+  END_ASM
+  (
+   : // output
+   : // input
+   [a] "m"(_A_p),
+   [b] "m"(_B_p)
+   : // clobber
+        "rbx", "memory"
+  )
+
 #pragma omp parallel 
 {
 #pragma omp for private(i)
           for(j=0;j<np;++j) {
+   _B_p = &(_B[(j+1)*NR2KC]);
+  BEGIN_ASM()
+  MOV(RBX,VAR(b))
+  PREFETCH(0, MEM(RBX, 0*8))
+  END_ASM
+  (
+   : // output
+   : // input
+   [b] "m"(_B_p)
+   : // clobber
+        "rbx", "memory"
+  )
+
               for(i=0;i<mp;++i) {
+
                   #pragma forceinline
                   dgemm_kernel_avx2_16regs_asm_unroll2(kc  , &_A[i*MR2KC], &_B[j*NR2KC], &C[(j*mp + i)*MR2NR2], incRowC, incColC);
               }

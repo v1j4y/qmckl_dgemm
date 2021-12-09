@@ -853,6 +853,7 @@
 
 #define ADDPS(_0, _1) INSTR_(addps, _0, _1)
 #define ADDPD(_0, _1) INSTR_(addpd, _0, _1)
+#define ADDSD(_0, _1) INSTR_(addsd, _0, _1)
 #define SUBPS(_0, _1) INSTR_(subps, _0, _1)
 #define SUBPD(_0, _1) INSTR_(subpd, _0, _1)
 #define MULPS(_0, _1) INSTR_(mulps, _0, _1)
