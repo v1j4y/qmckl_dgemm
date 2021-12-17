@@ -389,7 +389,7 @@ static uint64_t timer_ns() {
     return 1000000000ULL * t.tv_sec + t.tv_nsec;
 }
 
-int main() {
+int main(int argc, char *argv[]) {
 
     double *A;
     double *B;
@@ -460,7 +460,9 @@ int main() {
     fill_matrix_zeros  (DBlas, MBlas*NBlas);
     //print_matrix(B,N,K);
 
-    int64_t rep =400050;
+    int64_t rep =(int64_t)atol(argv[1]);
+    printf("Reps = %ld\n",rep);
+    //int64_t rep =100000;
     int i,j=rep;
 
     // Tile A and B
