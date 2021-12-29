@@ -8,6 +8,7 @@
 //#include "cblas.h"
 
 #include "utils.h"
+#define DEFINE_QMCKL_MNK
 #include "qmckl_dgemm.h"
 
 // DIRECT JIT MKL
@@ -35,33 +36,11 @@ int main(int argc, char *argv[]) {
     int64_t incColB = 1;
     int64_t incColC = 1;
 
-    /*
-     * We work only in factors of 16 * 14
-     */
+    init_dims_avx2();
 
-    if((MAT_DIM_M % MC) != 0){
-
-      M = ((MAT_DIM_M/MC)+1)*MC;
-    }
-    else{
-      M = MAT_DIM_M;
-    }
-
-    if((MAT_DIM_K % KC) != 0){
-      K = ((MAT_DIM_K/KC)+1)*KC;
-    }
-    else{
-      K = MAT_DIM_K;
-    }
-
-    if((MAT_DIM_N % NR) != 0){
-      N = ((MAT_DIM_N/NR)+1)*NR;
-    }
-    else{
-      N = MAT_DIM_N;
-    }
-    printf("M=%ld K=%ld N=%ld | MC=%ld KC=%ld NC=%ld\n",(long)M,(long)K,(long)N,(long)MC,(long)KC,(long)NC);
-
+    M = qmckl_M;
+    N = qmckl_N;
+    K = qmckl_K;
     MBlas = M;
     NBlas = N;
     KBlas = K;
