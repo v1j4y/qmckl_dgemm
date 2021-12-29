@@ -1,3 +1,6 @@
+#ifndef __UTILS_H
+#define __UTILS_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -60,8 +63,10 @@ static double _A[MC*KC] __attribute__ ((aligned(64)));
 static double _B[NC*KC] __attribute__ ((aligned(64)));
 
 //static double _A_tile[MAT_DIM_M*MAT_DIM_K] __attribute__ ((aligned(64)));
-static double _A_tile[MAT_DIM_M*MAT_DIM_K*2] __attribute__ ((aligned(64)));
-static double _B_tile[MAT_DIM_N*MAT_DIM_K*2] __attribute__ ((aligned(64)));
+//static double _A_tile[MAT_DIM_M*MAT_DIM_K*2] __attribute__ ((aligned(64)));
+//static double _B_tile[MAT_DIM_N*MAT_DIM_K*2] __attribute__ ((aligned(64)));
+static double *_A_tile = NULL;
+static double *_B_tile = NULL;
 
 static int  idxlist[64] = {
       0 + 0, 8 + 1, 16 + 2, 24 + 3, 32 + 4, 40 + 5, 48 + 6, 54 + 7,
@@ -89,3 +94,4 @@ void packB(int64_t kc, double *B, int64_t incRowB, int64_t incColB, double *buff
 void print_diff_matrix_ASer_B(double *A, double *B, int64_t M, int64_t N);
 void print_diff_matrix_ASer_BT(double *A, double *B, int64_t M, int64_t N);
 void print_matrix_ASer(double *A, int64_t M, int64_t N);
+#endif 
