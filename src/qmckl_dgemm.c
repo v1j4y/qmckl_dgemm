@@ -187,83 +187,83 @@ int dgemm_main_tiled_sse2(int64_t Min, int64_t Nin, int64_t Kin, double *A, int6
     return 1;
 }
 
-void init_dims_avx512() {
-
-    /*
-     * AVX512: We work only in factors of 16 * 14
-     */
-    //qmckl_M = (int64_t *)malloc(1 * sizeof(int64_t));
-    //qmckl_N = (int64_t *)malloc(1 * sizeof(int64_t));
-    //qmckl_K = (int64_t *)malloc(1 * sizeof(int64_t));
-
-    if((MAT_DIM_M % MC) != 0){
-
-      qmckl_M = (int64_t)((MAT_DIM_M/MC)+1)*MC;
-    }
-    else{
-      qmckl_M = (int64_t)MAT_DIM_M;
-    }
-
-    if((MAT_DIM_K % KC) != 0){
-      qmckl_K = (int64_t)((MAT_DIM_K/KC)+1)*KC;
-    }
-    else{
-      qmckl_K = (int64_t)MAT_DIM_K;
-    }
-
-    if((MAT_DIM_N % NR) != 0){
-      qmckl_N = (int64_t)((MAT_DIM_N/NR)+1)*NR;
-    }
-    else{
-      qmckl_N = (int64_t)MAT_DIM_N;
-    }
-    printf("M=%ld K=%ld N=%ld | MC=%ld KC=%ld NC=%ld\n",(long)qmckl_M,(long)qmckl_K,(long)qmckl_N,(long)MC,(long)KC,(long)NC);
-}
-
-void init_dims_avx2() {
-
-    /*
-     * AVX2: We work only in factors of 8 * 6
-     */
-    //qmckl_M = (int64_t *)malloc(1 * sizeof(int64_t));
-    //qmckl_N = (int64_t *)malloc(1 * sizeof(int64_t));
-    //qmckl_K = (int64_t *)malloc(1 * sizeof(int64_t));
-    //
-    int MR2NR2 = MR2*NR2;
-
-    KC = MAT_DIM_K;
-
-    if((MAT_DIM_M % MR2) != 0){
-
-      qmckl_M = (int64_t)((MAT_DIM_M/MR2)+1)*MR2;
-      MC = qmckl_M;
-      if(qmckl_M > 1152) MC = qmckl_M/2;
-    }
-    else{
-      qmckl_M = (int64_t)MAT_DIM_M;
-      MC = qmckl_M;
-      if(qmckl_M > 1152) MC = qmckl_M/2;
-    }
-
-    if((MAT_DIM_K % KC) != 0){
-      qmckl_K = (int64_t)((MAT_DIM_K/KC)+1)*KC;
-    }
-    else{
-      qmckl_K = (int64_t)MAT_DIM_K;
-    }
-
-    if((MAT_DIM_N % NR2) != 0){
-      qmckl_N = (int64_t)((MAT_DIM_N/NR2)+1)*NR2;
-      NC = qmckl_N;
-      if(qmckl_N > 1152) NC = qmckl_N/2;
-    }
-    else{
-      qmckl_N = (int64_t)MAT_DIM_N;
-      NC = qmckl_N;
-      if(qmckl_N > 1152) NC = qmckl_N/2;
-    }
-    printf("(AVX2) M=%ld K=%ld N=%ld | MC=%ld KC=%ld NC=%ld\n",(long)qmckl_M,(long)qmckl_K,(long)qmckl_N,(long)MC,(long)KC,(long)NC);
-}
+//void init_dims_avx512() {
+//
+//    /*
+//     * AVX512: We work only in factors of 16 * 14
+//     */
+//    //qmckl_M = (int64_t *)malloc(1 * sizeof(int64_t));
+//    //qmckl_N = (int64_t *)malloc(1 * sizeof(int64_t));
+//    //qmckl_K = (int64_t *)malloc(1 * sizeof(int64_t));
+//
+//    if((MAT_DIM_M % MC) != 0){
+//
+//      qmckl_M = (int64_t)((MAT_DIM_M/MC)+1)*MC;
+//    }
+//    else{
+//      qmckl_M = (int64_t)MAT_DIM_M;
+//    }
+//
+//    if((MAT_DIM_K % KC) != 0){
+//      qmckl_K = (int64_t)((MAT_DIM_K/KC)+1)*KC;
+//    }
+//    else{
+//      qmckl_K = (int64_t)MAT_DIM_K;
+//    }
+//
+//    if((MAT_DIM_N % NR) != 0){
+//      qmckl_N = (int64_t)((MAT_DIM_N/NR)+1)*NR;
+//    }
+//    else{
+//      qmckl_N = (int64_t)MAT_DIM_N;
+//    }
+//    printf("M=%ld K=%ld N=%ld | MC=%ld KC=%ld NC=%ld\n",(long)qmckl_M,(long)qmckl_K,(long)qmckl_N,(long)MC,(long)KC,(long)NC);
+//}
+//
+//void init_dims_avx2() {
+//
+//    /*
+//     * AVX2: We work only in factors of 8 * 6
+//     */
+//    //qmckl_M = (int64_t *)malloc(1 * sizeof(int64_t));
+//    //qmckl_N = (int64_t *)malloc(1 * sizeof(int64_t));
+//    //qmckl_K = (int64_t *)malloc(1 * sizeof(int64_t));
+//    //
+//    int MR2NR2 = MR2*NR2;
+//
+//    KC = MAT_DIM_K;
+//
+//    if((MAT_DIM_M % MR2) != 0){
+//
+//      qmckl_M = (int64_t)((MAT_DIM_M/MR2)+1)*MR2;
+//      MC = qmckl_M;
+//      if(qmckl_M > 1152) MC = qmckl_M/2;
+//    }
+//    else{
+//      qmckl_M = (int64_t)MAT_DIM_M;
+//      MC = qmckl_M;
+//      if(qmckl_M > 1152) MC = qmckl_M/2;
+//    }
+//
+//    if((MAT_DIM_K % KC) != 0){
+//      qmckl_K = (int64_t)((MAT_DIM_K/KC)+1)*KC;
+//    }
+//    else{
+//      qmckl_K = (int64_t)MAT_DIM_K;
+//    }
+//
+//    if((MAT_DIM_N % NR2) != 0){
+//      qmckl_N = (int64_t)((MAT_DIM_N/NR2)+1)*NR2;
+//      NC = qmckl_N;
+//      if(qmckl_N > 1152) NC = qmckl_N/2;
+//    }
+//    else{
+//      qmckl_N = (int64_t)MAT_DIM_N;
+//      NC = qmckl_N;
+//      if(qmckl_N > 1152) NC = qmckl_N/2;
+//    }
+//    printf("(AVX2) M=%ld K=%ld N=%ld | MC=%ld KC=%ld NC=%ld\n",(long)qmckl_M,(long)qmckl_K,(long)qmckl_N,(long)MC,(long)KC,(long)NC);
+//}
 
 void init_dims_avx2_input(int64_t DIM_M, int64_t DIM_N, int64_t DIM_K) {
 
