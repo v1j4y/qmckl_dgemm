@@ -231,6 +231,8 @@ void init_dims_avx2() {
     //
     int MR2NR2 = MR2*NR2;
 
+    KC = MAT_DIM_K;
+
     if((MAT_DIM_M % MR2) != 0){
 
       qmckl_M = (int64_t)((MAT_DIM_M/MR2)+1)*MR2;
@@ -257,6 +259,51 @@ void init_dims_avx2() {
     }
     else{
       qmckl_N = (int64_t)MAT_DIM_N;
+      NC = qmckl_N;
+      if(qmckl_N > 1152) NC = qmckl_N/2;
+    }
+    printf("(AVX2) M=%ld K=%ld N=%ld | MC=%ld KC=%ld NC=%ld\n",(long)qmckl_M,(long)qmckl_K,(long)qmckl_N,(long)MC,(long)KC,(long)NC);
+}
+
+void init_dims_avx2_input(int64_t DIM_M, int64_t DIM_N, int64_t DIM_K) {
+
+    /*
+     * AVX2: We work only in factors of 8 * 6
+     */
+    //qmckl_M = (int64_t *)malloc(1 * sizeof(int64_t));
+    //qmckl_N = (int64_t *)malloc(1 * sizeof(int64_t));
+    //qmckl_K = (int64_t *)malloc(1 * sizeof(int64_t));
+    //
+    int MR2NR2 = MR2*NR2;
+
+    KC = DIM_K;
+
+    if((DIM_M % MR2) != 0){
+
+      qmckl_M = (int64_t)((DIM_M/MR2)+1)*MR2;
+      MC = qmckl_M;
+      if(qmckl_M > 1152) MC = qmckl_M/2;
+    }
+    else{
+      qmckl_M = (int64_t)DIM_M;
+      MC = qmckl_M;
+      if(qmckl_M > 1152) MC = qmckl_M/2;
+    }
+
+    if((DIM_K % KC) != 0){
+      qmckl_K = (int64_t)((DIM_K/KC)+1)*KC;
+    }
+    else{
+      qmckl_K = (int64_t)DIM_K;
+    }
+
+    if((DIM_N % NR2) != 0){
+      qmckl_N = (int64_t)((DIM_N/NR2)+1)*NR2;
+      NC = qmckl_N;
+      if(qmckl_N > 1152) NC = qmckl_N/2;
+    }
+    else{
+      qmckl_N = (int64_t)DIM_N;
       NC = qmckl_N;
       if(qmckl_N > 1152) NC = qmckl_N/2;
     }

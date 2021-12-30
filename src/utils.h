@@ -11,17 +11,17 @@
 #define MAT_DIM 1024
 #endif
 
-#if !defined(MAT_DIM_M)
-#define MAT_DIM_M MAT_DIM
-#endif
-
-#if !defined(MAT_DIM_K)
-#define MAT_DIM_K MAT_DIM
-#endif
-
-#if !defined(MAT_DIM_N)
-#define MAT_DIM_N MAT_DIM
-#endif
+//#if !defined(MAT_DIM_M)
+//#define MAT_DIM_M MAT_DIM
+//#endif
+//
+//#if !defined(MAT_DIM_K)
+//#define MAT_DIM_K MAT_DIM
+//#endif
+//
+//#if !defined(MAT_DIM_N)
+//#define MAT_DIM_N MAT_DIM
+//#endif
 
 //#if !defined(MC)
 //#if MAT_DIM_M <= 192
@@ -35,16 +35,16 @@
 //#endif
 //#endif
 
-#if !defined(KC)
-#define KC 512
-#endif
+//#if !defined(KC)
+//#define KC 512
+//#endif
 
 #if !defined(MR)
-#define MR 16
+#define MR 8
 #endif
 
 #if !defined(NR)
-#define NR 14
+#define NR 6
 #endif
 
 #if !defined(MR2)

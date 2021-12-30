@@ -30,20 +30,28 @@ int main(int argc, char *argv[]) {
     double *ABlas;
     double *BBlas;
     double *DBlas;
+    int64_t DIM_M, DIM_N, DIM_K;
     int64_t M, N, K;
     int64_t MBlas, NBlas, KBlas;
     int64_t incColA = 1;
     int64_t incColB = 1;
     int64_t incColC = 1;
 
-    init_dims_avx2();
+    int64_t rep =(int64_t)atol(argv[1]);
+    DIM_M =(int64_t)atol(argv[2]);
+    DIM_N =(int64_t)atol(argv[3]);
+    DIM_K =(int64_t)atol(argv[4]);
+    printf("Reps = %ld\n",rep);
+    printf("M=%ld K=%ld N=%ld \n",(long)DIM_M,(long)DIM_K,(long)DIM_N);
+
+    init_dims_avx2_input(DIM_M, DIM_N, DIM_K);
 
     //M = qmckl_M;
     //N = qmckl_N;
     //K = qmckl_K;
-    M = MAT_DIM_M;
-    N = MAT_DIM_N;
-    K = MAT_DIM_K;
+    M = DIM_M;
+    N = DIM_N;
+    K = DIM_K;
     MBlas = M;
     NBlas = N;
     KBlas = K;
@@ -77,8 +85,6 @@ int main(int argc, char *argv[]) {
     fill_matrix_zeros  (DBlas, MBlas*NBlas);
     //print_matrix(B,N,K);
 
-    int64_t rep =(int64_t)atol(argv[1]);
-    printf("Reps = %ld\n",rep);
     //int64_t rep =100000;
     int i,j=rep;
 
