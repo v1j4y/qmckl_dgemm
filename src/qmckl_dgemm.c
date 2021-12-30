@@ -462,7 +462,7 @@ int dgemm_naive(int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRow
 int dgemm_main_tiled(int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
                                                 double *B, int64_t incRowB, int64_t incColB,
                                                 double *C, int64_t incRowC, int64_t incColC) {
-    init_dims_avx2();
+    init_dims_avx2_input(Min, Nin, Kin);
 
     // Tile A and B
     tile_matrix_general(Min, Nin, Kin, A, incRowA, incColA,
@@ -470,6 +470,7 @@ int dgemm_main_tiled(int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t i
                C, incRowC, incColC, _A_tile, _B_tile);
 
 
+    // Call DGEMM kernel
     dgemm_main_tiled_avx2(qmckl_M, qmckl_N, qmckl_K, A, incRowA, incColA,
                B, incRowB, incColB,
                C, incRowC, incColC);
