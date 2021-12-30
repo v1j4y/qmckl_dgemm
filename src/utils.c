@@ -219,6 +219,55 @@ void packB(int64_t kc, double *B, int64_t dimRowB, int64_t dimColB, double *buff
   //exit(0);
 }
 
+// Pack A which is traversed row wise (MC rows and KC columns)
+void packA_general(int64_t kc, int64_t MCmax, double *A, int64_t dimRowA, int64_t dimColA, double *buffer) {
+  int64_t mp = MC / MR;
+  double *buffer_start = buffer;
+  double *A_start = A;
+  int k,j,i,idxMC;
+  idxMC = 0;
+  for(k=0;k<mp;++k) {
+    for(j=0;j<MR;++j) {
+      for(i=0;i<kc;++i) {
+        if(idxMC < MCmax){
+            buffer[j + i*MR] = A[j*dimRowA + i];
+        }
+        else{
+            buffer[j + i*MR] = 0.0;
+        }
+      }
+      idxMC = k*MR + j;
+    }
+    buffer = buffer + MR * kc;
+    if(idxMC < MCmax) A = A + MR * dimRowA;
+  }
+}
+
+// Pack B which is traversed column wise (NC rows and KC columns)
+void packB_general(int64_t kc, int64_t NCmax, double *B, int64_t dimRowB, int64_t dimColB, double *buffer) {
+  int64_t np = NC / NR;
+  double *buffer_start = buffer;
+  double *B_start = B;
+  int k,j,i, idxNC, idxNCprev;
+  idxNC = 0;
+  for(k=0;k<np;++k) {
+    for(i=0;i<kc;++i) {
+      for(j=0;j<NR;++j) {
+        if(idxNC < NCmax){
+          buffer[j + i*NR] = B[j + i*dimRowB];
+        }
+        else{
+          buffer[j + i*NR] = 0.0;
+        }
+        idxNC = k*NR + j;
+      }
+        idxNC = k*NR + 0;
+    }
+    buffer = buffer + NR * kc;
+    if( idxNC < NCmax) B = B + NR;
+  }
+}
+
 //void packA(int64_t kc, double *A, int64_t incRowA, int64_t incColA, double *buffer) {
 //    int64_t mp = MC / MR;
 //    double *buffer_start = buffer;

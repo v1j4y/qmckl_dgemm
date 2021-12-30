@@ -38,23 +38,27 @@ int main(int argc, char *argv[]) {
 
     init_dims_avx2();
 
-    M = qmckl_M;
-    N = qmckl_N;
-    K = qmckl_K;
+    //M = qmckl_M;
+    //N = qmckl_N;
+    //K = qmckl_K;
+    M = MAT_DIM_M;
+    N = MAT_DIM_N;
+    K = MAT_DIM_K;
     MBlas = M;
     NBlas = N;
     KBlas = K;
+    printf("M=%ld K=%ld N=%ld | MC=%ld KC=%ld NC=%ld\n",(long)M,(long)K,(long)N,(long)MC,(long)KC,(long)NC);
     
     int64_t incRowA = K;
     int64_t incRowB = N;
-    int64_t incRowC = N;
+    int64_t incRowC = qmckl_N;
 
     A = (double *)malloc( M * K * sizeof(double));
     B = (double *)malloc( K * N * sizeof(double));
     //_A_tile = (double *)aligned_alloc(64, MAT_DIM_M*MAT_DIM_K*2 * sizeof(double));
     //_B_tile = (double *)aligned_alloc(64, MAT_DIM_N*MAT_DIM_K*2 * sizeof(double));
     //C = (double *)malloc( M * N * sizeof(double));
-    C = (double *)aligned_alloc( 64, M * N * sizeof(double));
+    C = (double *)aligned_alloc( 64, qmckl_M * qmckl_N * sizeof(double));
 
     ABlas = (double *)malloc( MBlas * KBlas * sizeof(double));
     BBlas = (double *)malloc( KBlas * NBlas * sizeof(double));
@@ -79,7 +83,7 @@ int main(int argc, char *argv[]) {
     int i,j=rep;
 
     // Tile A and B
-    tile_matrix(M, N, K, A, incRowA, incColA,
+    tile_matrix_general(M, N, K, A, incRowA, incColA,
                B, incRowB, incColB,
                C, incRowC, incColC, _A_tile, _B_tile);
 
@@ -98,14 +102,14 @@ int main(int argc, char *argv[]) {
     //const uint64_t dt = rdtsc() - t0;
     //printf("MyDGEMM(AVX512) = %f\n", 1e-9 * dt/1);
 
-    dgemm_main_tiled_avx2(M, N, K, A, incRowA, incColA,
+    dgemm_main_tiled_avx2(qmckl_M, qmckl_N, qmckl_K, A, incRowA, incColA,
                B, incRowB, incColB,
                C, incRowC, incColC);
 
     const uint64_t avx2t0 = rdtsc();
 
     for(i=0;i<j;++i) {
-        dgemm_main_tiled_avx2(M, N, K, A, incRowA, incColA,
+        dgemm_main_tiled_avx2(qmckl_M, qmckl_N, qmckl_K, A, incRowA, incColA,
                    B, incRowB, incColB,
                    C, incRowC, incColC);
     }
@@ -113,7 +117,7 @@ int main(int argc, char *argv[]) {
     const uint64_t avx2dt = rdtsc() - avx2t0;
     printf("MyDGEMM(AVX2_16) = %f\n", 1e-9 * avx2dt/1);
 
-    //print_matrix_ASer(C, M, N);
+    //print_matrix_ASer(C, qmckl_M, qmckl_N);
 
     //dgemm_main_tiled_avx2_8regs(M, N, K, A, incRowA, incColA,
     //           B, incRowB, incColB,

@@ -93,6 +93,8 @@ void print_diff_matrix(double *A, double *B, int64_t M, int64_t N);
 void print_diff_matrix_AT_B(double *A, double *B, int64_t M, int64_t N);
 void packA(int64_t kc, double *A, int64_t incRowA, int64_t incColA, double *buffer);
 void packB(int64_t kc, double *B, int64_t incRowB, int64_t incColB, double *buffer);
+void packA_general(int64_t kc, int64_t MCmax, double *A, int64_t dimRowA, int64_t dimColA, double *buffer);
+void packB_general(int64_t kc, int64_t NCmax, double *B, int64_t dimRowB, int64_t dimColB, double *buffer);
 void print_diff_matrix_ASer_B(double *A, double *B, int64_t M, int64_t N);
 void print_diff_matrix_ASer_BT(double *A, double *B, int64_t M, int64_t N);
 void print_matrix_ASer(double *A, int64_t M, int64_t N);
