@@ -1,5 +1,6 @@
 #include "kernel.h"
 #include "utils.h"
+#include "qmckl_dgemm.h"
 
 #include "bli_x86_asm_macros.h"
 

@@ -1,5 +1,6 @@
 #include "kernel_avx2_32regs.h"
 #include "utils.h"
+#include "qmckl_dgemm.h"
 
 #include "bli_x86_asm_macros.h"
 

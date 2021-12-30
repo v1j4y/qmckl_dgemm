@@ -23,13 +23,17 @@
 #define MAT_DIM_N MAT_DIM
 #endif
 
-#if !defined(MC)
-#define MC 512
-#endif
-
-#if !defined(NC)
-#define NC 512
-#endif
+//#if !defined(MC)
+//#if MAT_DIM_M <= 192
+//#define MC 192
+//#endif
+//#endif
+//
+//#if !defined(NC)
+//#if MAT_DIM_N <= 192
+//#define NC 192
+//#endif
+//#endif
 
 #if !defined(KC)
 #define KC 512
@@ -59,8 +63,8 @@
 #define NR1 2
 #endif
 
-static double _A[MC*KC] __attribute__ ((aligned(64)));
-static double _B[NC*KC] __attribute__ ((aligned(64)));
+//static double _A[MC*KC] __attribute__ ((aligned(64)));
+//static double _B[NC*KC] __attribute__ ((aligned(64)));
 
 //static double _A_tile[MAT_DIM_M*MAT_DIM_K] __attribute__ ((aligned(64)));
 //static double _A_tile[MAT_DIM_M*MAT_DIM_K*2] __attribute__ ((aligned(64)));
