@@ -187,6 +187,25 @@ int dgemm_main_tiled_sse2(int64_t Min, int64_t Nin, int64_t Kin, double *A, int6
     return 1;
 }
 
+void unpackC(double *A, double *B, int64_t M, int64_t N) {
+    int64_t mb = M / MC;
+    int64_t nb = N / NC;
+    int64_t mp = MC / MR;
+    int64_t np = NC / NR;
+    int i,j;
+    for(i=0;i<N;++i) {
+        for(j=0;j<M;++j) {
+          int64_t kmc = ( j / MC );
+          int64_t lnc = ( i / NC );
+          int64_t kmr = ( j - kmc * MC ) / MR;
+          int64_t lnr = ( i - lnc * NC ) / NR;
+          int64_t k   = ( ( j - kmc * MC ) - ( kmr * MR ) );
+          int64_t l   = ( ( i - lnc * NC ) - ( lnr * NR ) );
+          B[j + i*M] = A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k];
+        }
+    }
+}
+
 //void init_dims_avx512() {
 //
 //    /*
