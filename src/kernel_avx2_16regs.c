@@ -1,6 +1,6 @@
 #include "kernel_avx2_16regs.h"
-#include "utils.h"
 #include "qmckl_dgemm.h"
+
 
 #include "bli_x86_asm_macros.h"
 
@@ -489,7 +489,7 @@ void dgemm_macro_kernel_avx2_16regs(int64_t mc, int64_t kc, int64_t nc, double *
     int64_t MR2NR2 = MR2*NR2;
     int64_t MR2KC = MR2*kc;
     int64_t NR2KC = NR2*kc;
-    int64_t KC64 = (KC/64) * 64;
+    int64_t KC64 = (kc/64) * 64;
     int64_t KC32 = ((kc - KC64)/32) * 32;
     int64_t KC16 = ((kc - KC64 - KC32)/16) * 16;
     int64_t MR2KC64 = MR2 * KC64;
@@ -544,14 +544,14 @@ void dgemm_macro_kernel_avx2_16regs(int64_t mc, int64_t kc, int64_t nc, double *
                   dgemm_kernel_avx2_16regs_asm_unroll2(kc  , &_A[i*MR2KC], &_B[j*NR2KC], &C[(j*mp + i)*MR2NR2], incRowC, incColC);
 
                   //printf("A\n");
-                  //for(kk=0;kk<KC;++kk){
+                  //for(kk=0;kk<kc;++kk){
                   //  for(ll=0;ll<MR2;++ll){
                   //    printf("%3.2f ",_A[i*MR2KC + kk*MR2 + ll]);
                   //  }
                   //  printf("\n");
                   //}
                   //printf("B\n");
-                  //for(ll=0;ll<KC;++ll){
+                  //for(ll=0;ll<kc;++ll){
                   //  for(kk=0;kk<NR2;++kk){
                   //    printf("%3.2f ",_B[j*NR2KC + ll*NR2 + kk]);
                   //  }

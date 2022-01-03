@@ -1,5 +1,4 @@
 #include "utils.h"
-#include "qmckl_dgemm.h"
 
 unsigned long long rdtsc(void)
 {
@@ -79,149 +78,150 @@ void print_diff_matrix(double *A, double *B, int64_t M, int64_t N) {
     }
 }
 
-void print_matrix_ASer(double *A, int64_t M, int64_t N) {
-    int64_t mb = M / MC;
-    int64_t nb = N / N;
-    int64_t mp = MC / MR;
-    int64_t np = NC / NR;
-    int64_t idx = 0;
-    int i,j;
-    for(i=0;i<N;++i) {
-        for(j=0;j<M;++j) {
-          int64_t kmc = ( j / MC );
-          int64_t lnc = ( i / NC );
-          int64_t kmr = ( j - kmc * MC ) / MR;
-          int64_t lnr = ( i - lnc * NC ) / NR;
-          int64_t k   = ( ( j - kmc * MC ) - ( kmr * MR ) );
-          int64_t l   = ( ( i - lnc * NC ) - ( lnr * NR ) );
-          //printf("\n (%d,%d) knc = %ld lmc = %ld\n",i,j, knc, lmc);
-          //printf(" knr = %ld lmr = %ld\n",knr, lmr);
-          //printf(" k   = %ld l   = %ld\n",k, l);
-          //printf(" id = %ld\n",(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k);
-          printf(" %5.3f ",A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k]);
-          //printf(" %5.3f ",A[idx]);
-          //idx = idx + 1;
-        }
-        printf("\n");
-    }
-}
+//void print_matrix_ASer(double *A, int64_t M, int64_t N) {
+//    int64_t mb = M / MC;
+//    int64_t nb = N / N;
+//    int64_t mp = MC / MR;
+//    int64_t np = NC / NR;
+//    int64_t idx = 0;
+//    int i,j;
+//    for(i=0;i<N;++i) {
+//        for(j=0;j<M;++j) {
+//          int64_t kmc = ( j / MC );
+//          int64_t lnc = ( i / NC );
+//          int64_t kmr = ( j - kmc * MC ) / MR;
+//          int64_t lnr = ( i - lnc * NC ) / NR;
+//          int64_t k   = ( ( j - kmc * MC ) - ( kmr * MR ) );
+//          int64_t l   = ( ( i - lnc * NC ) - ( lnr * NR ) );
+//          //printf("\n (%d,%d) knc = %ld lmc = %ld\n",i,j, knc, lmc);
+//          //printf(" knr = %ld lmr = %ld\n",knr, lmr);
+//          //printf(" k   = %ld l   = %ld\n",k, l);
+//          //printf(" id = %ld\n",(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k);
+//          printf(" %5.3f ",A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k]);
+//          //printf(" %5.3f ",A[idx]);
+//          //idx = idx + 1;
+//        }
+//        printf("\n");
+//    }
+//}
 
-void print_diff_matrix_AT_B(double *A, double *B, int64_t M, int64_t N) {
-  int i,j;
-    for(j=0;j<N;++j) {
-        for(i=0;i<M;++i) {
-            printf(" %5.3f ",abs(A[j + i*N] - B[i + j*M]));
-        }
-        printf("\n");
-    }
-}
+//void print_diff_matrix_AT_B(double *A, double *B, int64_t M, int64_t N) {
+//  int i,j;
+//    for(j=0;j<N;++j) {
+//        for(i=0;i<M;++i) {
+//            printf(" %5.3f ",abs(A[j + i*N] - B[i + j*M]));
+//        }
+//        printf("\n");
+//    }
+//}
 
-void print_diff_matrix_ASer_BT(double *A, double *B, int64_t M, int64_t N) {
-    int64_t mb = M / MC;
-    int64_t nb = N / NC;
-    int64_t mp = MC / MR;
-    int64_t np = NC / NR;
-    int i,j;
-    for(i=0;i<N;++i) {
-        for(j=0;j<M;++j) {
-          int64_t kmc = ( j / MC );
-          int64_t lnc = ( i / NC );
-          int64_t kmr = ( j - kmc * MC ) / MR;
-          int64_t lnr = ( i - lnc * NC ) / NR;
-          int64_t k   = ( ( j - kmc * MC ) - ( kmr * MR ) );
-          int64_t l   = ( ( i - lnc * NC ) - ( lnr * NR ) );
-          if(abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[j + i*M]) > 1e-13){
-            printf(" %20.10e ",abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[j + i*M]));
-            printf("Fail\n");
-            return;
-          };
-        }
-        //printf("\n");
-    }
-}
+//void print_diff_matrix_ASer_BT(double *A, double *B, int64_t M, int64_t N) {
+//    int64_t mb = M / MC;
+//    int64_t nb = N / NC;
+//    int64_t mp = MC / MR;
+//    int64_t np = NC / NR;
+//    int i,j;
+//    for(i=0;i<N;++i) {
+//        for(j=0;j<M;++j) {
+//          int64_t kmc = ( j / MC );
+//          int64_t lnc = ( i / NC );
+//          int64_t kmr = ( j - kmc * MC ) / MR;
+//          int64_t lnr = ( i - lnc * NC ) / NR;
+//          int64_t k   = ( ( j - kmc * MC ) - ( kmr * MR ) );
+//          int64_t l   = ( ( i - lnc * NC ) - ( lnr * NR ) );
+//          if(abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[j + i*M]) > 1e-13){
+//            printf(" %20.10e ",abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[j + i*M]));
+//            printf("Fail\n");
+//            return;
+//          };
+//        }
+//        //printf("\n");
+//    }
+//}
 
-void print_diff_matrix_ASer_B(double *A, double *B, int64_t M, int64_t N) {
-    int64_t mb = M / MC;
-    int64_t nb = N / NC;
-    int64_t mp = MC / MR;
-    int64_t np = NC / NR;
-    int i,j;
-    for(i=0;i<N;++i) {
-        for(j=0;j<M;++j) {
-          int64_t kmc = ( j / MC );
-          int64_t lnc = ( i / NC );
-          int64_t kmr = ( j - kmc * MC ) / MR;
-          int64_t lnr = ( i - lnc * NC ) / NR;
-          int64_t k   = ( ( j - kmc * MC ) - ( kmr * MR ) );
-          int64_t l   = ( ( i - lnc * NC ) - ( lnr * NR ) );
-          //printf(" %5.3f ",abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[i + j*N]));
-          if(abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[i + j*N]) > 1e-13){
-            printf(" %20.10e ",abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[i + j*N]));
-            printf("Fail\n");
-            return;
-          };
-        }
-        //printf("\n");
-    }
-}
-
-// Pack A which is traversed row wise (MC rows and KC columns)
-void packA(int64_t kc, double *A, int64_t dimRowA, int64_t dimColA, double *buffer) {
-  int64_t mp = MC / MR;
-  double *buffer_start = buffer;
-  double *A_start = A;
-  int k,j,i;
-  for(k=0;k<mp;++k) {
-    for(j=0;j<MR;++j) {
-      for(i=0;i<kc;++i) {
-        buffer[j + i*MR] = A[j*dimRowA + i];
-      }
-    }
-    buffer = buffer + MR * kc;
-    A = A + MR * dimRowA;
-  }
-  //printf("\nPack A (%d %d)\n",dimRowA,dimColA);
-  //for(i=0;i<kc;++i){
-  //  for(j=0;j<MC;++j){
-  //    printf(" %5.3f ",buffer_start[i*MC + j]);
-  //  }
-  //  printf("\n");
-  //}
-  //exit(0);
-}
-
-// Pack B which is traversed column wise (NC rows and KC columns)
-void packB(int64_t kc, double *B, int64_t dimRowB, int64_t dimColB, double *buffer) {
-  int64_t np = NC / NR;
-  double *buffer_start = buffer;
-  double *B_start = B;
-  int k,j,i;
-  for(k=0;k<np;++k) {
-    for(i=0;i<kc;++i) {
-      for(j=0;j<NR;++j) {
-        buffer[j + i*NR] = B[j + i*dimRowB];
-      }
-    }
-    buffer = buffer + NR * kc;
-    B = B + NR;
-  }
-  //printf("\nPack B (%d %d)\n",dimRowB,dimColB);
-  //for(k=0;k<np;++k){
-  //for(i=0;i<kc;++i){
-  //  for(j=0;j<NR;++j){
-  //    printf(" %5.3f ",buffer_start[k*(NR*kc) + i*NR + j]);
-  //  }
-  //  printf("\n");
-  //}
-  //  printf("\n");
-  //  printf("\n");
-  //}
-  //exit(0);
-}
+//void print_diff_matrix_ASer_B(double *A, double *B, int64_t M, int64_t N) {
+//    int64_t mb = M / MC;
+//    int64_t nb = N / NC;
+//    int64_t mp = MC / MR;
+//    int64_t np = NC / NR;
+//    int i,j;
+//    for(i=0;i<N;++i) {
+//        for(j=0;j<M;++j) {
+//          int64_t kmc = ( j / MC );
+//          int64_t lnc = ( i / NC );
+//          int64_t kmr = ( j - kmc * MC ) / MR;
+//          int64_t lnr = ( i - lnc * NC ) / NR;
+//          int64_t k   = ( ( j - kmc * MC ) - ( kmr * MR ) );
+//          int64_t l   = ( ( i - lnc * NC ) - ( lnr * NR ) );
+//          //printf(" %5.3f ",abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[i + j*N]));
+//          if(abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[i + j*N]) > 1e-13){
+//            printf(" %20.10e ",abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[i + j*N]));
+//            printf("Fail\n");
+//            return;
+//          };
+//        }
+//        //printf("\n");
+//    }
+//}
 
 // Pack A which is traversed row wise (MC rows and KC columns)
-void packA_general(int64_t kc, int64_t MCmax, double *A, int64_t dimRowA, int64_t dimColA, double *buffer) {
-  int64_t mp = MC / MR;
+//void packA(int64_t kc, double *A, int64_t dimRowA, int64_t dimColA, double *buffer) {
+//  int64_t mp = MC / MR;
+//  double *buffer_start = buffer;
+//  double *A_start = A;
+//  int k,j,i;
+//  for(k=0;k<mp;++k) {
+//    for(j=0;j<MR;++j) {
+//      for(i=0;i<kc;++i) {
+//        buffer[j + i*MR] = A[j*dimRowA + i];
+//      }
+//    }
+//    buffer = buffer + MR * kc;
+//    A = A + MR * dimRowA;
+//  }
+//  //printf("\nPack A (%d %d)\n",dimRowA,dimColA);
+//  //for(i=0;i<kc;++i){
+//  //  for(j=0;j<MC;++j){
+//  //    printf(" %5.3f ",buffer_start[i*MC + j]);
+//  //  }
+//  //  printf("\n");
+//  //}
+//  //exit(0);
+//}
+//
+//// Pack B which is traversed column wise (NC rows and KC columns)
+//void packB(int64_t kc, double *B, int64_t dimRowB, int64_t dimColB, double *buffer) {
+//  int64_t np = NC / NR;
+//  double *buffer_start = buffer;
+//  double *B_start = B;
+//  int k,j,i;
+//  for(k=0;k<np;++k) {
+//    for(i=0;i<kc;++i) {
+//      for(j=0;j<NR;++j) {
+//        buffer[j + i*NR] = B[j + i*dimRowB];
+//      }
+//    }
+//    buffer = buffer + NR * kc;
+//    B = B + NR;
+//  }
+//  //printf("\nPack B (%d %d)\n",dimRowB,dimColB);
+//  //for(k=0;k<np;++k){
+//  //for(i=0;i<kc;++i){
+//  //  for(j=0;j<NR;++j){
+//  //    printf(" %5.3f ",buffer_start[k*(NR*kc) + i*NR + j]);
+//  //  }
+//  //  printf("\n");
+//  //}
+//  //  printf("\n");
+//  //  printf("\n");
+//  //}
+//  //exit(0);
+//}
+
+// Pack A which is traversed row wise (MC rows and KC columns)
+void packA_general(context_p ctxtp, int64_t kc, int64_t MCmax, double *A, int64_t dimRowA, int64_t dimColA, double *buffer) {
+  context ctxt=ctxtp[0];
+  int64_t mp = ctxt.MC / MR;
   double *buffer_start = buffer;
   double *A_start = A;
   int k,j,i,idxMC;
@@ -244,8 +244,9 @@ void packA_general(int64_t kc, int64_t MCmax, double *A, int64_t dimRowA, int64_
 }
 
 // Pack B which is traversed column wise (NC rows and KC columns)
-void packB_general(int64_t kc, int64_t NCmax, double *B, int64_t dimRowB, int64_t dimColB, double *buffer) {
-  int64_t np = NC / NR;
+void packB_general(context_p ctxtp, int64_t kc, int64_t NCmax, double *B, int64_t dimRowB, int64_t dimColB, double *buffer) {
+  context ctxt=ctxtp[0];
+  int64_t np = ctxt.NC / NR;
   double *buffer_start = buffer;
   double *B_start = B;
   int k,j,i, idxNC, idxNCprev;
