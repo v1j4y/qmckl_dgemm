@@ -57,3 +57,5 @@ int tile_matrix_general(int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_
 int dgemm_naive(int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
                                                 double *B, int64_t incRowB, int64_t incColB,
                                                 double *C, int64_t incRowC, int64_t incColC);
+
+void unpackC(double *A, double *B, int64_t M, int64_t N);

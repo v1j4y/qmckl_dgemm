@@ -27,6 +27,7 @@ int main(int argc, char *argv[]) {
     double *A;
     double *B;
     double *C;
+    double *CUnpack;
     double *ABlas;
     double *BBlas;
     double *DBlas;
@@ -67,6 +68,7 @@ int main(int argc, char *argv[]) {
     //_B_tile = (double *)aligned_alloc(64, MAT_DIM_N*MAT_DIM_K*2 * sizeof(double));
     //C = (double *)malloc( M * N * sizeof(double));
     C = (double *)aligned_alloc( 64, qmckl_M * qmckl_N * sizeof(double));
+    CUnpack = (double *)aligned_alloc( 64, qmckl_M * qmckl_N * sizeof(double));
 
     ABlas = (double *)malloc( MBlas * KBlas * sizeof(double));
     BBlas = (double *)malloc( KBlas * NBlas * sizeof(double));
@@ -201,13 +203,16 @@ int main(int argc, char *argv[]) {
     //print_matrix(DBlas, M, N);
     //printf("\n-------------diff-----------------\n");
     //print_diff_matrix_AT_B(C,D, M, N);
-    //print_diff_matrix_ASer_BT(C,DBlas, M, N);
+    //print_diftf_matrix_ASer_BT(C,DBlas, M, N);
+    //unpackC(C, CUnpack, M, N);
+    //print_matrix(CUnpack, M, N);
 
     mkl_free(ABlasp);
     mkl_free(BBlasp);
     free(A);
     free(B);
     free(C);
+    free(CUnpack);
     free(ABlas);
     free(BBlas);
     free(DBlas);

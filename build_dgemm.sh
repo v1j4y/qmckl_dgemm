@@ -58,3 +58,5 @@ BUILD_CMD="-o xtest "${CCFLAGS[@]}" src/main.c kernel_avx2_8regs.o kernel_sse2_8
 #echo $CC $BUILD_CMD
 $CC $OBJ_CMD
 $CC $BUILD_CMD
+
+#gcc --shared

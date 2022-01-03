@@ -493,6 +493,10 @@ int dgemm_main_tiled(int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t i
     dgemm_main_tiled_avx2(qmckl_M, qmckl_N, qmckl_K, A, incRowA, incColA,
                B, incRowB, incColB,
                C, incRowC, incColC);
+
+    // Unpacking
+    //unpackC();
+
     return 1;
 }
 
