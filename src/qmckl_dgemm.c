@@ -503,6 +503,7 @@ void free_context(context_p ctxtp){
 int dgemm_main_tiled(context_p ctxtp, int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
                                                 double *B, int64_t incRowB, int64_t incColB,
                                                 double *C, int64_t incRowC, int64_t incColC) {
+    // Init memory
     init_dims_avx2_input(ctxtp, Min, Nin, Kin);
 
     // Tile A and B
