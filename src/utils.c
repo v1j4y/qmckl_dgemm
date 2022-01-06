@@ -72,9 +72,12 @@ void print_diff_matrix(double *A, double *B, int64_t M, int64_t N) {
   int i,j;
     for(j=0;j<N;++j) {
         for(i=0;i<M;++i) {
+          if( abs(A[i + j*M] - B[i + j*M]) > 1e-13){
             printf(" %5.3f ",abs(A[i + j*M] - B[i + j*M]));
+            printf("Fail\n");
+            return;
+          };
         }
-        printf("\n");
     }
 }
 
@@ -115,29 +118,30 @@ void print_diff_matrix(double *A, double *B, int64_t M, int64_t N) {
 //    }
 //}
 
-//void print_diff_matrix_ASer_BT(double *A, double *B, int64_t M, int64_t N) {
-//    int64_t mb = M / MC;
-//    int64_t nb = N / NC;
-//    int64_t mp = MC / MR;
-//    int64_t np = NC / NR;
-//    int i,j;
-//    for(i=0;i<N;++i) {
-//        for(j=0;j<M;++j) {
-//          int64_t kmc = ( j / MC );
-//          int64_t lnc = ( i / NC );
-//          int64_t kmr = ( j - kmc * MC ) / MR;
-//          int64_t lnr = ( i - lnc * NC ) / NR;
-//          int64_t k   = ( ( j - kmc * MC ) - ( kmr * MR ) );
-//          int64_t l   = ( ( i - lnc * NC ) - ( lnr * NR ) );
-//          if(abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[j + i*M]) > 1e-13){
-//            printf(" %20.10e ",abs(A[(MC*NC)*(lnc*mb) + (MC*NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[j + i*M]));
-//            printf("Fail\n");
-//            return;
-//          };
-//        }
-//        //printf("\n");
-//    }
-//}
+void print_diff_matrix_ASer_BT(qmckl_context_struct_p ctxtp, double *A, double *B, int64_t M, int64_t N) {
+    int64_t mb = M / ctxtp->MC;
+    int64_t nb = N / ctxtp->NC;
+    int64_t mp = ctxtp->MC / MR;
+    int64_t np = ctxtp->NC / NR;
+    int64_t MCNC = ctxtp->MC*ctxtp->NC;
+    int i,j;
+    for(i=0;i<N;++i) {
+        for(j=0;j<M;++j) {
+          int64_t kmc = ( j / ctxtp->MC );
+          int64_t lnc = ( i / ctxtp->NC );
+          int64_t kmr = ( j - kmc * ctxtp->MC ) / MR;
+          int64_t lnr = ( i - lnc * ctxtp->NC ) / NR;
+          int64_t k   = ( ( j - kmc * ctxtp->MC ) - ( kmr * MR ) );
+          int64_t l   = ( ( i - lnc * ctxtp->NC ) - ( lnr * NR ) );
+          if(abs(A[(MCNC)*(lnc*mb) + (MCNC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[j + i*M]) > 1e-13){
+            printf(" %20.10e ",abs(A[(MCNC)*(lnc*mb) + (MCNC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[j + i*M]));
+            printf("Fail\n");
+            return;
+          };
+        }
+        //printf("\n");
+    }
+}
 
 //void print_diff_matrix_ASer_B(double *A, double *B, int64_t M, int64_t N) {
 //    int64_t mb = M / MC;

@@ -202,8 +202,9 @@ int main(int argc, char *argv[]) {
     //print_matrix(DBlas, M, N);
     //printf("\n-------------diff-----------------\n");
     //print_diff_matrix_AT_B(C,D, M, N);
-    //print_diftf_matrix_ASer_BT(C,DBlas, M, N);
-    //unpackC(ctxtp, CUnpack, M, N);
+    //print_diff_matrix_ASer_BT(ctxtp, C,DBlas, M, N);
+    //qmckl_unpack(ctxtp, CUnpack, M, N);
+    //print_diff_matrix(CUnpack,DBlas, M, N);
     //print_matrix(CUnpack, M, N);
 
     mkl_free(ABlasp);

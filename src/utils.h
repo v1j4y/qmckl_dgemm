@@ -9,7 +9,6 @@
 //struct context;
 //typedef context* context_p;
 #include "qmckl_dgemm.h"
-#include "qmckl_dgemm_private.h"
 
 //#if !defined(MAT_DIM_M)
 //#define MAT_DIM_M MAT_DIM
@@ -66,12 +65,12 @@ void fill_matrix_uniform(double *A, int64_t M, int64_t N);
 void fill_matrix_zeros(double *A, int64_t dim);
 void print_matrix(double *A, int64_t M, int64_t N);
 void print_diff_matrix(double *A, double *B, int64_t M, int64_t N);
-//void print_diff_matrix_AT_B(double *A, double *B, int64_t M, int64_t N);
+//void print_diff_matrix_AT_B( double *A, double *B, int64_t M, int64_t N);
 //void packA(int64_t kc, double *A, int64_t incRowA, int64_t incColA, double *buffer);
 //void packB(int64_t kc, double *B, int64_t incRowB, int64_t incColB, double *buffer);
 void packA_general(qmckl_context_struct_p ctxtp, int64_t kc, int64_t MCmax, double *A, int64_t dimRowA, int64_t dimColA, double *buffer);
 void packB_general(qmckl_context_struct_p ctxtp, int64_t kc, int64_t NCmax, double *B, int64_t dimRowB, int64_t dimColB, double *buffer);
 //void print_diff_matrix_ASer_B(double *A, double *B, int64_t M, int64_t N);
-//void print_diff_matrix_ASer_BT(double *A, double *B, int64_t M, int64_t N);
+void print_diff_matrix_ASer_BT(qmckl_context_struct_p ctxtp, double *A, double *B, int64_t M, int64_t N);
 //void print_matrix_ASer(double *A, int64_t M, int64_t N);
 #endif 
