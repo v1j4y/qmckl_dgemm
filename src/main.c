@@ -27,6 +27,9 @@ int main(int argc, char *argv[]) {
     double *B;
     double *C;
     double *CUnpack;
+    double *_A_tile;
+    double *_B_tile;
+    double *_C_tile;
     double *ABlas;
     double *BBlas;
     double *DBlas;
@@ -47,6 +50,9 @@ int main(int argc, char *argv[]) {
     qmckl_context context = qmckl_context_create();
     qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
     init_dims_avx2_input(context, DIM_M, DIM_N, DIM_K);
+    qmckl_init_pack(context, 'A', DIM_M, DIM_N, DIM_K);
+    qmckl_init_pack(context, 'B', DIM_M, DIM_N, DIM_K);
+    qmckl_init_pack(context, 'C', DIM_M, DIM_N, DIM_K);
 
     //M = qmckl_M;
     //N = qmckl_N;
@@ -92,24 +98,13 @@ int main(int argc, char *argv[]) {
     int i,j=rep;
 
     // Tile A and B
-    tile_matrix_general(context, M, N, K, A, incRowA, incColA,
-               B, incRowB, incColB,
-               C, incRowC, incColC, ctx->_A_tile, ctx->_B_tile);
-
-    //dgemm_main_tiled(M, N, K, A, incRowA, incColA,
+    //tile_matrix_general(context, M, N, K, A, incRowA, incColA,
     //           B, incRowB, incColB,
-    //           C, incRowC, incColC);
+    //           C, incRowC, incColC, ctx->_A_tile, ctx->_B_tile);
 
-    //const uint64_t t0 = rdtsc();
-
-    //for(i=0;i<j;++i) {
-    //    dgemm_main_tiled(M, N, K, A, incRowA, incColA,
-    //               B, incRowB, incColB,
-    //               C, incRowC, incColC);
-    //}
-
-    //const uint64_t dt = rdtsc() - t0;
-    //printf("MyDGEMM(AVX512) = %f\n", 1e-9 * dt/1);
+    qmckl_pack_matrix(context, 'A', M, K, A, incRowA, &_A_tile);
+    qmckl_pack_matrix(context, 'B', K, N, B, incRowB, &_B_tile);
+    qmckl_pack_matrix(context, 'C', M, N, C, incRowB, &_C_tile);
 
     dgemm_main_tiled_avx2(context, ctx->qmckl_M, ctx->qmckl_N, ctx->qmckl_K, A, incRowA, incColA,
                B, incRowB, incColB,
@@ -127,46 +122,6 @@ int main(int argc, char *argv[]) {
     printf("MyDGEMM(AVX2_16) = %f\n", 1e-9 * avx2dt/1);
 
     //print_matrix_ASer(C, qmckl_M, qmckl_N);
-
-    //dgemm_main_tiled_avx2_8regs(M, N, K, A, incRowA, incColA,
-    //           B, incRowB, incColB,
-    //           C, incRowC, incColC);
-
-    //const uint64_t sse2t0 = rdtsc();
-
-    //for(i=0;i<j;++i) {
-    //    dgemm_main_tiled_avx2_8regs(M, N, K, A, incRowA, incColA,
-    //               B, incRowB, incColB,
-    //               C, incRowC, incColC);
-    //}
-
-    //const uint64_t sse2dt = rdtsc() - sse2t0;
-    //printf("MyDGEMM(AVX2_8) = %f\n", 1e-9 * sse2dt/1);
-
-    //dgemm_main_tiled_sse2(M, N, K, A, incRowA, incColA,
-    //           B, incRowB, incColB,
-    //           C, incRowC, incColC);
-
-    //const uint64_t sse2t0 = rdtsc();
-
-    //for(i=0;i<j;++i) {
-    //    dgemm_main_tiled_sse2(M, N, K, A, incRowA, incColA,
-    //               B, incRowB, incColB,
-    //               C, incRowC, incColC);
-    //}
-
-    //const uint64_t sse2dt = rdtsc() - sse2t0;
-    //printf("MyDGEMM(AVX2_16) = %f\n", 1e-9 * sse2dt/1);
-
-    // MKL
-    //mkl_jit_status_t status = mkl_jit_create_dgemm(&jitter, MKL_ROW_MAJOR, MKL_NOTRANS, MKL_NOTRANS, MBlas, NBlas, KBlas, 1.0, KBlas, NBlas, 0.0, NBlas);
-    //if(MKL_JIT_ERROR == status){
-    //  printf("Error in MKL\n");
-    //  return(1);
-    //}
-    //dgemm_jit_kernel_t mkl_dgemm = mkl_jit_get_dgemm_ptr(jitter);
-
-    //mkl_dgemm(jitter,ABlas,BBlas,DBlas);
 
     const int MB = MBlas;
     const int NB = NBlas;
@@ -190,7 +145,6 @@ int main(int argc, char *argv[]) {
     // Pack
     dgemm_pack("B","T",&MB,&NB,&KB,&alpha,BBlas,&NB,BBlasp);
 
-    //cblas_dgemm(CblasRowMajor,CblasNoTrans, CblasNoTrans,MBlas,NBlas,KBlas,1.0,ABlas,KBlas,BBlas,NBlas,0.0,DBlas,NBlas);
     dgemm_compute("P","P",&MB,&NB,&KB,ABlasp,&KB,BBlasp,&NB,&beta,DBlas,&MB);
 
     const uint64_t bt0 = rdtsc();

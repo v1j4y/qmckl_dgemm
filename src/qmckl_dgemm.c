@@ -34,6 +34,8 @@ qmckl_exit_code qmckl_init_pack(qmckl_context context, unsigned char mType, int6
   if(mType == 'A' || mType == 'a'){
     // Initialize Tile data for A
     ctx->A_tile.Nt = K8;
+    ctx->A_tile.NCt = K8;
+    if(ctx->A_tile.Nt > 1152) ctx->A_tile.NCt = ctx->A_tile.Nt/2;
     if((M8 % MR2) != 0){
 
       ctx->A_tile.Mt = (int64_t)((M8/MR2)+1)*MR2;
@@ -48,6 +50,8 @@ qmckl_exit_code qmckl_init_pack(qmckl_context context, unsigned char mType, int6
   }
   else if(mType == 'B' || mType == 'b'){
     ctx->B_tile.Mt = K8;
+    ctx->B_tile.MCt = K8;
+    if(ctx->B_tile.Mt > 1152) ctx->B_tile.MCt = ctx->B_tile.Mt/2;
     if((N8 % NR2) != 0){
       ctx->B_tile.Nt = (int64_t)((N8/NR2)+1)*NR2;
       ctx->B_tile.NCt = ctx->B_tile.Nt;
@@ -136,7 +140,7 @@ qmckl_exit_code init_dims_avx2_input(qmckl_context context, int64_t DIM_M, int64
   return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, int64_t M8, int64_t N8, double *A, int64_t LDA, double *A_tile) {
+qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, int64_t M8, int64_t N8, double *A, int64_t LDA, double **A_tile) {
 
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
 
@@ -183,7 +187,7 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
 	i_tile_a += 1;
       }
     }
-    A_tile = ctx->A_tile.data;
+    (*A_tile) = ctx->B_tile.data;
   }
   else if(mType == 'B' || mType == 'b'){
     int64_t nb = ctx->B_tile.Nt / ctx->B_tile.NCt;
@@ -222,12 +226,13 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
 	i_tile_b += 1;
       }
     }
-    A_tile = ctx->B_tile.data;
+    (*A_tile) = ctx->B_tile.data;
   }
   else if(mType == 'C' || mType == 'c'){
 
     // Initialize C_tile
-    if( ctx->_C_tile == NULL) ctx->_C_tile = (double *)aligned_alloc(64, ctx->C_tile.Mt*ctx->C_tile.Nt   * sizeof(double));
+    if( ctx->C_tile.data == NULL) ctx->C_tile.data = (double *)aligned_alloc(64, ctx->C_tile.Mt*ctx->C_tile.Nt   * sizeof(double));
+    (*A_tile) = ctx->C_tile.data;
   }
   else{
     printf("Wrong mType in qmckl_pack_matrix. mType=%c\n",mType);
@@ -242,19 +247,22 @@ qmckl_exit_code dgemm_main_tiled_avx2(qmckl_context context, int64_t Min, int64_
                                                 double *C, int64_t incRowC, int64_t incColC) {
 
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
-  int64_t mb = Min / ctx->MC;
-  int64_t nb = Nin / ctx->NC;
-  int64_t kb = Kin / ctx->KC;
+  int64_t mb = Min / ctx->A_tile.MCt;
+  int64_t nb = Nin / ctx->B_tile.NCt;
+  int64_t kb = Kin / ctx->A_tile.NCt;
   int64_t idxi = 0;
   int64_t idxk = 0;
   int64_t nmbnb = 0;
   int64_t nmbnb_prev = 0;
-  int64_t MCNC = ctx->MC*ctx->NC;
-  size_t szeA = ctx->MC*ctx->KC*sizeof(double);
-  size_t szeB = ctx->NC*ctx->KC*sizeof(double);
+  int64_t mc = ctx->A_tile.MCt;
+  int64_t nc = ctx->B_tile.NCt;
+  int64_t kc = ctx->A_tile.NCt;
+  int64_t MCNC = mc*nc;
+  size_t szeA = mc*kc*sizeof(double);
+  size_t szeB = nc*kc*sizeof(double);
   int i,j,k,imb;
-  int MCKC = ctx->MC*ctx->KC;
-  int NCKC = ctx->NC*ctx->KC;
+  int MCKC = mc*kc;
+  int NCKC = nc*kc;
 
   int64_t i_tile_b, i_tile_a;
   double *A_tile_p __attribute__ ((aligned(64)));
@@ -265,30 +273,29 @@ qmckl_exit_code dgemm_main_tiled_avx2(qmckl_context context, int64_t Min, int64_
   i_tile_b = 0;
   i_tile_a = 0;
 
-  B_tile_p = ctx->_B_tile;
-  A_tile_p = ctx->_A_tile;
+  B_tile_p = ctx->B_tile.data;
+  A_tile_p = ctx->A_tile.data;
 
 //#pragma omp parallel
 //{
     for(i=0;i<nb;++i) {
         nmbnb_prev = i*mb;
         i_tile_a = 0;
-        A_tile_p = ctx->_A_tile;
+        A_tile_p = ctx->A_tile.data;
         //B_tile_p = _B_tile + i*kb*(NCKC);
         imb = i*mb;
 //#pragma omp single
         for(k=0;k<kb;++k) {
-            int64_t kc = ctx->KC;
 
-            idxi = i * ctx->NC * incRowC;
-            idxk = k * ctx->KC * incColA;
+            idxi = i * nc * incRowC;
+            idxk = k * kc * incColA;
 
             //B_tile_p = _B_tile + i_tile_b * (NCKC);
-            C_tile_p = ctx->_C_tile + (imb) * MCNC;
+            C_tile_p = ctx->C_tile.data + (imb) * MCNC;
 
             for(j=0;j<mb;++j) {
                 #pragma forceinline
-                dgemm_macro_kernel_avx2_16regs(ctx->MC, ctx->KC, ctx->NC, C_tile_p, incRowC, incColC, A_tile_p, B_tile_p);
+                dgemm_macro_kernel_avx2_16regs(mc, kc, nc, C_tile_p, incRowC, incColC, A_tile_p, B_tile_p);
                 A_tile_p += (MCKC);
                 C_tile_p +=  MCNC;
                 //nmbnb = nmbnb + 1;
@@ -421,14 +428,25 @@ qmckl_exit_code qmckl_context_destroy(qmckl_context context){
     free(ctx->_B_tile);
     ctx->_B_tile = NULL;
   }
-  if( ctx->_B_tile != NULL){
-    free(ctx->_B_tile);
-    ctx->_B_tile = NULL;
-  }
   if( ctx->_C_tile != NULL){
     free(ctx->_C_tile);
     ctx->_C_tile = NULL;
   }
+
+  // Free tiles
+  if( ctx->A_tile.data != NULL){
+    free(ctx->A_tile.data);
+    ctx->A_tile.data = NULL;
+  }
+  if( ctx->B_tile.data != NULL){
+    free(ctx->B_tile.data);
+    ctx->B_tile.data = NULL;
+  }
+  if( ctx->C_tile.data != NULL){
+    free(ctx->C_tile.data);
+    ctx->C_tile.data = NULL;
+  }
+
   return QMCKL_SUCCESS;
 }
 
