@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 
     qmckl_context context = qmckl_context_create();
     qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
-    init_dims_avx2_input(context, DIM_M, DIM_N, DIM_K);
+    //init_dims_avx2_input(context, DIM_M, DIM_N, DIM_K);
     qmckl_init_pack(context, 'A', DIM_M, DIM_N, DIM_K);
     qmckl_init_pack(context, 'B', DIM_M, DIM_N, DIM_K);
     qmckl_init_pack(context, 'C', DIM_M, DIM_N, DIM_K);
@@ -67,15 +67,15 @@ int main(int argc, char *argv[]) {
     
     int64_t incRowA = K;
     int64_t incRowB = N;
-    int64_t incRowC = ctx->qmckl_N;
+    int64_t incRowC = ctx->C_tile.Nt;
 
     A = (double *)malloc( M * K * sizeof(double));
     B = (double *)malloc( K * N * sizeof(double));
     //_A_tile = (double *)aligned_alloc(64, MAT_DIM_M*MAT_DIM_K*2 * sizeof(double));
     //_B_tile = (double *)aligned_alloc(64, MAT_DIM_N*MAT_DIM_K*2 * sizeof(double));
     //C = (double *)malloc( M * N * sizeof(double));
-    C = (double *)aligned_alloc( 64, ctx->qmckl_M * ctx->qmckl_N * sizeof(double));
-    CUnpack = (double *)aligned_alloc( 64, ctx->qmckl_M * ctx->qmckl_N * sizeof(double));
+    C = (double *)aligned_alloc( 64, ctx->C_tile.Mt * ctx->C_tile.Nt * sizeof(double));
+    CUnpack = (double *)aligned_alloc( 64, ctx->C_tile.Mt * ctx->C_tile.Nt * sizeof(double));
 
     ABlas = (double *)malloc( MBlas * KBlas * sizeof(double));
     BBlas = (double *)malloc( KBlas * NBlas * sizeof(double));
@@ -106,14 +106,14 @@ int main(int argc, char *argv[]) {
     qmckl_pack_matrix(context, 'B', K, N, B, incRowB, &_B_tile);
     qmckl_pack_matrix(context, 'C', M, N, C, incRowB, &_C_tile);
 
-    dgemm_main_tiled_avx2(context, ctx->qmckl_M, ctx->qmckl_N, ctx->qmckl_K, A, incRowA, incColA,
+    dgemm_main_tiled_avx2_NN(context, A, incRowA, incColA,
                B, incRowB, incColB,
                C, incRowC, incColC);
 
     const uint64_t avx2t0 = rdtsc();
 
     for(i=0;i<j;++i) {
-        dgemm_main_tiled_avx2(context, ctx->qmckl_M, ctx->qmckl_N, ctx->qmckl_K, A, incRowA, incColA,
+        dgemm_main_tiled_avx2_NN(context, A, incRowA, incColA,
                    B, incRowB, incColB,
                    C, incRowC, incColC);
     }
