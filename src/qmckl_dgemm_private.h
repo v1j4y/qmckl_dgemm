@@ -72,7 +72,7 @@ typedef qmckl_context_struct* qmckl_context_struct_p;
 void init_dims_avx512();
 void init_dims_avx2();
 
-int dgemm_main_tiled_avx2(qmckl_context_struct_p ctxtp, int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
+int dgemm_main_tiled_avx2(qmckl_context context, int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
                                                 double *B, int64_t incRowB, int64_t incColB,
                                                 double *C, int64_t incRowC, int64_t incColC);
 

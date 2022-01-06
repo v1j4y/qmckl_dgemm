@@ -44,7 +44,9 @@ int main(int argc, char *argv[]) {
     printf("Reps = %ld\n",rep);
     printf("M=%ld K=%ld N=%ld \n",(long)DIM_M,(long)DIM_K,(long)DIM_N);
 
-    init_dims_avx2_input(ctxtp, DIM_M, DIM_N, DIM_K);
+    qmckl_context context = qmckl_context_create();
+    qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
+    init_dims_avx2_input(context, DIM_M, DIM_N, DIM_K);
 
     //M = qmckl_M;
     //N = qmckl_N;
@@ -55,19 +57,19 @@ int main(int argc, char *argv[]) {
     MBlas = M;
     NBlas = N;
     KBlas = K;
-    printf("M=%ld K=%ld N=%ld | MC=%ld KC=%ld NC=%ld\n",(long)M,(long)K,(long)N,(long)ctxtp[0].MC,(long)ctxtp[0].KC,(long)ctxtp[0].NC);
+    printf("M=%ld K=%ld N=%ld | MC=%ld KC=%ld NC=%ld\n",(long)M,(long)K,(long)N,(long)ctx->MC,(long)ctx->KC,(long)ctx->NC);
     
     int64_t incRowA = K;
     int64_t incRowB = N;
-    int64_t incRowC = ctxtp[0].qmckl_N;
+    int64_t incRowC = ctx->qmckl_N;
 
     A = (double *)malloc( M * K * sizeof(double));
     B = (double *)malloc( K * N * sizeof(double));
     //_A_tile = (double *)aligned_alloc(64, MAT_DIM_M*MAT_DIM_K*2 * sizeof(double));
     //_B_tile = (double *)aligned_alloc(64, MAT_DIM_N*MAT_DIM_K*2 * sizeof(double));
     //C = (double *)malloc( M * N * sizeof(double));
-    C = (double *)aligned_alloc( 64, ctxtp[0].qmckl_M * ctxtp[0].qmckl_N * sizeof(double));
-    CUnpack = (double *)aligned_alloc( 64, ctxtp[0].qmckl_M * ctxtp[0].qmckl_N * sizeof(double));
+    C = (double *)aligned_alloc( 64, ctx->qmckl_M * ctx->qmckl_N * sizeof(double));
+    CUnpack = (double *)aligned_alloc( 64, ctx->qmckl_M * ctx->qmckl_N * sizeof(double));
 
     ABlas = (double *)malloc( MBlas * KBlas * sizeof(double));
     BBlas = (double *)malloc( KBlas * NBlas * sizeof(double));
@@ -90,9 +92,9 @@ int main(int argc, char *argv[]) {
     int i,j=rep;
 
     // Tile A and B
-    tile_matrix_general(ctxtp, M, N, K, A, incRowA, incColA,
+    tile_matrix_general(context, M, N, K, A, incRowA, incColA,
                B, incRowB, incColB,
-               C, incRowC, incColC, ctxtp[0]._A_tile, ctxtp[0]._B_tile);
+               C, incRowC, incColC, ctx->_A_tile, ctx->_B_tile);
 
     //dgemm_main_tiled(M, N, K, A, incRowA, incColA,
     //           B, incRowB, incColB,
@@ -109,14 +111,14 @@ int main(int argc, char *argv[]) {
     //const uint64_t dt = rdtsc() - t0;
     //printf("MyDGEMM(AVX512) = %f\n", 1e-9 * dt/1);
 
-    dgemm_main_tiled_avx2(ctxtp, ctxtp[0].qmckl_M, ctxtp[0].qmckl_N, ctxtp[0].qmckl_K, A, incRowA, incColA,
+    dgemm_main_tiled_avx2(context, ctx->qmckl_M, ctx->qmckl_N, ctx->qmckl_K, A, incRowA, incColA,
                B, incRowB, incColB,
                C, incRowC, incColC);
 
     const uint64_t avx2t0 = rdtsc();
 
     for(i=0;i<j;++i) {
-        dgemm_main_tiled_avx2(ctxtp, ctxtp[0].qmckl_M, ctxtp[0].qmckl_N, ctxtp[0].qmckl_K, A, incRowA, incColA,
+        dgemm_main_tiled_avx2(context, ctx->qmckl_M, ctx->qmckl_N, ctx->qmckl_K, A, incRowA, incColA,
                    B, incRowB, incColB,
                    C, incRowC, incColC);
     }
@@ -202,14 +204,14 @@ int main(int argc, char *argv[]) {
     //print_matrix(DBlas, M, N);
     //printf("\n-------------diff-----------------\n");
     //print_diff_matrix_AT_B(C,D, M, N);
-    //print_diff_matrix_ASer_BT(ctxtp, C,DBlas, M, N);
-    //qmckl_unpack(ctxtp, CUnpack, M, N);
+    //print_diff_matrix_ASer_BT(context, C,DBlas, M, N);
+    //qmckl_unpack(context, CUnpack, M, N);
     //print_diff_matrix(CUnpack,DBlas, M, N);
     //print_matrix(CUnpack, M, N);
 
     mkl_free(ABlasp);
     mkl_free(BBlasp);
-    qmckl_context_destroy(ctxtp);
+    qmckl_context_destroy(context);
     free(A);
     free(B);
     free(C);
