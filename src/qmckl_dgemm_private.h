@@ -2,6 +2,7 @@
 #define __QMCKL_DGEMM_PRIVATE_H
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 #if !defined(MR)
 #define MR 8

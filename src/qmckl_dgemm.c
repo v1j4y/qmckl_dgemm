@@ -8,6 +8,23 @@ qmckl_context_struct ctxt = {.qmckl_M=0, .qmckl_N=0, .qmckl_K=0, .MC=0, .NC=0, .
                        ._A=NULL, ._B=NULL};
 qmckl_context_struct_p ctxtp = &ctxt;
 
+qmckl_context qmckl_context_create() {
+
+  qmckl_context_struct* const ctx = (qmckl_context_struct* const) malloc (sizeof(qmckl_context_struct));
+
+  if (ctx == NULL) {
+    return QMCKL_NULL_CONTEXT;
+  }
+
+  /* Set all pointers and values to NULL */
+  {
+    memset(ctx, 0, sizeof(qmckl_context_struct));
+  }
+
+  return (qmckl_context) ctx;
+}
+
+
 qmckl_exit_code dgemm_main_tiled_avx2(qmckl_context_struct_p ctxtp, int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
                                                 double *B, int64_t incRowB, int64_t incColB,
                                                 double *C, int64_t incRowC, int64_t incColC) {
