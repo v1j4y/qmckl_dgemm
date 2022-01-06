@@ -24,6 +24,118 @@ qmckl_context qmckl_context_create() {
   return (qmckl_context) ctx;
 }
 
+qmckl_exit_code qmckl_init_tile(qmckl_context context, unsigned char mType, int64_t M8, int64_t N8, int64_t K8) {
+
+    /*
+     * AVX2: We work only in factors of 8 * 6
+     */
+  qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
+
+  if(mType == 'A' || mType == 'a'){
+    // Initialize Tile data for A
+    ctx->A_tile.Nt = K8;
+    if((M8 % MR2) != 0){
+
+      ctx->A_tile.Mt = (int64_t)((M8/MR2)+1)*MR2;
+      ctx->A_tile.MCt = ctx->A_tile.Mt;
+      if(ctx->A_tile.Mt > 1152) ctx->A_tile.MCt = ctx->A_tile.Mt/2;
+    }
+    else{
+      ctx->A_tile.Mt = (int64_t)M8;
+      ctx->A_tile.MCt = ctx->A_tile.Mt;
+      if(ctx->A_tile.Mt > 1152) ctx->A_tile.MCt = ctx->A_tile.Mt/2;
+    }
+  }
+  else if(mType == 'B' || mType == 'b'){
+    ctx->B_tile.Mt = K8;
+    if((N8 % NR2) != 0){
+      ctx->B_tile.Nt = (int64_t)((N8/NR2)+1)*NR2;
+      ctx->B_tile.NCt = ctx->B_tile.Nt;
+      if(ctx->B_tile.Nt > 1152) ctx->B_tile.NCt = ctx->B_tile.Nt/2;
+    }
+    else{
+      ctx->B_tile.Nt = (int64_t)N8;
+      ctx->B_tile.NCt = ctx->B_tile.Nt;
+      if(ctx->B_tile.Nt > 1152) ctx->B_tile.NCt = ctx->B_tile.Nt/2;
+    }
+  }
+  else if(mType == 'C' || mType == 'c'){
+    if((M8 % MR2) != 0){
+
+      ctx->C_tile.Mt = (int64_t)((M8/MR2)+1)*MR2;
+      ctx->C_tile.MCt = ctx->C_tile.Mt;
+      if(ctx->C_tile.Mt > 1152) ctx->C_tile.MCt = ctx->C_tile.Mt/2;
+    }
+    else{
+      ctx->C_tile.Mt = (int64_t)M8;
+      ctx->C_tile.MCt = ctx->C_tile.Mt;
+      if(ctx->C_tile.Mt > 1152) ctx->C_tile.MCt = ctx->C_tile.Mt/2;
+    }
+    if((N8 % NR2) != 0){
+      ctx->C_tile.Nt = (int64_t)((N8/NR2)+1)*NR2;
+      ctx->C_tile.NCt = ctx->C_tile.Nt;
+      if(ctx->C_tile.Nt > 1152) ctx->C_tile.NCt = ctx->C_tile.Nt/2;
+    }
+    else{
+      ctx->C_tile.Nt = (int64_t)N8;
+      ctx->C_tile.NCt = ctx->C_tile.Nt;
+      if(ctx->C_tile.Nt > 1152) ctx->C_tile.NCt = ctx->C_tile.Nt/2;
+    }
+  }
+  else{
+    printf("Wrong mType in qmckl_init_tile. mType=%c\n",mType);
+  }
+
+  return QMCKL_SUCCESS;
+}
+
+qmckl_exit_code init_dims_avx2_input(qmckl_context context, int64_t DIM_M, int64_t DIM_N, int64_t DIM_K) {
+
+    /*
+     * AVX2: We work only in factors of 8 * 6
+     */
+    //qmckl_M = (int64_t *)malloc(1 * sizeof(int64_t));
+    //qmckl_N = (int64_t *)malloc(1 * sizeof(int64_t));
+    //qmckl_K = (int64_t *)malloc(1 * sizeof(int64_t));
+    //
+  qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
+  int MR2NR2 = MR2*NR2;
+
+  ctx->KC = DIM_K;
+
+  if((DIM_M % MR2) != 0){
+
+    ctx->qmckl_M = (int64_t)((DIM_M/MR2)+1)*MR2;
+    ctx->MC = ctx->qmckl_M;
+    if(ctx->qmckl_M > 1152) ctx->MC = ctx->qmckl_M/2;
+  }
+  else{
+    ctx->qmckl_M = (int64_t)DIM_M;
+    ctx->MC = ctx->qmckl_M;
+    if(ctx->qmckl_M > 1152) ctx->MC = ctx->qmckl_M/2;
+  }
+
+  if((DIM_K % ctx->KC) != 0){
+    ctx->qmckl_K = (int64_t)((DIM_K/ctx->KC)+1)*ctx->KC;
+  }
+  else{
+    ctx->qmckl_K = (int64_t)DIM_K;
+  }
+
+  if((DIM_N % NR2) != 0){
+    ctx->qmckl_N = (int64_t)((DIM_N/NR2)+1)*NR2;
+    ctx->NC = ctx->qmckl_N;
+    if(ctx->qmckl_N > 1152) ctx->NC = ctx->qmckl_N/2;
+  }
+  else{
+    ctx->qmckl_N = (int64_t)DIM_N;
+    ctx->NC = ctx->qmckl_N;
+    if(ctx->qmckl_N > 1152) ctx->NC = ctx->qmckl_N/2;
+  }
+  printf("(AVX2) M=%ld K=%ld N=%ld | MC=%ld KC=%ld NC=%ld\n",(long)ctx->qmckl_M,(long)ctx->qmckl_K,(long)ctx->qmckl_N,(long)ctx->MC,(long)ctx->KC,(long)ctx->NC);
+  return QMCKL_SUCCESS;
+}
+
 
 qmckl_exit_code dgemm_main_tiled_avx2(qmckl_context context, int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
                                                 double *B, int64_t incRowB, int64_t incColB,
@@ -111,53 +223,6 @@ qmckl_exit_code qmckl_unpack(qmckl_context context, double *B, int64_t M, int64_
         B[j + i*M] = ctx->_C_tile[(ctx->MC*ctx->NC)*(lnc*mb) + (ctx->MC*ctx->NC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k];
       }
   }
-  return QMCKL_SUCCESS;
-}
-
-qmckl_exit_code init_dims_avx2_input(qmckl_context context, int64_t DIM_M, int64_t DIM_N, int64_t DIM_K) {
-
-    /*
-     * AVX2: We work only in factors of 8 * 6
-     */
-    //qmckl_M = (int64_t *)malloc(1 * sizeof(int64_t));
-    //qmckl_N = (int64_t *)malloc(1 * sizeof(int64_t));
-    //qmckl_K = (int64_t *)malloc(1 * sizeof(int64_t));
-    //
-  qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
-  int MR2NR2 = MR2*NR2;
-
-  ctx->KC = DIM_K;
-
-  if((DIM_M % MR2) != 0){
-
-    ctx->qmckl_M = (int64_t)((DIM_M/MR2)+1)*MR2;
-    ctx->MC = ctx->qmckl_M;
-    if(ctx->qmckl_M > 1152) ctx->MC = ctx->qmckl_M/2;
-  }
-  else{
-    ctx->qmckl_M = (int64_t)DIM_M;
-    ctx->MC = ctx->qmckl_M;
-    if(ctx->qmckl_M > 1152) ctx->MC = ctx->qmckl_M/2;
-  }
-
-  if((DIM_K % ctx->KC) != 0){
-    ctx->qmckl_K = (int64_t)((DIM_K/ctx->KC)+1)*ctx->KC;
-  }
-  else{
-    ctx->qmckl_K = (int64_t)DIM_K;
-  }
-
-  if((DIM_N % NR2) != 0){
-    ctx->qmckl_N = (int64_t)((DIM_N/NR2)+1)*NR2;
-    ctx->NC = ctx->qmckl_N;
-    if(ctx->qmckl_N > 1152) ctx->NC = ctx->qmckl_N/2;
-  }
-  else{
-    ctx->qmckl_N = (int64_t)DIM_N;
-    ctx->NC = ctx->qmckl_N;
-    if(ctx->qmckl_N > 1152) ctx->NC = ctx->qmckl_N/2;
-  }
-  printf("(AVX2) M=%ld K=%ld N=%ld | MC=%ld KC=%ld NC=%ld\n",(long)ctx->qmckl_M,(long)ctx->qmckl_K,(long)ctx->qmckl_N,(long)ctx->MC,(long)ctx->KC,(long)ctx->NC);
   return QMCKL_SUCCESS;
 }
 

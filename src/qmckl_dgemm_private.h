@@ -23,32 +23,21 @@
 typedef int64_t qmckl_context;
 typedef int32_t qmckl_exit_code;
 
-//typedef struct qmckl_tile_struct{
-//};
-
-//typedef struct qmckl_context_struct{
-//  // Matrix dimensions
-//  int64_t qmckl_M;
-//  int64_t qmckl_N;
-//  int64_t qmckl_K;
-//
-//  // Block dimensions
-//  int64_t KC;
-//  int64_t MC;
-//  int64_t NC;
-//  
-//  // Container for Packed arrays
-//  double* _A_tile;
-//  double* _B_tile;
-//  double* _C_tile;
-//  
-//  // Buffers for intermediates
-//  double* _A;
-//  double* _B;
-//
-//} context;
-
-//typedef context* context_p;
+typedef struct qmckl_tile_struct{
+  // Container for Packed arrays
+  double* _data;
+  // Type of Packing (A or B or C)
+  char mType;
+  // Matrix dimensions
+  int64_t Mt;
+  int64_t Nt;
+  // Block dimensions
+  int64_t MCt;
+  int64_t NCt;
+  // Tile dimensions
+  int64_t MRt;
+  int64_t NRt;
+} qmckl_tile_struct;
 
 typedef struct qmckl_context_struct{
 
@@ -64,6 +53,10 @@ double* _B_tile;
 double* _C_tile;
 double* _A;
 double* _B;
+
+  qmckl_tile_struct A_tile;
+  qmckl_tile_struct B_tile;
+  qmckl_tile_struct C_tile;
 
 } qmckl_context_struct;
 
