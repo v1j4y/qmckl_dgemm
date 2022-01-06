@@ -1,5 +1,6 @@
 #include "utils.h"
 #include "qmckl_dgemm.h"
+#include "qmckl_dgemm_private.h"
 
 // Global context
 context ctxt = {.qmckl_M=0, .qmckl_N=0, .qmckl_K=0, .MC=0, .NC=0, .KC=0, 

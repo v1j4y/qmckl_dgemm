@@ -6,34 +6,6 @@
 #include "kernel_sse2_8regs.h"
 //#include "kernel_avx2_32regs.h"
 
-#if !defined(MAT_DIM)
-#define MAT_DIM 1024
-#endif
-
-#if !defined(MR)
-#define MR 8
-#endif
-
-#if !defined(NR)
-#define NR 6
-#endif
-
-#if !defined(MR2)
-#define MR2 8
-#endif
-
-#if !defined(NR2)
-#define NR2 6
-#endif
-
-#if !defined(MR1)
-#define MR1 8
-#endif
-
-#if !defined(NR1)
-#define NR1 2
-#endif
-
 struct context{
 
 int64_t qmckl_M;

@@ -9,6 +9,7 @@
 //struct context;
 //typedef context* context_p;
 #include "qmckl_dgemm.h"
+#include "qmckl_dgemm_private.h"
 
 //#if !defined(MAT_DIM_M)
 //#define MAT_DIM_M MAT_DIM
