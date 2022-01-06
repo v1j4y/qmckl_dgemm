@@ -25,7 +25,7 @@ typedef int32_t qmckl_exit_code;
 
 typedef struct qmckl_tile_struct{
   // Container for Packed arrays
-  double* _data;
+  double* data;
   // Type of Packing (A or B or C)
   char mType;
   // Matrix dimensions

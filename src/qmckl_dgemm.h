@@ -18,6 +18,10 @@ extern qmckl_context_struct ctxt;
 
 qmckl_context qmckl_context_create();
 
+qmckl_exit_code qmckl_init_pack(qmckl_context context, unsigned char mType, int64_t M8, int64_t N8, int64_t K8);
+
+qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, int64_t M8, int64_t N8, double *A, int64_t LDA, double *A_tile);
+
 qmckl_exit_code init_dims_avx2_input(qmckl_context context, int64_t DIM_M, int64_t DIM_N, int64_t DIM_K);
 qmckl_exit_code dgemm_main_tiled(qmckl_context context, int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
                                                 double *B, int64_t incRowB, int64_t incColB,
