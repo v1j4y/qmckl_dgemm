@@ -118,21 +118,22 @@ void print_diff_matrix(double *A, double *B, int64_t M, int64_t N) {
 //    }
 //}
 
-void print_diff_matrix_ASer_BT(qmckl_context_struct_p ctxtp, double *A, double *B, int64_t M, int64_t N) {
-    int64_t mb = M / ctxtp->MC;
-    int64_t nb = N / ctxtp->NC;
-    int64_t mp = ctxtp->MC / MR;
-    int64_t np = ctxtp->NC / NR;
-    int64_t MCNC = ctxtp->MC*ctxtp->NC;
+void print_diff_matrix_ASer_BT(qmckl_context context, double *A, double *B, int64_t M, int64_t N) {
+  qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
+    int64_t mb = M / ctx->MC;
+    int64_t nb = N / ctx->NC;
+    int64_t mp = ctx->MC / MR;
+    int64_t np = ctx->NC / NR;
+    int64_t MCNC = ctx->MC*ctx->NC;
     int i,j;
     for(i=0;i<N;++i) {
         for(j=0;j<M;++j) {
-          int64_t kmc = ( j / ctxtp->MC );
-          int64_t lnc = ( i / ctxtp->NC );
-          int64_t kmr = ( j - kmc * ctxtp->MC ) / MR;
-          int64_t lnr = ( i - lnc * ctxtp->NC ) / NR;
-          int64_t k   = ( ( j - kmc * ctxtp->MC ) - ( kmr * MR ) );
-          int64_t l   = ( ( i - lnc * ctxtp->NC ) - ( lnr * NR ) );
+          int64_t kmc = ( j / ctx->MC );
+          int64_t lnc = ( i / ctx->NC );
+          int64_t kmr = ( j - kmc * ctx->MC ) / MR;
+          int64_t lnr = ( i - lnc * ctx->NC ) / NR;
+          int64_t k   = ( ( j - kmc * ctx->MC ) - ( kmr * MR ) );
+          int64_t l   = ( ( i - lnc * ctx->NC ) - ( lnr * NR ) );
           if(abs(A[(MCNC)*(lnc*mb) + (MCNC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[j + i*M]) > 1e-13){
             printf(" %20.10e ",abs(A[(MCNC)*(lnc*mb) + (MCNC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[j + i*M]));
             printf("Fail\n");
@@ -223,8 +224,9 @@ void print_diff_matrix_ASer_BT(qmckl_context_struct_p ctxtp, double *A, double *
 //}
 
 // Pack A which is traversed row wise (MC rows and KC columns)
-void packA_general(qmckl_context_struct_p ctxtp, int64_t kc, int64_t MCmax, double *A, int64_t dimRowA, int64_t dimColA, double *buffer) {
-  int64_t mp = ctxtp->MC / MR;
+void packA_general(qmckl_context context, int64_t kc, int64_t MCmax, double *A, int64_t dimRowA, int64_t dimColA, double *buffer) {
+  qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
+  int64_t mp = ctx->MC / MR;
   double *buffer_start = buffer;
   double *A_start = A;
   int k,j,i,idxMC;
@@ -247,8 +249,9 @@ void packA_general(qmckl_context_struct_p ctxtp, int64_t kc, int64_t MCmax, doub
 }
 
 // Pack B which is traversed column wise (NC rows and KC columns)
-void packB_general(qmckl_context_struct_p ctxtp, int64_t kc, int64_t NCmax, double *B, int64_t dimRowB, int64_t dimColB, double *buffer) {
-  int64_t np = ctxtp->NC / NR;
+void packB_general(qmckl_context context, int64_t kc, int64_t NCmax, double *B, int64_t dimRowB, int64_t dimColB, double *buffer) {
+  qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
+  int64_t np = ctx->NC / NR;
   double *buffer_start = buffer;
   double *B_start = B;
   int k,j,i, idxNC, idxNCprev;

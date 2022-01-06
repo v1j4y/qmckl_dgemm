@@ -67,7 +67,7 @@ double* _B;
 
 } qmckl_context_struct;
 
-typedef qmckl_context_struct* qmckl_context_struct_p;
+//typedef qmckl_context_struct* qmckl_context_struct_p;
 
 void init_dims_avx512();
 void init_dims_avx2();
@@ -76,7 +76,7 @@ int dgemm_main_tiled_avx2(qmckl_context context, int64_t Min, int64_t Nin, int64
                                                 double *B, int64_t incRowB, int64_t incColB,
                                                 double *C, int64_t incRowC, int64_t incColC);
 
-qmckl_exit_code dgemm_main_packed_avx2(qmckl_context_struct_p ctxp, double alpha, 
+qmckl_exit_code dgemm_main_packed_avx2(qmckl_context context, double alpha, 
 			  double *A, double *B, double beta, double *C);
 
 #endif

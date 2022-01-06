@@ -14,7 +14,7 @@ typedef int32_t qmckl_exit_code;
 #define QMCKL_FAILURE (qmckl_context) 101
 
 extern qmckl_context_struct ctxt;
-extern qmckl_context_struct_p ctxtp;
+//extern qmckl_context_struct_p ctxtp;
 
 qmckl_context qmckl_context_create();
 

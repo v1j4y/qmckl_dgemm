@@ -6,7 +6,7 @@
 qmckl_context_struct ctxt = {.qmckl_M=0, .qmckl_N=0, .qmckl_K=0, .MC=0, .NC=0, .KC=0, 
                        ._A_tile=NULL, ._B_tile=NULL, ._C_tile=NULL,
                        ._A=NULL, ._B=NULL};
-qmckl_context_struct_p ctxtp = &ctxt;
+//qmckl_context_struct_p ctxtp = &ctxt;
 
 qmckl_context qmckl_context_create() {
 
@@ -202,7 +202,7 @@ qmckl_exit_code tile_matrix_general(qmckl_context context, int64_t Min, int64_t 
       }
       for(k=0;k<kb;++k) {
           int64_t kc = ctx->KC;
-          packB_general(ctxtp, kc, NCmax, &B[k*ctx->KC*incRowB + i*ctx->NC*incColB], incRowB, incColB, ctx->_B);
+          packB_general(context, kc, NCmax, &B[k*ctx->KC*incRowB + i*ctx->NC*incColB], incRowB, incColB, ctx->_B);
 
           // Write to tiled matrix to B
           for(ii=0;ii<NCKC;++ii) {
@@ -224,7 +224,7 @@ qmckl_exit_code tile_matrix_general(qmckl_context context, int64_t Min, int64_t 
           else{
             MCmax = ctx->MC;
           }
-          packA_general(ctxtp, kc, MCmax, &A[idxk + j*ctx->MC*incRowA], incRowA, incColA, ctx->_A);
+          packA_general(context, kc, MCmax, &A[idxk + j*ctx->MC*incRowA], incRowA, incColA, ctx->_A);
 
           // Write to tiled matrix to A
           for(ii=0;ii<MCKC;++ii) {
