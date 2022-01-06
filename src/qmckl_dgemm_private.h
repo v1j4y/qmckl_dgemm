@@ -46,6 +46,25 @@
 
 //typedef context* context_p;
 
+struct context{
+
+int64_t qmckl_M;
+int64_t qmckl_N;
+int64_t qmckl_K;
+int64_t MC;
+int64_t NC;
+int64_t KC;
+
+double* _A_tile;
+double* _B_tile;
+double* _C_tile;
+double* _A;
+double* _B;
+
+};
+
+typedef context* context_p;
+
 int dgemm_main_packed_avx2(context_p ctxp, double alpha, 
 			  double *A, double *B, double beta, double *C);
 

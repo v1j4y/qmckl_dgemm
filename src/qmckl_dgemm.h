@@ -1,29 +1,11 @@
 #ifndef __QMCKL_DGEMM_H
 #define __QMCKL_DGEMM_H
-//#include "kernel.h"
+#include "qmckl_dgemm_private.h"
+
 #include "kernel_avx2_16regs.h"
 #include "kernel_avx2_8regs.h"
 #include "kernel_sse2_8regs.h"
 //#include "kernel_avx2_32regs.h"
-
-struct context{
-
-int64_t qmckl_M;
-int64_t qmckl_N;
-int64_t qmckl_K;
-int64_t MC;
-int64_t NC;
-int64_t KC;
-
-double* _A_tile;
-double* _B_tile;
-double* _C_tile;
-double* _A;
-double* _B;
-
-};
-
-typedef context* context_p;
 
 extern context ctxt;
 extern context_p ctxtp;
