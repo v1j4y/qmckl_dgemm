@@ -41,16 +41,6 @@ typedef struct qmckl_tile_struct{
 
 typedef struct qmckl_context_struct{
 
-  //int64_t qmckl_M;
-  //int64_t qmckl_N;
-  //int64_t qmckl_K;
-int64_t MC;
-int64_t NC;
-int64_t KC;
-
-double* _A_tile;
-double* _B_tile;
-double* _C_tile;
 double* _A;
 double* _B;
 

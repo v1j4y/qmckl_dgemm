@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
     MBlas = M;
     NBlas = N;
     KBlas = K;
-    printf("M=%ld K=%ld N=%ld | MC=%ld KC=%ld NC=%ld\n",(long)M,(long)K,(long)N,(long)ctx->MC,(long)ctx->KC,(long)ctx->NC);
+    //printf("M=%ld K=%ld N=%ld | MC=%ld KC=%ld NC=%ld\n",(long)M,(long)K,(long)N,(long)ctx->MC,(long)ctx->KC,(long)ctx->NC);
     
     int64_t incRowA = K;
     int64_t incRowB = N;
@@ -155,13 +155,13 @@ int main(int argc, char *argv[]) {
 
     const uint64_t bdt = rdtsc() - bt0;
     printf("BLAS DGEMM = %f\n", 1e-9 * bdt/1);
-    //print_matrix(DBlas, M, N);
-    //printf("\n-------------diff-----------------\n");
+    print_matrix(DBlas, M, N);
+    printf("\n-------------diff-----------------\n");
     //print_diff_matrix_AT_B(C,D, M, N);
     //print_diff_matrix_ASer_BT(context, C,DBlas, M, N);
-    //qmckl_unpack(context, CUnpack, M, N);
-    //print_diff_matrix(CUnpack,DBlas, M, N);
-    //print_matrix(CUnpack, M, N);
+    qmckl_unpack_matrix(context, CUnpack, M, N);
+    print_diff_matrix(CUnpack,DBlas, M, N);
+    print_matrix(CUnpack, M, N);
 
     mkl_free(ABlasp);
     mkl_free(BBlasp);

@@ -31,6 +31,6 @@ qmckl_exit_code tile_matrix_general(qmckl_context context, int64_t Min, int64_t 
                                                 double *B, int64_t incRowB, int64_t incColB,
                                                 double *C, int64_t incRowC, int64_t incColC, double *A_tile, double *B_tile);
 
-qmckl_exit_code qmckl_unpack(qmckl_context context, double *B, int64_t M, int64_t N);
+qmckl_exit_code qmckl_unpack_matrix(qmckl_context context, double *B, int64_t M, int64_t N);
 qmckl_exit_code qmckl_context_destroy(qmckl_context context);
 #endif
