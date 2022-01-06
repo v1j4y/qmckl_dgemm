@@ -65,7 +65,32 @@ double* _B;
 
 typedef qmckl_context* qmckl_context_p;
 
+void init_dims_avx512();
+void init_dims_avx2();
+void init_dims_avx2_input(qmckl_context_p ctxtp, int64_t DIM_M, int64_t DIM_N, int64_t DIM_K);
+
+int dgemm_main_tiled_avx2(qmckl_context_p ctxtp, int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
+                                                double *B, int64_t incRowB, int64_t incColB,
+                                                double *C, int64_t incRowC, int64_t incColC);
+
+int dgemm_main_tiled_avx2_8regs(int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
+                                                double *B, int64_t incRowB, int64_t incColB,
+                                                double *C, int64_t incRowC, int64_t incColC);
+
+
+int dgemm_main_tiled_sse2(int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
+                                                double *B, int64_t incRowB, int64_t incColB,
+                                                double *C, int64_t incRowC, int64_t incColC);
+
+int tile_matrix(int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
+                                                double *B, int64_t incRowB, int64_t incColB,
+                                                double *C, int64_t incRowC, int64_t incColC, double *A_tile, double *B_tile);
+
 int dgemm_main_packed_avx2(qmckl_context_p ctxp, double alpha, 
 			  double *A, double *B, double beta, double *C);
+
+int dgemm_naive(int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
+                                                double *B, int64_t incRowB, int64_t incColB,
+                                                double *C, int64_t incRowC, int64_t incColC);
 
 #endif
