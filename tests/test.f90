@@ -38,7 +38,7 @@ program test
      do n=1,amax
         n8 = n
 
-        rc = qmckl_tile(qmckl_context, m8, n8, C1, LDC1, C_tile)
+        rc = qmckl_tile(qmckl_context, 'C', m8, n8, C1, LDC1, C_tile)
         if (rc /= QMCKL_SUCCESS) then
            print *, m,n
            print *, 'Failed tiling of C1'
@@ -49,14 +49,14 @@ program test
         do k=1,amax
            k8 = k
          
-           rc = qmckl_tile(qmckl_context, m8, k8, A, LDA, A_tile)
+           rc = qmckl_tile(qmckl_context, 'A', m8, k8, A, LDA, A_tile)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
               print *, 'Failed tiling of A'
               call exit(-1)
            end if
            
-           rc = qmckl_tile(qmckl_context, k8, n8, B, LDB, B_tile)
+           rc = qmckl_tile(qmckl_context, 'B', k8, n8, B, LDB, B_tile)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
               print *, 'Failed tiling of B'
