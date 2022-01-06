@@ -209,7 +209,7 @@ int main(int argc, char *argv[]) {
 
     mkl_free(ABlasp);
     mkl_free(BBlasp);
-    free_context(ctxtp);
+    qmckl_context_destroy(ctxtp);
     free(A);
     free(B);
     free(C);

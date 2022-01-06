@@ -233,7 +233,7 @@ qmckl_exit_code tile_matrix_general(qmckl_context_struct_p ctxtp, int64_t Min, i
     return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code free_context(qmckl_context_struct_p ctxtp){
+qmckl_exit_code qmckl_context_destroy(qmckl_context_struct_p ctxtp){
 
     if( ctxtp[0]._A != NULL){
       free(ctxtp[0]._A);
