@@ -46,7 +46,7 @@
 
 //typedef context* context_p;
 
-struct context{
+typedef struct qmckl_context_struct{
 
 int64_t qmckl_M;
 int64_t qmckl_N;
@@ -61,11 +61,11 @@ double* _C_tile;
 double* _A;
 double* _B;
 
-};
+} qmckl_context;
 
-typedef context* context_p;
+typedef qmckl_context* qmckl_context_p;
 
-int dgemm_main_packed_avx2(context_p ctxp, double alpha, 
+int dgemm_main_packed_avx2(qmckl_context_p ctxp, double alpha, 
 			  double *A, double *B, double beta, double *C);
 
 #endif

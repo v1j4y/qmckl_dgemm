@@ -219,9 +219,8 @@ void print_diff_matrix(double *A, double *B, int64_t M, int64_t N) {
 //}
 
 // Pack A which is traversed row wise (MC rows and KC columns)
-void packA_general(context_p ctxtp, int64_t kc, int64_t MCmax, double *A, int64_t dimRowA, int64_t dimColA, double *buffer) {
-  context ctxt=ctxtp[0];
-  int64_t mp = ctxt.MC / MR;
+void packA_general(qmckl_context_p ctxtp, int64_t kc, int64_t MCmax, double *A, int64_t dimRowA, int64_t dimColA, double *buffer) {
+  int64_t mp = ctxtp->MC / MR;
   double *buffer_start = buffer;
   double *A_start = A;
   int k,j,i,idxMC;
@@ -244,9 +243,8 @@ void packA_general(context_p ctxtp, int64_t kc, int64_t MCmax, double *A, int64_
 }
 
 // Pack B which is traversed column wise (NC rows and KC columns)
-void packB_general(context_p ctxtp, int64_t kc, int64_t NCmax, double *B, int64_t dimRowB, int64_t dimColB, double *buffer) {
-  context ctxt=ctxtp[0];
-  int64_t np = ctxt.NC / NR;
+void packB_general(qmckl_context_p ctxtp, int64_t kc, int64_t NCmax, double *B, int64_t dimRowB, int64_t dimColB, double *buffer) {
+  int64_t np = ctxtp->NC / NR;
   double *buffer_start = buffer;
   double *B_start = B;
   int k,j,i, idxNC, idxNCprev;

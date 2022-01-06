@@ -3,12 +3,12 @@
 #include "qmckl_dgemm_private.h"
 
 // Global context
-context ctxt = {.qmckl_M=0, .qmckl_N=0, .qmckl_K=0, .MC=0, .NC=0, .KC=0, 
+qmckl_context ctxt = {.qmckl_M=0, .qmckl_N=0, .qmckl_K=0, .MC=0, .NC=0, .KC=0, 
                        ._A_tile=NULL, ._B_tile=NULL, ._C_tile=NULL,
                        ._A=NULL, ._B=NULL};
-context_p ctxtp = &ctxt;
+qmckl_context_p ctxtp = &ctxt;
 
-int dgemm_main_tiled_avx2(context_p ctxtp, int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
+int dgemm_main_tiled_avx2(qmckl_context_p ctxtp, int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
                                                 double *B, int64_t incRowB, int64_t incColB,
                                                 double *C, int64_t incRowC, int64_t incColC) {
 
@@ -195,7 +195,7 @@ int dgemm_main_tiled_avx2(context_p ctxtp, int64_t Min, int64_t Nin, int64_t Kin
 //    return 1;
 //}
 
-void unpackC(context_p ctxtp, double *B, int64_t M, int64_t N) {
+void unpackC(qmckl_context_p ctxtp, double *B, int64_t M, int64_t N) {
     int64_t mb = M / ctxtp[0].MC;
     int64_t nb = N / ctxtp[0].NC;
     int64_t mp = ctxtp[0].MC / MR;
@@ -292,7 +292,7 @@ void unpackC(context_p ctxtp, double *B, int64_t M, int64_t N) {
 //    printf("(AVX2) M=%ld K=%ld N=%ld | MC=%ld KC=%ld NC=%ld\n",(long)qmckl_M,(long)qmckl_K,(long)qmckl_N,(long)MC,(long)KC,(long)NC);
 //}
 
-void init_dims_avx2_input(context_p ctxtp, int64_t DIM_M, int64_t DIM_N, int64_t DIM_K) {
+void init_dims_avx2_input(qmckl_context_p ctxtp, int64_t DIM_M, int64_t DIM_N, int64_t DIM_K) {
 
     /*
      * AVX2: We work only in factors of 8 * 6
@@ -397,7 +397,7 @@ void init_dims_avx2_input(context_p ctxtp, int64_t DIM_M, int64_t DIM_N, int64_t
 //    return 1;
 //}
 
-int tile_matrix_general(context_p ctxtp, int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
+int tile_matrix_general(qmckl_context_p ctxtp, int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
                                                 double *B, int64_t incRowB, int64_t incColB,
                                                 double *C, int64_t incRowC, int64_t incColC, double *A_tile, double *B_tile) {
 
@@ -472,7 +472,7 @@ int tile_matrix_general(context_p ctxtp, int64_t Min, int64_t Nin, int64_t Kin, 
     return 1;
 }
 
-void free_context(context_p ctxtp){
+void free_context(qmckl_context_p ctxtp){
 
     if( ctxtp[0]._A != NULL){
       free(ctxtp[0]._A);
@@ -501,7 +501,7 @@ void free_context(context_p ctxtp){
 }
 
 
-int dgemm_main_tiled(context_p ctxtp, int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
+int dgemm_main_tiled(qmckl_context_p ctxtp, int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
                                                 double *B, int64_t incRowB, int64_t incColB,
                                                 double *C, int64_t incRowC, int64_t incColC) {
     // Init memory
