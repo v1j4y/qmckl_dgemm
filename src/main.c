@@ -39,6 +39,8 @@ int main(int argc, char *argv[]) {
     int64_t incColA = 1;
     int64_t incColB = 1;
     int64_t incColC = 1;
+    //srand ( time ( NULL));
+    srand ( 1024);
 
     int64_t rep =(int64_t)atol(argv[1]);
     DIM_M =(int64_t)atol(argv[2]);
@@ -77,26 +79,35 @@ int main(int argc, char *argv[]) {
     C = (double *)aligned_alloc( 64, ctx->C_tile.Mt * ctx->C_tile.Nt * sizeof(double));
     CUnpack = (double *)aligned_alloc( 64, ctx->C_tile.Mt * ctx->C_tile.Nt * sizeof(double));
 
-  _A_tile = (double *)malloc( ctx->A_tile.Mt*ctx->A_tile.Nt * sizeof(double));
-  _B_tile = (double *)malloc( ctx->B_tile.Mt*ctx->B_tile.Nt * sizeof(double));
-  _C_tile = (double *)malloc( ctx->C_tile.Mt*ctx->C_tile.Nt * sizeof(double));
+    _A_tile = (double *)malloc( ctx->A_tile.Mt*ctx->A_tile.Nt * sizeof(double));
+    _B_tile = (double *)malloc( ctx->B_tile.Mt*ctx->B_tile.Nt * sizeof(double));
+    _C_tile = (double *)malloc( ctx->C_tile.Mt*ctx->C_tile.Nt * sizeof(double));
   
     ABlas = (double *)malloc( MBlas * KBlas * sizeof(double));
     BBlas = (double *)malloc( KBlas * NBlas * sizeof(double));
     DBlas = (double *)malloc( MBlas * NBlas * sizeof(double));
 
-    fill_matrix_ones   (A, M*K);
-    fill_matrix_uniform(B, K, N);
-    //fill_matrix_random(A, M,K);
-    //fill_matrix_random(B, K, N);
+    //fill_matrix_ones   (A, M*K);
+    //fill_matrix_uniform(B, K, N);
+    fill_matrix_random(A, M,K);
+    fill_matrix_random(B, K, N);
     fill_matrix_zeros  (C, M*N);
 
-    fill_matrix_ones   (ABlas, MBlas*KBlas);
-    fill_matrix_uniform(BBlas, KBlas, NBlas);
+    copy_matrix(ABlas, A, MBlas,KBlas);
+    copy_matrix(BBlas, B, KBlas,NBlas);
+    //fill_matrix_ones   (ABlas, MBlas*KBlas);
+    //fill_matrix_uniform(BBlas, KBlas, NBlas);
     //fill_matrix_random(ABlas, MBlas,KBlas);
     //fill_matrix_random(BBlas, KBlas, NBlas);
     fill_matrix_zeros  (DBlas, MBlas*NBlas);
-    //print_matrix(B,N,K);
+    //printf("----- B     ----\n");
+    //print_matrix(B,K,N);
+    //printf("----- BBlas ----\n");
+    //print_matrix(BBlas,K,N);
+    //printf("----- A     ----\n");
+    //print_matrix(A,M,K);
+    //printf("----- ABlas ----\n");
+    //print_matrix(ABlas,M,K);
 
     //int64_t rep =100000;
     int i,j=rep;
@@ -140,7 +151,7 @@ int main(int argc, char *argv[]) {
     ABlasp = (double *)mkl_malloc(ABlasp_size,64);
 
     // Pack
-    dgemm_pack("A","N",&MB,&NB,&KB,&alpha,ABlas,&MB,ABlasp);
+    dgemm_pack("A","T",&MB,&NB,&KB,&alpha,ABlas,&KB,ABlasp);
 
     // Get size of packed B
     size_t BBlasp_size = dgemm_pack_get_size("B",&MB,&NB,&KB);
@@ -159,13 +170,13 @@ int main(int argc, char *argv[]) {
 
     const uint64_t bdt = rdtsc() - bt0;
     printf("BLAS DGEMM = %f\n", 1e-9 * bdt/1);
-    print_matrix(DBlas, M, N);
+    //print_matrix(DBlas, N, M);
     printf("\n-------------diff-----------------\n");
     //print_diff_matrix_AT_B(C,D, M, N);
     //print_diff_matrix_ASer_BT(context, C,DBlas, M, N);
     qmckl_unpack_matrix(context, CUnpack, M, N);
-    print_diff_matrix(CUnpack,DBlas, M, N);
-    print_matrix(CUnpack, M, N);
+    print_diff_matrix_ABT(CUnpack,DBlas, M, N);
+    //print_matrix(CUnpack, M, N);
 
     mkl_free(ABlasp);
     mkl_free(BBlasp);

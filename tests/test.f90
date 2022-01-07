@@ -3,7 +3,7 @@ program test
   implicit none
   
   integer, parameter :: amax=100
-  integer    :: m , n , k, i, j
+  integer    :: m , n , k, i, j, ii, jj
   double precision :: norm1, norm2
   integer(8) :: m8, n8, k8
   
@@ -23,18 +23,6 @@ program test
   ! list of allocated pointers for cleaning
   context = qmckl_context_create()
   
-  ! Allocate matrices once for all
-  allocate(A(amax,amax), B(amax,amax), C0(amax,amax), C1(amax,amax))
-  allocate(A_tile(amax*amax), B_tile(amax*amax), C_tile(amax*amax))
-  LDA  = size( A,1)
-  LDB  = size( B,1)
-  LDC0 = size(C0,1)
-  LDC1 = size(C1,1)
-  
-  ! Create random matrices A and B
-  call random_number(A)
-  call random_number(B)
-  
   ! For all (m,n,k) in (1..amax)^3, compute C0 = A.B using MKL and
   ! C1 = A.B using qmckl_dgemm, and compare the results
   do m=1,amax
@@ -45,6 +33,22 @@ program test
         do k=1,amax
            k8 = k
 
+           ! Allocate matrices once for all
+           allocate(A(k8,m8), B(n8,k8), C0(n8,k8), C1(n8,k8))
+           allocate(A_tile(k8*m8), B_tile(n8*k8), C_tile(n8*m8))
+           LDA  = size( A,1)
+           LDB  = size( B,1)
+           LDC0 = size(C0,1)
+           LDC1 = size(C1,1)
+  
+           ! Create random matrices A and B
+           call random_number(A)
+           call random_number(B)
+
+
+           C0 = 0.0d0
+           C1 = 0.0d0
+
            rc = qmckl_init_pack(context, 'C', m8, n8, k8)
            rc = qmckl_pack_matrix(context, 'C', m8, n8, C1, LDC1, C_tile)
            if (rc /= QMCKL_SUCCESS) then
@@ -52,9 +56,24 @@ program test
               print *, 'Failed tiling of C1'
               call exit(-1)
            end if
-         
+
          
            rc = qmckl_init_pack(context, 'A', m8, n8, k8)
+
+           print *, "B"
+           do jj=1,k
+              do ii=1,n
+                 print *,B(ii,jj)
+              end do
+           end do
+         
+           print *, "A"
+           do jj=1,m
+              do ii=1,k
+                 print *,A(ii,jj)
+              end do
+           end do
+
            rc = qmckl_pack_matrix(context, 'A', m8, k8, A, LDA, A_tile)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
@@ -85,9 +104,24 @@ program test
               print *, 'Failed untiling of C'
               call exit(-1)
            end if
+
+           print *, "C"
+           do jj=1,m
+              do ii=1,n
+                 print *,C1(ii,jj)
+              end do
+           end do
+           print *, m, n, k
+           
            
            ! Compare results
-           call dgemm('N','N', m,n,k, 1.d0, A, LDA, B, LDB, 0.d0, C0, LDC0)
+           call dgemm('T','T', m,n,k, 1.d0, A, LDA, B, LDB, 0.d0, C0, LDC0)
+
+           do jj=1,m
+              do ii=1,n
+                 print *,C0(ii,jj)
+              end do
+           end do
 
            norm1 = 0.d0
            norm2 = 0.d0
@@ -98,11 +132,21 @@ program test
               end do
            end do
 
+           C0 = 0.0d0
+
            if (dsqrt(norm1/norm2) > 1.d-14) then
               print *, m, n, k
               print *, dsqrt(norm1), dsqrt(norm2), dsqrt(norm1/norm2)
               call exit(-1)
            end if
+
+           deallocate(A)
+           deallocate(B)
+           deallocate(C0)
+           deallocate(C1)
+           deallocate(A_tile)
+           deallocate(B_tile)
+           deallocate(C_tile)
 
         end do
      end do

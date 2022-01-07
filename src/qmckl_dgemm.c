@@ -87,22 +87,9 @@ qmckl_exit_code qmckl_init_pack(qmckl_context context, unsigned char mType, int6
   return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, int64_t M8, int64_t N8, double *A, int64_t LDA, double *A_tile) {
+qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, int64_t M8, int64_t N8, double *Ain, int64_t LDA, double *A_tile) {
 
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
-
-  // Initialize buffers
-  if( ctx->_A == NULL) ctx->_A  = (double *)aligned_alloc(64, ctx->A_tile.MCt*ctx->A_tile.NCt * sizeof(double));
-  if( ctx->_B == NULL) ctx->_B  = (double *)aligned_alloc(64, ctx->B_tile.NCt*ctx->B_tile.MCt * sizeof(double));
-
-  // Fill buffers with 0
-  int i,j,k;
-  for(i=0;i<ctx->A_tile.MCt*ctx->A_tile.NCt;++i){
-    ctx->_A[i]=0.0;
-  }
-  for(i=0;i<ctx->B_tile.NCt*ctx->B_tile.MCt;++i){
-    ctx->_B[i]=0.0;
-  }
 
   if(mType == 'A' || mType == 'a'){
     int64_t mb = ctx->A_tile.Mt / ctx->A_tile.MCt;
@@ -116,7 +103,24 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
     int64_t i_tile_b, i_tile_a;
     int i,j,k,ii;
     int64_t Min = M8;
+    printf("in A\n");
+    for(i=0;i<M8;++i){
+      for(j=0;j<N8;++j){
+	printf(" %3.2f ", Ain[i*N8 + j]);
+      }
+      printf("\n");
+    }
+    printf("M8=%ld N8=%ld LDA=%ld\n",M8,N8,LDA);
+    printf("Mt=%ld Nt=%ld\n",ctx->A_tile.Mt,ctx->A_tile.Nt);
 
+    // Initialize buffers
+    if( ctx->_A == NULL) {
+      ctx->_A  = (double *)aligned_alloc(64, ctx->A_tile.MCt*ctx->A_tile.NCt * sizeof(double));
+      for(i=0;i<ctx->A_tile.MCt*ctx->A_tile.NCt;++i){
+	ctx->_A[i]=0.0;
+      }
+    }
+  
     // Initialize indices
     i_tile_b = 0;
     i_tile_a = 0;
@@ -134,12 +138,12 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
 	else{
 	  MCmax = ctx->A_tile.MCt;
 	}
-	packA_general(context, kc, MCmax, &A[idxk + j*ctx->A_tile.MCt*LDA], LDA, 1, ctx->_A);
+	packA_general(context, kc, MCmax, &Ain[idxk + j*ctx->A_tile.MCt*LDA], LDA, 1, ctx->_A);
 
 	// Write to tiled matrix to A
 	for(ii=0;ii<MCKC;++ii) {
 	  ctx->A_tile.data[i_tile_a * (MCKC) + ii] = ctx->_A[ii];
-	  if(A_tile != NULL) A_tile[i_tile_a * (MCKC) + ii] = ctx->_A[ii];
+	  //if(A_tile != NULL) A_tile[i_tile_a * (MCKC) + ii] = ctx->_A[ii];
 	}
 	i_tile_a += 1;
       }
@@ -158,6 +162,14 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
     int i,j,k,ii;
     int64_t Nin = N8;
 
+    // Initialize buffers
+    if( ctx->_B == NULL) {
+      ctx->_B  = (double *)aligned_alloc(64, ctx->B_tile.NCt*ctx->B_tile.MCt * sizeof(double));
+      for(i=0;i<ctx->B_tile.NCt*ctx->B_tile.MCt;++i){
+	ctx->_B[i]=0.0;
+      }
+    }
+
     // Initialize indices
     i_tile_b = 0;
     i_tile_a = 0;
@@ -173,12 +185,12 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
       }
       for(k=0;k<kb;++k) {
 	int64_t kc = ctx->B_tile.MCt;
-	packB_general(context, kc, NCmax, &A[k*ctx->B_tile.MCt*LDA + i*ctx->B_tile.NCt], LDA, 1, ctx->_B);
+	packB_general(context, kc, NCmax, &Ain[k*ctx->B_tile.MCt*LDA + i*ctx->B_tile.NCt], LDA, 1, ctx->_B);
 
 	// Write to tiled matrix to B
 	for(ii=0;ii<NCKC;++ii) {
 	  ctx->B_tile.data[i_tile_b * (NCKC) + ii] = ctx->_B[ii];
-	  if(A_tile != NULL) A_tile[i_tile_b * (NCKC) + ii] = ctx->_B[ii];
+	  //if(A_tile != NULL) A_tile[i_tile_b * (NCKC) + ii] = ctx->_B[ii];
 	}
 	i_tile_b += 1;
       }
@@ -186,13 +198,23 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
   }
   else if(mType == 'C' || mType == 'c'){
 
+    int i,j,k,ii;
+    printf("in C\n");
+    for(i=0;i<M8;++i){
+      for(j=0;j<N8;++j){
+	printf(" %3.2f ", Ain[i*N8 + j]);
+      }
+      printf("\n");
+    }
+    printf("Mt=%ld Nt=%ld\n",ctx->C_tile.Mt,ctx->C_tile.Nt);
+
     // Initialize C_tile
     if( ctx->C_tile.data == NULL) ctx->C_tile.data = (double *)aligned_alloc(64, ctx->C_tile.Mt*ctx->C_tile.Nt   * sizeof(double));
 
     // Initialize C_tile
     for(i=0;i<ctx->C_tile.Mt*ctx->C_tile.Nt;++i){
       ctx->C_tile.data[i] = 0.0;
-      if(A_tile != NULL) A_tile[i] = 0.0;
+      //if(A_tile != NULL) A_tile[i] = 0.0;
     }
   }
   else{
@@ -290,7 +312,7 @@ qmckl_exit_code qmckl_unpack_matrix(qmckl_context context, double *B, int64_t M,
         int64_t lnr = ( i - lnc * nc ) / NR;
         int64_t k   = ( ( j - kmc * mc ) - ( kmr * MR ) );
         int64_t l   = ( ( i - lnc * nc ) - ( lnr * NR ) );
-        B[j + i*M] = ctx->C_tile.data[(mc*nc)*(lnc*mb) + (mc*nc)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k];
+        B[i + j*N] = ctx->C_tile.data[(mc*nc)*(lnc*mb) + (mc*nc)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k];
       }
   }
   return QMCKL_SUCCESS;

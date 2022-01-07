@@ -522,7 +522,7 @@ void dgemm_macro_kernel_avx2_16regs(int64_t mc, int64_t kc, int64_t nc, double *
         "rbx", "memory"
   )
 
-    if(kc & 1 == 0){
+  if((kc & 1) == 0){
 #pragma omp parallel 
 {
 #pragma omp for private(i)
@@ -544,6 +544,28 @@ void dgemm_macro_kernel_avx2_16regs(int64_t mc, int64_t kc, int64_t nc, double *
 
                   #pragma forceinline
                   dgemm_kernel_avx2_16regs_asm_unroll2(kc  , &_A[i*MR2KC], &_B[j*NR2KC], &C[(j*mp + i)*MR2NR2], incRowC, incColC);
+
+                  //printf("A\n");
+                  //for(kk=0;kk<kc;++kk){
+                  //  for(ll=0;ll<MR2;++ll){
+                  //    printf("%3.2f ",_A[i*MR2KC + kk*MR2 + ll]);
+                  //  }
+                  //  printf("\n");
+                  //}
+                  //printf("B\n");
+                  //for(ll=0;ll<kc;++ll){
+                  //  for(kk=0;kk<NR2;++kk){
+                  //    printf("%3.2f ",_B[j*NR2KC + ll*NR2 + kk]);
+                  //  }
+                  //  printf("\n");
+                  //}
+                  //printf("C\n");
+                  //for(kk=0;kk<NR2;++kk){
+                  //  for(ll=0;ll<MR2;++ll){
+                  //    printf("%3.2f ",C[(j*mp+i)*MR2NR2 + kk*MR2 + ll]);
+                  //  }
+                  //  printf("\n");
+                  //}
               }
           }
 }

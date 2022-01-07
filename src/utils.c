@@ -17,8 +17,7 @@ void fill_matrix_ones(double *A, int64_t dim) {
 void fill_matrix_random(double *dA, int64_t dM, int64_t dN) {
     double count=0.0;
     int i,j;
-    //srand ( time ( NULL));
-    srand ( 1024 );
+    //srand ( 1024 );
     for(i=0;i<dM;++i) {
       for(j=0;j<dN;++j) {
         double random_value = (double)rand()/RAND_MAX*2.0-1.0;//float in range -1 to 1
@@ -58,7 +57,35 @@ void fill_matrix_zeros(double *A, int64_t dim) {
     }
 }
 
+void copy_matrix(double *toB, double *fromA, int64_t M, int64_t N) {
+  int i,j;
+    for(i=0;i<M;++i) {
+        for(j=0;j<N;++j) {
+            toB[i*N + j] = fromA[i*N + j];
+        }
+    }
+}
+
+void copy_matrix_T(double *toB, double *fromA, int64_t M, int64_t N) {
+  int i,j;
+    for(i=0;i<M;++i) {
+        for(j=0;j<N;++j) {
+            toB[j*M + i] = fromA[i*N + j];
+        }
+    }
+}
+
 void print_matrix(double *A, int64_t M, int64_t N) {
+  int i,j;
+    for(i=0;i<M;++i) {
+        for(j=0;j<N;++j) {
+            printf(" %5.3f ",A[i*N + j]);
+        }
+        printf("\n");
+    }
+}
+
+void print_matrix_T(double *A, int64_t M, int64_t N) {
   int i,j;
     for(i=0;i<N;++i) {
         for(j=0;j<M;++j) {
@@ -81,6 +108,25 @@ void print_diff_matrix(double *A, double *B, int64_t M, int64_t N) {
     }
 }
 
+void print_diff_matrix_ABT(double *A, double *B, int64_t M, int64_t N) {
+  int i,j, idi,idj, idtot;
+  idtot=0;
+    for(j=0;j<N;++j) {
+        for(i=0;i<M;++i) {
+	  idi = idtot % N;
+	  idj = (idtot - idi)/N;
+	  //printf(" %5.3f (%5.3f) ",A[i + j*M], B[idi*M + idj]);
+	  //printf(" %5.3f ((%d,%d)) ",A[i + j*M], idi,idj);
+	  if( abs(A[i + j*M] - B[idi*M + idj]) > 1e-13){
+	    printf(" %5.3f ",abs(A[i + j*M] - B[idi*M + idj]));
+	    printf("Fail\n");
+	    return;
+	  };
+	  idtot+=1;
+        }
+    }
+}
+
 qmckl_exit_code get_diff_matrix(double *A, double *B, int64_t M, int64_t N) {
   int i,j;
     for(j=0;j<N;++j) {
@@ -91,6 +137,22 @@ qmckl_exit_code get_diff_matrix(double *A, double *B, int64_t M, int64_t N) {
         }
     }
     return QMCKL_SUCCESS;
+}
+
+qmckl_exit_code get_diff_matrix_ABT(double *A, double *B, int64_t M, int64_t N) {
+  int i,j, idi,idj, idtot;
+  idtot=0;
+  for(j=0;j<N;++j) {
+      for(i=0;i<M;++i) {
+	idi = idtot % N;
+	idj = (idtot - idi)/N;
+	if( abs(A[i + j*M] - B[idi*M + idj]) > 1e-13){
+          return QMCKL_FAILURE;
+        };
+	idtot+=1;
+      }
+  }
+  return QMCKL_SUCCESS;
 }
 
 //void print_matrix_ASer(double *A, int64_t M, int64_t N) {

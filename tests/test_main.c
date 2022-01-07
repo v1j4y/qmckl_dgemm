@@ -75,12 +75,12 @@ int main() {
   BBlas = (double *)malloc( KBlas * NBlas * sizeof(double));
   DBlas = (double *)malloc( MBlas * NBlas * sizeof(double));
   
-  fill_matrix_ones   (A, M*K);
-  fill_matrix_uniform(B, K, N);
+  fill_matrix_random(A, M,K);
+  fill_matrix_random(B, K, N);
   fill_matrix_zeros  (C, M*N);
   
-  fill_matrix_ones   (ABlas, MBlas*KBlas);
-  fill_matrix_uniform(BBlas, KBlas, NBlas);
+  copy_matrix(ABlas, A, MBlas,KBlas);
+  copy_matrix(BBlas, B, KBlas,NBlas);
   fill_matrix_zeros  (DBlas, MBlas*NBlas);
   
   int i,j=rep;
@@ -106,7 +106,7 @@ int main() {
   ABlasp = (double *)mkl_malloc(ABlasp_size,64);
   
   // Pack
-  dgemm_pack("A","N",&MB,&NB,&KB,&alpha,ABlas,&MB,ABlasp);
+  dgemm_pack("A","T",&MB,&NB,&KB,&alpha,ABlas,&KB,ABlasp);
   
   // Get size of packed B
   size_t BBlasp_size = dgemm_pack_get_size("B",&MB,&NB,&KB);
@@ -123,7 +123,7 @@ int main() {
   //print_diff_matrix_ASer_BT(context, C,DBlas, M, N);
   qmckl_unpack_matrix(context, CUnpack, M, N);
   //print_diff_matrix(CUnpack,DBlas, M, N);
-  qmckl_exit_code rc = get_diff_matrix(CUnpack,DBlas, M, N);
+  qmckl_exit_code rc = get_diff_matrix_ABT(CUnpack,DBlas, M, N);
   if(rc == QMCKL_FAILURE){
     printf(" QMCKL_FAILURE !\n");
     return QMCKL_FAILURE;

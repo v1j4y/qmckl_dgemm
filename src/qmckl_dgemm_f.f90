@@ -54,7 +54,6 @@ module qmckl_dgemm
      integer (c_int64_t) , intent(in)  , value :: lda
      real    (c_double ) , intent(in)          :: A(lda,*)
      real    (c_double ) , intent(in)          :: A_tile(*)
- 
    end function qmckl_pack_matrix
  end interface
 
