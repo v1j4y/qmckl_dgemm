@@ -59,7 +59,7 @@ module qmckl_dgemm
  end interface
 
    interface
-   integer(c_int32_t) function qmckl_dgemm_tiled_avx2_NN &
+   integer(c_int32_t) function qmckl_dgemm_tiled_avx2_nn &
        (context, A, lda, B, ldb, C, ldc) &
        bind(C)
      use, intrinsic :: iso_c_binding
@@ -74,7 +74,7 @@ module qmckl_dgemm
      integer (c_int64_t) , intent(in)  , value :: ldc
      real    (c_double ) , intent(in)          :: C(ldc,*)
  
-   end function qmckl_dgemm_tiled_avx2_NN
+   end function qmckl_dgemm_tiled_avx2_nn
  end interface
 
    interface

@@ -87,7 +87,7 @@ qmckl_exit_code qmckl_init_pack(qmckl_context context, unsigned char mType, int6
   return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, int64_t M8, int64_t N8, double *A, int64_t LDA, double **A_tile) {
+qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, int64_t M8, int64_t N8, double *A, int64_t LDA, double *A_tile) {
 
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
 
@@ -139,11 +139,11 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
 	// Write to tiled matrix to A
 	for(ii=0;ii<MCKC;++ii) {
 	  ctx->A_tile.data[i_tile_a * (MCKC) + ii] = ctx->_A[ii];
+	  if(A_tile != NULL) A_tile[i_tile_a * (MCKC) + ii] = ctx->_A[ii];
 	}
 	i_tile_a += 1;
       }
     }
-    (*A_tile) = ctx->B_tile.data;
   }
   else if(mType == 'B' || mType == 'b'){
     int64_t nb = ctx->B_tile.Nt / ctx->B_tile.NCt;
@@ -178,21 +178,21 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
 	// Write to tiled matrix to B
 	for(ii=0;ii<NCKC;++ii) {
 	  ctx->B_tile.data[i_tile_b * (NCKC) + ii] = ctx->_B[ii];
+	  if(A_tile != NULL) A_tile[i_tile_b * (NCKC) + ii] = ctx->_B[ii];
 	}
 	i_tile_b += 1;
       }
     }
-    (*A_tile) = ctx->B_tile.data;
   }
   else if(mType == 'C' || mType == 'c'){
 
     // Initialize C_tile
     if( ctx->C_tile.data == NULL) ctx->C_tile.data = (double *)aligned_alloc(64, ctx->C_tile.Mt*ctx->C_tile.Nt   * sizeof(double));
-    (*A_tile) = ctx->C_tile.data;
 
     // Initialize C_tile
     for(i=0;i<ctx->C_tile.Mt*ctx->C_tile.Nt;++i){
-      ctx->C_tile.data[i]=0.0;
+      ctx->C_tile.data[i] = 0.0;
+      if(A_tile != NULL) A_tile[i] = 0.0;
     }
   }
   else{
@@ -203,7 +203,7 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
 }
 
 
-qmckl_exit_code qmckl_dgemm_tiled_avx2_NN(qmckl_context context, double *A, int64_t incRowA,
+qmckl_exit_code qmckl_dgemm_tiled_avx2_nn(qmckl_context context, double *A, int64_t incRowA,
                                                 double *B, int64_t incRowB,
                                                 double *C, int64_t incRowC) {
 
@@ -338,17 +338,17 @@ qmckl_exit_code qmckl_dgemm_tiled_NN(qmckl_context context, int64_t Min, int64_t
   qmckl_init_pack(context, 'C', Min, Nin, Kin);
 
   // Tile A and B
-  double *_A_tile;
-  double *_B_tile;
-  double *_C_tile;
-  qmckl_pack_matrix(context, 'A', Min, Kin, A, incRowA, &_A_tile);
-  qmckl_pack_matrix(context, 'B', Kin, Nin, B, incRowB, &_B_tile);
-  qmckl_pack_matrix(context, 'C', Min, Nin, C, incRowB, &_C_tile);
+  double *_A_tile = NULL;
+  double *_B_tile = NULL;
+  double *_C_tile = NULL;
+  qmckl_pack_matrix(context, 'A', Min, Kin, A, incRowA, _A_tile);
+  qmckl_pack_matrix(context, 'B', Kin, Nin, B, incRowB, _B_tile);
+  qmckl_pack_matrix(context, 'C', Min, Nin, C, incRowB, _C_tile);
 
 
 
   // Call DGEMM kernel
-  qmckl_dgemm_tiled_avx2_NN(context, A, incRowA,
+  qmckl_dgemm_tiled_avx2_nn(context, A, incRowA,
              B, incRowB,
              ctx->C_tile.data, incRowC);
 

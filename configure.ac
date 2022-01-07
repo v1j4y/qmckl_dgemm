@@ -23,6 +23,7 @@ AC_CONFIG_FILES([Makefile])
 
 # Flags
 CFLAGS="-qmkl=sequential -O2 -g -march=core-avx2 -finline -finline-functions -inline-forceinline -restrict -ipo -qopenmp -lpthread"
+FCFLAGS="-qmkl=sequential -O2 -g -march=core-avx2 -finline -finline-functions -inline-forceinline -restrict -ipo -qopenmp -lpthread"
 
 # Done
 AC_OUTPUT

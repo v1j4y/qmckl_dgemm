@@ -1,19 +1,22 @@
 program test
-  use qmckl
+  use qmckl_dgemm
   implicit none
   
   integer, parameter :: amax=100
-  integer    :: m , n , k
+  integer    :: m , n , k, i, j
+  double precision :: norm1, norm2
   integer(8) :: m8, n8, k8
   
   ! Matrices
   double precision, allocatable :: A(:,:), B(:,:), C0(:,:), C1(:,:)
-  integer                       :: LDA, LDB, LDC0, LDC1
+  integer(8)                    :: LDA, LDB, LDC0, LDC1
   
   ! C Pointers as int64
   integer(8) :: context
-  integer(8) :: A_tile, B_tile
-  
+  !integer(8) :: A_tile, B_tile, C_tile
+  !integer(8) :: A_tile, B_tile, C_tile
+  double precision, allocatable :: A_tile(:), B_tile(:), C_tile(:)
+  integer(8) :: rc 
   
   
   ! Create context for qmckl. It contains the tiling parameters, and the
@@ -22,6 +25,7 @@ program test
   
   ! Allocate matrices once for all
   allocate(A(amax,amax), B(amax,amax), C0(amax,amax), C1(amax,amax))
+  allocate(A_tile(amax*amax), B_tile(amax*amax), C_tile(amax*amax))
   LDA  = size( A,1)
   LDB  = size( B,1)
   LDC0 = size(C0,1)
@@ -38,39 +42,44 @@ program test
      do n=1,amax
         n8 = n
 
-        rc = qmckl_tile(qmckl_context, 'C', m8, n8, C1, LDC1, C_tile)
-        if (rc /= QMCKL_SUCCESS) then
-           print *, m,n
-           print *, 'Failed tiling of C1'
-           call exit(-1)
-        end if
-         
-      
         do k=1,amax
            k8 = k
+
+           rc = qmckl_init_pack(context, 'C', m8, n8, k8)
+           rc = qmckl_pack_matrix(context, 'C', m8, n8, C1, LDC1, C_tile)
+           if (rc /= QMCKL_SUCCESS) then
+              print *, m,n
+              print *, 'Failed tiling of C1'
+              call exit(-1)
+           end if
          
-           rc = qmckl_tile(qmckl_context, 'A', m8, k8, A, LDA, A_tile)
+         
+           rc = qmckl_init_pack(context, 'A', m8, n8, k8)
+           rc = qmckl_pack_matrix(context, 'A', m8, k8, A, LDA, A_tile)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
               print *, 'Failed tiling of A'
               call exit(-1)
            end if
            
-           rc = qmckl_tile(qmckl_context, 'B', k8, n8, B, LDB, B_tile)
+           rc = qmckl_init_pack(context, 'B', m8, n8, k8)
+           rc = qmckl_pack_matrix(context, 'B', k8, n8, B, LDB, B_tile)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
               print *, 'Failed tiling of B'
               call exit(-1)
            end if
            
-           rc = qmckl_dgemm_tiled_NN(qmckl_context, 1.d0, A_tiled, B_tiled, 0.d0, C_tiled)
+           
+           !rc = qmckl_dgemm_tiled_NN(context, 1.d0, A_tiled, B_tiled, 0.d0, C_tiled)
+           rc = qmckl_dgemm_tiled_avx2_nn(context, A, LDA, B, LDB, C1, LDC1)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
               print *, 'Failed tiled dgemm'
               call exit(-1)
            end if
            
-           rc = qmckl_untile(qmckl_context, C_tiled, C1, LDC1)
+           rc = qmckl_unpack_matrix(context, C1, m8, n8)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
               print *, 'Failed untiling of C'
