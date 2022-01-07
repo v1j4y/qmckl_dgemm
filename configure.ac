@@ -13,13 +13,16 @@ AC_LANG(C)
 AC_PROG_CC([icpc])
 
 # Make sure Fortran is available
-AC_PROG_FC([gfortran])
+AC_PROG_FC([ifort])
 
 # Generate config
 AC_CONFIG_HEADERS([config.h])
 
 # Generate Makefile from Makefile.in
 AC_CONFIG_FILES([Makefile])
+
+# Flags
+CFLAGS="-qmkl=sequential -O2 -g -march=core-avx2 -finline -finline-functions -inline-forceinline -restrict -ipo -qopenmp -lpthread"
 
 # Done
 AC_OUTPUT
