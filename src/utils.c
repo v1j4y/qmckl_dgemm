@@ -81,6 +81,18 @@ void print_diff_matrix(double *A, double *B, int64_t M, int64_t N) {
     }
 }
 
+qmckl_exit_code get_diff_matrix(double *A, double *B, int64_t M, int64_t N) {
+  int i,j;
+    for(j=0;j<N;++j) {
+        for(i=0;i<M;++i) {
+          if( abs(A[i + j*M] - B[i + j*M]) > 1e-13){
+            return QMCKL_FAILURE;
+          };
+        }
+    }
+    return QMCKL_SUCCESS;
+}
+
 //void print_matrix_ASer(double *A, int64_t M, int64_t N) {
 //    int64_t mb = M / MC;
 //    int64_t nb = N / N;

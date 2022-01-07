@@ -29,13 +29,13 @@ int main() {
   
   int64_t DIM_M_MAX =MR2*2;
   int64_t DIM_N_MAX =NR2*2;
-  int64_t DIM_K_MAX =2;
+  int64_t DIM_K_MAX =10;
 
-  for(iterM = MR2;iterM <= DIM_M_MAX; ++iterM){
+  for(iterM = 1;iterM <= DIM_M_MAX; ++iterM){
     DIM_M = iterM;
-    for(iterN = NR2;iterN <= DIM_N_MAX; ++iterN){
+    for(iterN = 1;iterN <= DIM_N_MAX; ++iterN){
       DIM_N = iterN;
-      for(iterK = 2;iterK <= DIM_K_MAX; iterK = iterK + 2){
+      for(iterK = 1;iterK <= DIM_K_MAX; ++iterK){
 	DIM_K = iterK;
     
   
@@ -55,7 +55,8 @@ int main() {
   MBlas = M;
   NBlas = N;
   KBlas = K;
-  printf("(%d, %d, %d) | M=%ld K=%ld N=%ld \n",iterM, iterN, iterK, (long)M,(long)K,(long)N);
+  printf("\n----------------------------------\n");
+  printf("(%d, %d, %d) | M=%ld K=%ld N=%ld | ",iterM, iterN, iterK, (long)M,(long)K,(long)N);
   
   int64_t incRowA = K;
   int64_t incRowB = N;
@@ -112,12 +113,22 @@ int main() {
   
   dgemm_compute("P","P",&MB,&NB,&KB,ABlasp,&KB,BBlasp,&NB,&beta,DBlas,&MB);
   
-  printf("\n-------------diff-----------------\n");
+  //print_matrix(DBlas, M, N);
+  //printf("\n-------------diff-----------------\n");
   //print_diff_matrix_AT_B(C,D, M, N);
   //print_diff_matrix_ASer_BT(context, C,DBlas, M, N);
   qmckl_unpack_matrix(context, CUnpack, M, N);
-  print_diff_matrix(CUnpack,DBlas, M, N);
+  //print_diff_matrix(CUnpack,DBlas, M, N);
+  qmckl_exit_code rc = get_diff_matrix(CUnpack,DBlas, M, N);
+  if(rc == QMCKL_FAILURE){
+    printf(" QMCKL_FAILURE !\n");
+    return QMCKL_FAILURE;
+  }
+  else{
+    printf(" QMCKL_SUCCESS !\n");
+  }
   //print_matrix(CUnpack, M, N);
+  printf("\n----------------------------------\n");
   
   mkl_free(ABlasp);
   mkl_free(BBlasp);
@@ -133,5 +144,5 @@ int main() {
     }
   }
 
-  return 0;
+  return QMCKL_SUCCESS;
 }

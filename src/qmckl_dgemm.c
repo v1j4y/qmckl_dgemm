@@ -95,6 +95,15 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
   if( ctx->_A == NULL) ctx->_A  = (double *)aligned_alloc(64, ctx->A_tile.MCt*ctx->A_tile.NCt * sizeof(double));
   if( ctx->_B == NULL) ctx->_B  = (double *)aligned_alloc(64, ctx->B_tile.NCt*ctx->B_tile.MCt * sizeof(double));
 
+  // Fill buffers with 0
+  int i,j,k;
+  for(i=0;i<ctx->A_tile.MCt*ctx->A_tile.NCt;++i){
+    ctx->_A[i]=0.0;
+  }
+  for(i=0;i<ctx->B_tile.NCt*ctx->B_tile.MCt;++i){
+    ctx->_B[i]=0.0;
+  }
+
   if(mType == 'A' || mType == 'a'){
     int64_t mb = ctx->A_tile.Mt / ctx->A_tile.MCt;
     int64_t kb = ctx->A_tile.Nt / ctx->A_tile.NCt;
@@ -180,6 +189,11 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
     // Initialize C_tile
     if( ctx->C_tile.data == NULL) ctx->C_tile.data = (double *)aligned_alloc(64, ctx->C_tile.Mt*ctx->C_tile.Nt   * sizeof(double));
     (*A_tile) = ctx->C_tile.data;
+
+    // Initialize C_tile
+    for(i=0;i<ctx->C_tile.Mt*ctx->C_tile.Nt;++i){
+      ctx->C_tile.data[i]=0.0;
+    }
   }
   else{
     printf("Wrong mType in qmckl_pack_matrix. mType=%c\n",mType);
