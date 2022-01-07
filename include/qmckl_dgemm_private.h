@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "kernel_avx2_16regs.h"
+
 #if !defined(MR)
 #define MR 8
 #endif
@@ -49,17 +51,5 @@ double* _B;
   qmckl_tile_struct C_tile;
 
 } qmckl_context_struct;
-
-//typedef qmckl_context_struct* qmckl_context_struct_p;
-
-void init_dims_avx512();
-void init_dims_avx2();
-
-int dgemm_main_tiled_avx2_NN(qmckl_context context, double *A, int64_t incRowA, int64_t incColA,
-                                                double *B, int64_t incRowB, int64_t incColB,
-                                                double *C, int64_t incRowC, int64_t incColC);
-
-qmckl_exit_code dgemm_main_packed_avx2(qmckl_context context, double alpha, 
-			  double *A, double *B, double beta, double *C);
 
 #endif

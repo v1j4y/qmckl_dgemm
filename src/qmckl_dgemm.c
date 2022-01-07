@@ -203,9 +203,9 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
 }
 
 
-qmckl_exit_code dgemm_main_tiled_avx2_NN(qmckl_context context, double *A, int64_t incRowA, int64_t incColA,
-                                                double *B, int64_t incRowB, int64_t incColB,
-                                                double *C, int64_t incRowC, int64_t incColC) {
+qmckl_exit_code qmckl_dgemm_tiled_avx2_NN(qmckl_context context, double *A, int64_t incRowA,
+                                                double *B, int64_t incRowB,
+                                                double *C, int64_t incRowC) {
 
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
   int64_t mb = ctx->A_tile.Mt / ctx->A_tile.MCt;
@@ -249,14 +249,14 @@ qmckl_exit_code dgemm_main_tiled_avx2_NN(qmckl_context context, double *A, int64
         for(k=0;k<kb;++k) {
 
             idxi = i * nc * incRowC;
-            idxk = k * kc * incColA;
+            idxk = k * kc;
 
             //B_tile_p = _B_tile + i_tile_b * (NCKC);
             C_tile_p = ctx->C_tile.data + (imb) * MCNC;
 
             for(j=0;j<mb;++j) {
                 #pragma forceinline
-                dgemm_macro_kernel_avx2_16regs(mc, kc, nc, C_tile_p, incRowC, incColC, A_tile_p, B_tile_p);
+                dgemm_macro_kernel_avx2_16regs(mc, kc, nc, C_tile_p, incRowC, 1, A_tile_p, B_tile_p);
                 A_tile_p += (MCKC);
                 C_tile_p +=  MCNC;
                 //nmbnb = nmbnb + 1;
@@ -326,9 +326,10 @@ qmckl_exit_code qmckl_context_destroy(qmckl_context context){
 }
 
 
-qmckl_exit_code dgemm_main_tiled(qmckl_context context, int64_t Min, int64_t Nin, int64_t Kin, double *A, int64_t incRowA, int64_t incColA,
-                                                double *B, int64_t incRowB, int64_t incColB,
-                                                double *C, int64_t incRowC, int64_t incColC) {
+qmckl_exit_code qmckl_dgemm_tiled_NN(qmckl_context context, int64_t Min, int64_t Nin, int64_t Kin,
+				     double *A, int64_t incRowA,
+				     double *B, int64_t incRowB,
+				     double *C, int64_t incRowC) {
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
 
   // Init memory
@@ -347,9 +348,9 @@ qmckl_exit_code dgemm_main_tiled(qmckl_context context, int64_t Min, int64_t Nin
 
 
   // Call DGEMM kernel
-  dgemm_main_tiled_avx2_NN(context, A, incRowA, incColA,
-             B, incRowB, incColB,
-             ctx->C_tile.data, incRowC, incColC);
+  qmckl_dgemm_tiled_avx2_NN(context, A, incRowA,
+             B, incRowB,
+             ctx->C_tile.data, incRowC);
 
   // Unpacking
   qmckl_unpack_matrix(context, C, Min, Nin);
