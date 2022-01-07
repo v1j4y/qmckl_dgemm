@@ -59,21 +59,6 @@ program test
 
          
            rc = qmckl_init_pack(context, 'A', m8, n8, k8)
-
-           print *, "B"
-           do jj=1,k
-              do ii=1,n
-                 print *,B(ii,jj)
-              end do
-           end do
-         
-           print *, "A"
-           do jj=1,m
-              do ii=1,k
-                 print *,A(ii,jj)
-              end do
-           end do
-
            rc = qmckl_pack_matrix(context, 'A', m8, k8, A, LDA, A_tile)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
@@ -90,7 +75,6 @@ program test
            end if
            
            
-           !rc = qmckl_dgemm_tiled_NN(context, 1.d0, A_tiled, B_tiled, 0.d0, C_tiled)
            rc = qmckl_dgemm_tiled_avx2_nn(context, A, LDA, B, LDB, C1, LDC1)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
@@ -105,23 +89,8 @@ program test
               call exit(-1)
            end if
 
-           print *, "C"
-           do jj=1,m
-              do ii=1,n
-                 print *,C1(ii,jj)
-              end do
-           end do
-           print *, m, n, k
-           
-           
            ! Compare results
            call dgemm('T','T', m,n,k, 1.d0, A, LDA, B, LDB, 0.d0, C0, LDC0)
-
-           do jj=1,m
-              do ii=1,n
-                 print *,C0(ii,jj)
-              end do
-           end do
 
            norm1 = 0.d0
            norm2 = 0.d0

@@ -103,15 +103,15 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
     int64_t i_tile_b, i_tile_a;
     int i,j,k,ii;
     int64_t Min = M8;
-    printf("in A\n");
-    for(i=0;i<M8;++i){
-      for(j=0;j<N8;++j){
-	printf(" %3.2f ", Ain[i*N8 + j]);
-      }
-      printf("\n");
-    }
-    printf("M8=%ld N8=%ld LDA=%ld\n",M8,N8,LDA);
-    printf("Mt=%ld Nt=%ld\n",ctx->A_tile.Mt,ctx->A_tile.Nt);
+    //printf("in A\n");
+    //for(i=0;i<M8;++i){
+    //  for(j=0;j<N8;++j){
+    //	printf(" %3.2f ", Ain[i*N8 + j]);
+    //  }
+    //  printf("\n");
+    //}
+    //printf("M8=%ld N8=%ld LDA=%ld\n",M8,N8,LDA);
+    //printf("Mt=%ld Nt=%ld\n",ctx->A_tile.Mt,ctx->A_tile.Nt);
 
     // Initialize buffers
     if( ctx->_A == NULL) {
@@ -199,14 +199,14 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
   else if(mType == 'C' || mType == 'c'){
 
     int i,j,k,ii;
-    printf("in C\n");
-    for(i=0;i<M8;++i){
-      for(j=0;j<N8;++j){
-	printf(" %3.2f ", Ain[i*N8 + j]);
-      }
-      printf("\n");
-    }
-    printf("Mt=%ld Nt=%ld\n",ctx->C_tile.Mt,ctx->C_tile.Nt);
+    //printf("in C\n");
+    //for(i=0;i<M8;++i){
+    //  for(j=0;j<N8;++j){
+    //	printf(" %3.2f ", Ain[i*N8 + j]);
+    //  }
+    //  printf("\n");
+    //}
+    //printf("Mt=%ld Nt=%ld\n",ctx->C_tile.Mt,ctx->C_tile.Nt);
 
     // Initialize C_tile
     if( ctx->C_tile.data == NULL) ctx->C_tile.data = (double *)aligned_alloc(64, ctx->C_tile.Mt*ctx->C_tile.Nt   * sizeof(double));
