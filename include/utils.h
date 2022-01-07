@@ -65,6 +65,7 @@ void fill_matrix_uniform(double *A, int64_t M, int64_t N);
 void fill_matrix_zeros(double *A, int64_t dim);
 void print_matrix(double *A, int64_t M, int64_t N);
 void print_diff_matrix(double *A, double *B, int64_t M, int64_t N);
+qmckl_exit_code get_diff_matrix(double *A, double *B, int64_t M, int64_t N);
 //void print_diff_matrix_AT_B( double *A, double *B, int64_t M, int64_t N);
 //void packA(int64_t kc, double *A, int64_t incRowA, int64_t incColA, double *buffer);
 //void packB(int64_t kc, double *B, int64_t incRowB, int64_t incColB, double *buffer);
