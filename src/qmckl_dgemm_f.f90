@@ -41,7 +41,7 @@ module qmckl_dgemm
 
    interface
    integer(c_int32_t) function qmckl_pack_matrix &
-       (context, mType, m, n, A, lda, A_tile) &
+       (context, mType, m, n, A, lda) &
        bind(C)
      use, intrinsic :: iso_c_binding
      import
@@ -53,7 +53,6 @@ module qmckl_dgemm
      integer (c_int64_t) , intent(in)  , value :: n
      integer (c_int64_t) , intent(in)  , value :: lda
      real    (c_double ) , intent(in)          :: A(lda,*)
-     real    (c_double ) , intent(in)          :: A_tile(*)
    end function qmckl_pack_matrix
  end interface
 

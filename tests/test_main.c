@@ -12,9 +12,6 @@ int main() {
   double *B;
   double *C;
   double *CUnpack;
-  double *_A_tile;
-  double *_B_tile;
-  double *_C_tile;
   double *ABlas;
   double *BBlas;
   double *DBlas;
@@ -67,10 +64,6 @@ int main() {
   C = (double *)aligned_alloc( 64, ctx->C_tile.Mt * ctx->C_tile.Nt * sizeof(double));
   CUnpack = (double *)aligned_alloc( 64, ctx->C_tile.Mt * ctx->C_tile.Nt * sizeof(double));
   
-  _A_tile = (double *)malloc( ctx->A_tile.Mt*ctx->A_tile.Nt * sizeof(double));
-  _B_tile = (double *)malloc( ctx->B_tile.Mt*ctx->B_tile.Nt * sizeof(double));
-  _C_tile = (double *)malloc( ctx->C_tile.Mt*ctx->C_tile.Nt * sizeof(double));
-  
   ABlas = (double *)malloc( MBlas * KBlas * sizeof(double));
   BBlas = (double *)malloc( KBlas * NBlas * sizeof(double));
   DBlas = (double *)malloc( MBlas * NBlas * sizeof(double));
@@ -85,9 +78,9 @@ int main() {
   
   int i,j=rep;
   
-  qmckl_pack_matrix(context, 'A', M, K, A, incRowA, _A_tile);
-  qmckl_pack_matrix(context, 'B', K, N, B, incRowB, _B_tile);
-  qmckl_pack_matrix(context, 'C', M, N, C, incRowC, _C_tile);
+  qmckl_pack_matrix(context, 'A', M, K, A, incRowA);
+  qmckl_pack_matrix(context, 'B', K, N, B, incRowB);
+  qmckl_pack_matrix(context, 'C', M, N, C, incRowC);
   
   qmckl_dgemm_tiled_avx2_nn(context, A, incRowA,
 			   B, incRowB,

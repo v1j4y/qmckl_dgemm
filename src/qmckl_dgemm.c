@@ -87,7 +87,7 @@ qmckl_exit_code qmckl_init_pack(qmckl_context context, unsigned char mType, int6
   return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, int64_t M8, int64_t N8, double *Ain, int64_t LDA, double *A_tile) {
+qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, int64_t M8, int64_t N8, double *Ain, int64_t LDA) {
 
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
 
@@ -144,7 +144,6 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
 	//total=0;
 	for(ii=0;ii<MCKC;++ii) {
 	  ctx->A_tile.data[i_tile_a * (MCKC) + ii] = ctx->_A[ii];
-	  //if(A_tile != NULL) A_tile[i_tile_a * (MCKC) + ii] = ctx->_A[ii];
 	  //total = total ^ _A[ii];
 	}
 	//ctx->A_tile.data[i_tile_a * (MCKC) + 0] = total;
@@ -193,7 +192,6 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
 	// Write to tiled matrix to B
 	for(ii=0;ii<NCKC;++ii) {
 	  ctx->B_tile.data[i_tile_b * (NCKC) + ii] = ctx->_B[ii];
-	  //if(A_tile != NULL) A_tile[i_tile_b * (NCKC) + ii] = ctx->_B[ii];
 	}
 	i_tile_b += 1;
       }
@@ -217,7 +215,6 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
     // Initialize C_tile
     for(i=0;i<ctx->C_tile.Mt*ctx->C_tile.Nt;++i){
       ctx->C_tile.data[i] = 0.0;
-      //if(A_tile != NULL) A_tile[i] = 0.0;
     }
   }
   else{
@@ -363,12 +360,9 @@ qmckl_exit_code qmckl_dgemm_tiled_NN(qmckl_context context, int64_t Min, int64_t
   qmckl_init_pack(context, 'C', Min, Nin, Kin);
 
   // Tile A and B
-  double *_A_tile = NULL;
-  double *_B_tile = NULL;
-  double *_C_tile = NULL;
-  qmckl_pack_matrix(context, 'A', Min, Kin, A, incRowA, _A_tile);
-  qmckl_pack_matrix(context, 'B', Kin, Nin, B, incRowB, _B_tile);
-  qmckl_pack_matrix(context, 'C', Min, Nin, C, incRowB, _C_tile);
+  qmckl_pack_matrix(context, 'A', Min, Kin, A, incRowA);
+  qmckl_pack_matrix(context, 'B', Kin, Nin, B, incRowB);
+  qmckl_pack_matrix(context, 'C', Min, Nin, C, incRowB);
 
 
 

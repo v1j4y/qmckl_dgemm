@@ -50,7 +50,7 @@ program test
            C1 = 0.0d0
 
            rc = qmckl_init_pack(context, 'C', m8, n8, k8)
-           rc = qmckl_pack_matrix(context, 'C', m8, n8, C1, LDC1, C_tile)
+           rc = qmckl_pack_matrix(context, 'C', m8, n8, C1, LDC1)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n
               print *, 'Failed tiling of C1'
@@ -59,7 +59,7 @@ program test
 
          
            rc = qmckl_init_pack(context, 'A', m8, n8, k8)
-           rc = qmckl_pack_matrix(context, 'A', m8, k8, A, LDA, A_tile)
+           rc = qmckl_pack_matrix(context, 'A', m8, k8, A, LDA)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
               print *, 'Failed tiling of A'
@@ -67,7 +67,7 @@ program test
            end if
            
            rc = qmckl_init_pack(context, 'B', m8, n8, k8)
-           rc = qmckl_pack_matrix(context, 'B', k8, n8, B, LDB, B_tile)
+           rc = qmckl_pack_matrix(context, 'B', k8, n8, B, LDB)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
               print *, 'Failed tiling of B'
@@ -100,12 +100,15 @@ program test
                  norm2 = norm2 + C0(i,j)**2
               end do
            end do
+           print *, norm1
+           print *, norm2
 
            C0 = 0.0d0
 
            if (dsqrt(norm1/norm2) > 1.d-14) then
               print *, m, n, k
               print *, dsqrt(norm1), dsqrt(norm2), dsqrt(norm1/norm2)
+              print *, 'Failed DGEMM'
               call exit(-1)
            end if
 

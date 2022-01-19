@@ -117,9 +117,9 @@ int main(int argc, char *argv[]) {
     //           B, incRowB, incColB,
     //           C, incRowC, incColC, ctx->_A_tile, ctx->_B_tile);
 
-    qmckl_pack_matrix(context, 'A', M, K, A, incRowA, _A_tile);
-    qmckl_pack_matrix(context, 'B', K, N, B, incRowB, _B_tile);
-    qmckl_pack_matrix(context, 'C', M, N, C, incRowB, _C_tile);
+    qmckl_pack_matrix(context, 'A', M, K, A, incRowA);
+    qmckl_pack_matrix(context, 'B', K, N, B, incRowB);
+    qmckl_pack_matrix(context, 'C', M, N, C, incRowB);
 
     qmckl_dgemm_tiled_avx2_nn(context, A, incRowA,
                B, incRowB,
