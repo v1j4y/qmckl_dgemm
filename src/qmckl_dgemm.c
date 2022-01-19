@@ -141,10 +141,13 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
 	packA_general(context, kc, MCmax, &Ain[idxk + j*ctx->A_tile.MCt*LDA], LDA, 1, ctx->_A);
 
 	// Write to tiled matrix to A
+	//total=0;
 	for(ii=0;ii<MCKC;++ii) {
 	  ctx->A_tile.data[i_tile_a * (MCKC) + ii] = ctx->_A[ii];
 	  //if(A_tile != NULL) A_tile[i_tile_a * (MCKC) + ii] = ctx->_A[ii];
+	  //total = total ^ _A[ii];
 	}
+	//ctx->A_tile.data[i_tile_a * (MCKC) + 0] = total;
 	i_tile_a += 1;
       }
     }
