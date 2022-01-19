@@ -1,11 +1,26 @@
+subroutine print_matrix(A, N, M)
+  implicit none
+  integer,intent(in) :: M, N
+  double precision,intent(in) :: A(N,M)
+  integer :: i, j
+  print *, "Printing Matrix", N, M
+  do j = 1, M
+  do i = 1, N
+     print *,A(i,j)
+  end do
+  end do
+end subroutine print_matrix
+
+
 program test
   use qmckl_dgemm
   implicit none
   
-  integer, parameter :: amax=100
+  integer, parameter :: amax=20
   integer    :: m , n , k, i, j, ii, jj
   double precision :: norm1, norm2
   integer(8) :: m8, n8, k8
+  integer(qmckl_exit_code) :: res
   
   ! Matrices
   double precision, allocatable :: A(:,:), B(:,:), C0(:,:), C1(:,:)
@@ -21,7 +36,6 @@ program test
   
   ! Create context for qmckl. It contains the tiling parameters, and the
   ! list of allocated pointers for cleaning
-  context = qmckl_context_create()
   
   ! For all (m,n,k) in (1..amax)^3, compute C0 = A.B using MKL and
   ! C1 = A.B using qmckl_dgemm, and compare the results
@@ -33,9 +47,10 @@ program test
         do k=1,amax
            k8 = k
 
+           context = qmckl_context_create()
+
            ! Allocate matrices once for all
-           allocate(A(k8,m8), B(n8,k8), C0(n8,k8), C1(n8,k8))
-           allocate(A_tile(k8*m8), B_tile(n8*k8), C_tile(n8*m8))
+           allocate(A(k8,m8), B(n8,k8), C0(m8,n8), C1(n8,m8))
            LDA  = size( A,1)
            LDB  = size( B,1)
            LDC0 = size(C0,1)
@@ -58,7 +73,7 @@ program test
            end if
 
          
-           rc = qmckl_init_pack(context, 'A', m8, n8, k8)
+           rc = qmckl_init_pack(context, 'A', m8, k8, k8)
            rc = qmckl_pack_matrix(context, 'A', m8, k8, A, LDA)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
@@ -66,7 +81,7 @@ program test
               call exit(-1)
            end if
            
-           rc = qmckl_init_pack(context, 'B', m8, n8, k8)
+           rc = qmckl_init_pack(context, 'B', k8, n8, k8)
            rc = qmckl_pack_matrix(context, 'B', k8, n8, B, LDB)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
@@ -76,6 +91,7 @@ program test
            
            
            rc = qmckl_dgemm_tiled_avx2_nn(context, A, LDA, B, LDB, C1, LDC1)
+
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
               print *, 'Failed tiled dgemm'
@@ -96,12 +112,10 @@ program test
            norm2 = 0.d0
            do j=1,n
               do i=1,m
-                 norm1 = norm1 + (C0(i,j) - C1(i,j))**2
+                 norm1 = norm1 + (C0(i,j) - C1(j,i))**2
                  norm2 = norm2 + C0(i,j)**2
               end do
            end do
-           print *, norm1
-           print *, norm2
 
            C0 = 0.0d0
 
@@ -116,9 +130,7 @@ program test
            deallocate(B)
            deallocate(C0)
            deallocate(C1)
-           deallocate(A_tile)
-           deallocate(B_tile)
-           deallocate(C_tile)
+           res = qmckl_context_destroy(context)
 
         end do
      end do

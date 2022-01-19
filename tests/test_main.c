@@ -24,9 +24,9 @@ int main() {
   int64_t iterM, iterN, iterK;
   int64_t rep = 0;
   
-  int64_t DIM_M_MAX =MR2*2;
-  int64_t DIM_N_MAX =NR2*2;
-  int64_t DIM_K_MAX =10;
+  int64_t DIM_M_MAX =MR2*4;
+  int64_t DIM_N_MAX =NR2*4;
+  int64_t DIM_K_MAX =50;
 
   for(iterM = 1;iterM <= DIM_M_MAX; ++iterM){
     DIM_M = iterM;

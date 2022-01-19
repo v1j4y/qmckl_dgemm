@@ -112,6 +112,7 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, in
     //}
     //printf("M8=%ld N8=%ld LDA=%ld\n",M8,N8,LDA);
     //printf("Mt=%ld Nt=%ld\n",ctx->A_tile.Mt,ctx->A_tile.Nt);
+    //printf("MC=%ld KC=%ld\n",ctx->A_tile.MCt,ctx->A_tile.NCt);
 
     // Initialize buffers
     if( ctx->_A == NULL) {
