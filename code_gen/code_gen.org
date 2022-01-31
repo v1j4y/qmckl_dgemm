@@ -2,8 +2,8 @@
 #+author:    Vijay Gopal Chilkuri
 #+email:     vijay.gopal.c@gmail.com
 
-
-* Input parameters
+* DGEMM Opt kernel
+** Input parameters
 
 #+begin_example
 1. Number of Registers - numReg
@@ -11,7 +11,7 @@
 3. Unroll factor       - unrollFactor
 #+end_example
 
-* Template code
+** Template code
   
 Template code for beginning and ending of the 
 ASM Volatile block. 
@@ -43,7 +43,7 @@ ending =r"""
 
 #+RESULTS: templatecode
 
-* Initialize registers
+** Initialize registers
 
 Zero initializing registers.
 
@@ -68,7 +68,7 @@ def initReg(numReg, sizeReg):
 
 #+RESULTS: init
 
-* Setup data in Registers
+** Setup data in Registers
 
 Moving data from variables to registers
 
@@ -86,7 +86,7 @@ def setupRegs():
 #+RESULTS: setupregs
 : None
 
-* Main loop
+** Main loop
 
 Generate the main kernel based on the 
 Input parameters, i.e. numReg, sizeReg, and unrollFactor.
@@ -258,3 +258,68 @@ print(mainLoop(16,256,1))
 
 #+RESULTS: mainloop
 : None
+
+* General kernel generator code
+** Generate kernel with given input
+
+#+name: gen_core_kernel
+#+begin_src python :tangle code_gen_new.py :results output :noweb yes :wrap  "src c"
+def gen_core_kernel(nra, nrb, ntra, ntrb, vl, nk):
+    nc = nra * nrb
+    for ik in range(nk):
+        cnt = 0
+        for ira in range(0,nra,ntra):
+            for itra in range(0,ntra):
+                if ira + itra == nra:
+                    break
+                print("VMOVPD(A"+str(ira+itra)+", MEM(RAX," + str(cnt*vl)+"*8 ))")
+                cnt = cnt + 1
+            cnt = 0
+            nc = 0
+            for irb in range(0,nrb,ntrb):
+                for itrb in range(0,ntrb):
+                    print("VBORADCASTSD(B"+str(irb+itrb)+", MEM(RAX," + str(cnt)+"*8 ))")
+                    cnt = cnt + 1
+                for itrb in range(0,ntrb):
+                    for itra in range(0,ntra):
+                        if ira + itra == nra:
+                            break
+                        print("VFMADD231PD(C"+str(nc)+",A"+str(ira+itra)+",B"+str(irb+itrb)+")")
+                        nc = nc + 1
+r"""
+Code generator for a general kernel
+"""
+gen_core_kernel(3, # Total Number of registers A
+                4, # Total Number of registers B
+                2, # Number of temporary registers for A
+                2, # Number of temporary registers for B
+                4, # Vector Lenght
+                1) # Unroll factor
+#+end_src
+
+#+RESULTS: gen_core_kernel
+#+begin_src c
+VMOVPD(A0, MEM(RAX,0*8 ))
+VMOVPD(A1, MEM(RAX,4*8 ))
+VBORADCASTSD(B0, MEM(RAX,0*8 ))
+VBORADCASTSD(B1, MEM(RAX,1*8 ))
+VFMADD231PD(C0,A0,B0)
+VFMADD231PD(C1,A1,B0)
+VFMADD231PD(C2,A0,B1)
+VFMADD231PD(C3,A1,B1)
+VBORADCASTSD(B2, MEM(RAX,2*8 ))
+VBORADCASTSD(B3, MEM(RAX,3*8 ))
+VFMADD231PD(C4,A0,B2)
+VFMADD231PD(C5,A1,B2)
+VFMADD231PD(C6,A0,B3)
+VFMADD231PD(C7,A1,B3)
+VMOVPD(A2, MEM(RAX,16*8 ))
+VBORADCASTSD(B0, MEM(RAX,0*8 ))
+VBORADCASTSD(B1, MEM(RAX,1*8 ))
+VFMADD231PD(C0,A2,B0)
+VFMADD231PD(C1,A2,B1)
+VBORADCASTSD(B2, MEM(RAX,2*8 ))
+VBORADCASTSD(B3, MEM(RAX,3*8 ))
+VFMADD231PD(C2,A2,B2)
+VFMADD231PD(C3,A2,B3)
+#+end_src
