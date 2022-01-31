@@ -35,6 +35,8 @@ qmckl_exit_code qmckl_init_pack(qmckl_context context, unsigned char mType, int6
       ctx->A_tile.Mt = (int64_t)((M8/MR2)+1)*MR2;
       ctx->A_tile.MCt = ctx->A_tile.Mt;
       if(ctx->A_tile.Mt > 1152) ctx->A_tile.MCt = ctx->A_tile.Mt/2;
+      //if(ctx->A_tile.Mt < 512) ctx->A_tile.MCt = ctx->A_tile.Mt;
+      //else ctx->A_tile.MCt = MR2*64;
     }
     else{
       ctx->A_tile.Mt = (int64_t)M8;
@@ -306,14 +308,14 @@ qmckl_exit_code qmckl_unpack_matrix(qmckl_context context, double *B, int64_t M,
   int64_t np = nc / NR;
   int i,j;
   for(i=0;i<N;++i) {
-      for(j=0;j<M;++j) {
-        int64_t kmc = ( j / mc );
-        int64_t lnc = ( i / nc );
-        int64_t kmr = ( j - kmc * mc ) / MR;
-        int64_t lnr = ( i - lnc * nc ) / NR;
-        int64_t k   = ( ( j - kmc * mc ) - ( kmr * MR ) );
-        int64_t l   = ( ( i - lnc * nc ) - ( lnr * NR ) );
-        B[i + j*N] = ctx->C_tile.data[(mc*nc)*(lnc*mb) + (mc*nc)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k];
+    int64_t lnc = ( i / nc );
+    int64_t lnr = ( i - lnc * nc ) / NR;
+    int64_t l   = ( ( i - lnc * nc ) - ( lnr * NR ) );
+    for(j=0;j<M;++j) {
+      int64_t kmc = ( j / mc );
+      int64_t kmr = ( j - kmc * mc ) / MR;
+      int64_t k   = ( ( j - kmc * mc ) - ( kmr * MR ) );
+      B[i + j*N] = ctx->C_tile.data[(mc*nc)*(lnc*mb) + (mc*nc)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k];
       }
   }
   return QMCKL_SUCCESS;
