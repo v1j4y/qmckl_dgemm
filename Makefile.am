@@ -1,8 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
 ACLOCAL_AMFLAGS = -I m4 --install
-#AM_CFLAGS = $(CFLAGS) #-qmkl=sequential -O2 -g -march=core-avx2 -finline -finline-functions -inline-forceinline -restrict -ipo -qopenmp -lpthread
-#AM_CFLAGS += -qmkl=sequential -O2 -g -march=core-avx2 -finline -finline-functions -inline-forceinline -restrict -ipo -qopenmp -lpthread
-AM_CFLAGS += -qmkl=sequential -O2 -g 
 
 src_main_c = src/main.c src/qmckl_dgemm.c src/utils.c src/kernel_avx2_16regs.c 
 src_main_f = src/qmckl_dgemm_f.f90
@@ -17,7 +14,6 @@ qmckldgemm_CPPFLAGS = $(AM_CPPFLAGS)
 qmckldgemm_CFLAGS = $(AM_CFLAGS)
 qmckldgemm_CFLAGS += "-I${top_srcdir}/include"  "-I${top_srcdir}/src"
 qmckldgemm_LDFLAGS = $(AM_LDFLAGS)
-qmckldgemm_LDFLAGS += -qmkl=sequential
 
 lib_LTLIBRARIES = src/libqmckldgemm.la
 src_libqmckldgemm_la_SOURCES = $(src_main_c) $(src_main_f)
