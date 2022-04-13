@@ -192,10 +192,11 @@ qmckl_exit_code get_diff_matrix_ABT(double *A, double *B, int64_t M, int64_t N) 
 //    }
 //}
 
-void print_diff_matrix_ASer_BT(qmckl_context context, double *A, double *B, int64_t M, int64_t N) {
+void print_diff_matrix_ASer_BT(qmckl_context context, qmckl_tile_matrix tile_matrix, double *A, double *B, int64_t M, int64_t N) {
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
-    int64_t mc = ctx->C_tile.MCt;
-    int64_t nc = ctx->C_tile.NCt;
+  qmckl_tile_struct* const tmat = (qmckl_tile_struct* const) tile_matrix;
+    int64_t mc = tmat->MCt;
+    int64_t nc = tmat->NCt;
     int64_t mb = M / mc;
     int64_t nb = N / nc;
     int64_t mp = mc / MR;
@@ -300,9 +301,10 @@ void print_diff_matrix_ASer_BT(qmckl_context context, double *A, double *B, int6
 //}
 
 // Pack A which is traversed row wise (MC rows and KC columns)
-void packA_general(qmckl_context context, int64_t kc, int64_t MCmax, double *A, int64_t dimRowA, int64_t dimColA, double *buffer) {
+void packA_general(qmckl_context context, qmckl_tile_matrix tile_matrix, int64_t kc, int64_t MCmax, double *A, int64_t dimRowA, int64_t dimColA, double *buffer) {
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
-  int64_t mp = ctx->A_tile.MCt / MR;
+  qmckl_tile_struct* const tmat = (qmckl_tile_struct* const) tile_matrix;
+  int64_t mp = tmat->MCt / MR;
   double *buffer_start = buffer;
   double *A_start = A;
   int k,j,i,idxMC;
@@ -325,9 +327,10 @@ void packA_general(qmckl_context context, int64_t kc, int64_t MCmax, double *A, 
 }
 
 // Pack B which is traversed column wise (NC rows and KC columns)
-void packB_general(qmckl_context context, int64_t kc, int64_t NCmax, double *B, int64_t dimRowB, int64_t dimColB, double *buffer) {
+void packB_general(qmckl_context context, qmckl_tile_matrix tile_matrix, int64_t kc, int64_t NCmax, double *B, int64_t dimRowB, int64_t dimColB, double *buffer) {
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
-  int64_t np = ctx->B_tile.NCt / NR;
+  qmckl_tile_struct* const tmat = (qmckl_tile_struct* const) tile_matrix;
+  int64_t np = tmat->NCt / NR;
   double *buffer_start = buffer;
   double *B_start = B;
   int k,j,i, idxNC, idxNCprev;

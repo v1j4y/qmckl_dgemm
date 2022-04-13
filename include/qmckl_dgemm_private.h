@@ -47,10 +47,6 @@ typedef struct qmckl_context_struct{
 double* _A;
 double* _B;
 
-  qmckl_tile_struct A_tile;
-  qmckl_tile_struct B_tile;
-  qmckl_tile_struct C_tile;
-
 } qmckl_context_struct;
 
 #endif

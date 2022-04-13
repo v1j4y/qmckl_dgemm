@@ -41,6 +41,9 @@ int main() {
   qmckl_tile_matrix tile_matrix_A = qmckl_tile_matrix_create();
   qmckl_tile_matrix tile_matrix_B = qmckl_tile_matrix_create();
   qmckl_tile_matrix tile_matrix_C = qmckl_tile_matrix_create();
+  qmckl_tile_struct* const tmatA = (qmckl_tile_struct* const) tile_matrix_A;
+  qmckl_tile_struct* const tmatB = (qmckl_tile_struct* const) tile_matrix_B;
+  qmckl_tile_struct* const tmatC = (qmckl_tile_struct* const) tile_matrix_C;
 
   //init_dims_avx2_input(context, DIM_M, DIM_N, DIM_K);
   qmckl_init_pack(context, tile_matrix_A, 'A', DIM_M, DIM_N, DIM_K);
@@ -58,12 +61,12 @@ int main() {
   
   int64_t incRowA = K;
   int64_t incRowB = N;
-  int64_t incRowC = ctx->C_tile.Nt;
+  int64_t incRowC = tmatC->Nt;
   
   A = (double *)malloc( M * K * sizeof(double));
   B = (double *)malloc( K * N * sizeof(double));
-  C = (double *)aligned_alloc( 64, ctx->C_tile.Mt * ctx->C_tile.Nt * sizeof(double));
-  CUnpack = (double *)aligned_alloc( 64, ctx->C_tile.Mt * ctx->C_tile.Nt * sizeof(double));
+  C = (double *)aligned_alloc( 64, tmatC->Mt * tmatC->Nt * sizeof(double));
+  CUnpack = (double *)aligned_alloc( 64, tmatC->Mt * tmatC->Nt * sizeof(double));
   
   ABlas = (double *)malloc( MBlas * KBlas * sizeof(double));
   BBlas = (double *)malloc( KBlas * NBlas * sizeof(double));
@@ -153,7 +156,9 @@ int main() {
   
 #endif
 
-  qmckl_tile_matrix_destroy(context);
+  qmckl_tile_matrix_destroy(tile_matrix_A);
+  qmckl_tile_matrix_destroy(tile_matrix_B);
+  qmckl_tile_matrix_destroy(tile_matrix_C);
   qmckl_context_destroy(context);
   free(A);
   free(B);
