@@ -38,7 +38,8 @@ int main() {
   
   qmckl_context context = qmckl_context_create();
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
-  qmckl_tile_matrix const tile_matrix;
+  qmckl_tile_matrix tile_matrix = qmckl_tile_matrix_create();
+
   //init_dims_avx2_input(context, DIM_M, DIM_N, DIM_K);
   qmckl_init_pack(context, tile_matrix, 'A', DIM_M, DIM_N, DIM_K);
   qmckl_init_pack(context, tile_matrix, 'B', DIM_M, DIM_N, DIM_K);
@@ -153,6 +154,7 @@ int main() {
   
 #endif
 
+  qmckl_tile_matrix_destroy(context);
   qmckl_context_destroy(context);
   free(A);
   free(B);

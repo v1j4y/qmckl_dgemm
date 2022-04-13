@@ -30,6 +30,14 @@ module qmckl_dgemm
      end function qmckl_context_destroy
   end interface
 
+  interface
+     integer (qmckl_exit_code) function qmckl_tile_matrix_destroy(context) bind(C)
+       use, intrinsic :: iso_c_binding
+       import
+       integer (qmckl_context), intent(in), value :: context
+     end function qmckl_tile_matrix_destroy
+  end interface
+
    interface
    integer(c_int32_t) function qmckl_init_pack &
        (context, tile_matrix, mType, m, n, k) &

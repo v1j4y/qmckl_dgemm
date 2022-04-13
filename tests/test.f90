@@ -132,6 +132,7 @@ program test
            deallocate(B)
            deallocate(C0)
            deallocate(C1)
+           res = qmckl_tile_matrix_destroy(context)
            res = qmckl_context_destroy(context)
 
         end do

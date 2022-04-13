@@ -337,6 +337,19 @@ qmckl_exit_code qmckl_unpack_matrix(qmckl_context context, double *B, int64_t M,
   return QMCKL_SUCCESS;
 }
 
+qmckl_exit_code qmckl_tile_matrix_destroy(qmckl_tile_matrix tile_matrix){
+
+  qmckl_tile_struct* const ctx = (qmckl_tile_struct* const) tile_matrix;
+
+  // Free data
+  if( ctx->data != NULL){
+    free(ctx->data);
+    ctx->data = NULL;
+  }
+
+  return QMCKL_SUCCESS;
+}
+
 qmckl_exit_code qmckl_context_destroy(qmckl_context context){
 
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
