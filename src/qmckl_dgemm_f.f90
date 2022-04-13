@@ -24,13 +24,14 @@ module qmckl_dgemm
 
    interface
    integer(c_int32_t) function qmckl_init_pack &
-       (context, mType, m, n, k) &
+       (context, tile_matrix, mType, m, n, k) &
        bind(C)
      use, intrinsic :: iso_c_binding
      import
      implicit none
  
      integer (c_int64_t) , intent(in)  , value :: context
+     integer (c_int64_t) , intent(in)  , value :: tile_matrix
      character           , intent(in)  , value :: mType
      integer (c_int64_t) , intent(in)  , value :: m
      integer (c_int64_t) , intent(in)  , value :: n

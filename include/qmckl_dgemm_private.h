@@ -23,6 +23,7 @@
 #endif
 
 typedef int64_t qmckl_context;
+typedef int64_t qmckl_tile_matrix;
 typedef int32_t qmckl_exit_code;
 
 typedef struct qmckl_tile_struct{

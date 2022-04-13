@@ -38,10 +38,11 @@ int main() {
   
   qmckl_context context = qmckl_context_create();
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
+  qmckl_tile_matrix const tile_matrix;
   //init_dims_avx2_input(context, DIM_M, DIM_N, DIM_K);
-  qmckl_init_pack(context, 'A', DIM_M, DIM_N, DIM_K);
-  qmckl_init_pack(context, 'B', DIM_M, DIM_N, DIM_K);
-  qmckl_init_pack(context, 'C', DIM_M, DIM_N, DIM_K);
+  qmckl_init_pack(context, tile_matrix, 'A', DIM_M, DIM_N, DIM_K);
+  qmckl_init_pack(context, tile_matrix, 'B', DIM_M, DIM_N, DIM_K);
+  qmckl_init_pack(context, tile_matrix, 'C', DIM_M, DIM_N, DIM_K);
   
   //M = qmckl_M;
   //N = qmckl_N;

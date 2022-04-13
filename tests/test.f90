@@ -28,6 +28,7 @@ program test
   
   ! C Pointers as int64
   integer(8) :: context
+  integer(8) :: tile_matrix
   !integer(8) :: A_tile, B_tile, C_tile
   !integer(8) :: A_tile, B_tile, C_tile
   double precision, allocatable :: A_tile(:), B_tile(:), C_tile(:)
@@ -64,7 +65,7 @@ program test
            C0 = 0.0d0
            C1 = 0.0d0
 
-           rc = qmckl_init_pack(context, 'C', m8, n8, k8)
+           rc = qmckl_init_pack(context, tile_matrix, 'C', m8, n8, k8)
            rc = qmckl_pack_matrix(context, 'C', m8, n8, C1, LDC1)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n
@@ -73,7 +74,7 @@ program test
            end if
 
          
-           rc = qmckl_init_pack(context, 'A', m8, k8, k8)
+           rc = qmckl_init_pack(context, tile_matrix, 'A', m8, k8, k8)
            rc = qmckl_pack_matrix(context, 'A', m8, k8, A, LDA)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
@@ -81,7 +82,7 @@ program test
               call exit(-1)
            end if
            
-           rc = qmckl_init_pack(context, 'B', k8, n8, k8)
+           rc = qmckl_init_pack(context, tile_matrix, 'B', k8, n8, k8)
            rc = qmckl_pack_matrix(context, 'B', k8, n8, B, LDB)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k

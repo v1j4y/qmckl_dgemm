@@ -18,7 +18,7 @@ qmckl_context qmckl_context_create() {
   return (qmckl_context) ctx;
 }
 
-qmckl_exit_code qmckl_init_pack(qmckl_context context, unsigned char mType, int64_t M8, int64_t N8, int64_t K8) {
+qmckl_exit_code qmckl_init_pack(qmckl_context context, qmckl_tile_matrix tile_matrix, unsigned char mType, int64_t M8, int64_t N8, int64_t K8) {
 
     /*
      * AVX2: We work only in factors of 8 * 6
@@ -356,11 +356,12 @@ qmckl_exit_code qmckl_dgemm_tiled_NN(qmckl_context context, int64_t Min, int64_t
 				     double *B, int64_t incRowB,
 				     double *C, int64_t incRowC) {
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
+  qmckl_tile_matrix const tile_matrix;
 
   // Init memory
-  qmckl_init_pack(context, 'A', Min, Nin, Kin);
-  qmckl_init_pack(context, 'B', Min, Nin, Kin);
-  qmckl_init_pack(context, 'C', Min, Nin, Kin);
+  qmckl_init_pack(context, tile_matrix, 'A', Min, Nin, Kin);
+  qmckl_init_pack(context, tile_matrix, 'B', Min, Nin, Kin);
+  qmckl_init_pack(context, tile_matrix, 'C', Min, Nin, Kin);
 
   // Tile A and B
   qmckl_pack_matrix(context, 'A', Min, Kin, A, incRowA);
