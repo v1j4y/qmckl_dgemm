@@ -1,19 +1,19 @@
 AUTOMAKE_OPTIONS = subdir-objects
 ACLOCAL_AMFLAGS = -I m4 --install
 
-src_main_c = src/main.c src/qmckl_dgemm.c src/utils.c src/kernel_avx2_16regs.c 
+src_main_c = src/qmckl_dgemm.c src/utils.c src/kernel_avx2_16regs.c 
 src_main_f = src/qmckl_dgemm_f.f90
 src_main_h = include/qmckl_dgemm.h include/qmckl_dgemm_private.h include/utils.h src/kernel_avx2_16regs.h src/bli_x86_asm_macros.h
 test_main_c = tests/test_main.c
 test_main_f = tests/test.f90
 
-bin_PROGRAMS = qmckldgemm
-qmckldgemm_SOURCES = $(src_main_c) #$(src_main_h)
-include_HEADERS = $(src_main_h)
-qmckldgemm_CPPFLAGS = $(AM_CPPFLAGS)
-qmckldgemm_CFLAGS = $(AM_CFLAGS)
-qmckldgemm_CFLAGS += "-I${top_srcdir}/include"  "-I${top_srcdir}/src"
-qmckldgemm_LDFLAGS = $(AM_LDFLAGS)
+#bin_PROGRAMS = qmckldgemm
+#qmckldgemm_SOURCES = $(src_main_c) #$(src_main_h)
+#include_HEADERS = $(src_main_h)
+#qmckldgemm_CPPFLAGS = $(AM_CPPFLAGS)
+#qmckldgemm_CFLAGS = $(AM_CFLAGS)
+#qmckldgemm_CFLAGS += "-I${top_srcdir}/include"  "-I${top_srcdir}/src"
+#qmckldgemm_LDFLAGS = $(AM_LDFLAGS)
 
 lib_LTLIBRARIES = src/libqmckldgemm.la
 src_libqmckldgemm_la_SOURCES = $(src_main_c) $(src_main_f)

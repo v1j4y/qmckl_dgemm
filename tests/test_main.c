@@ -91,9 +91,12 @@ int main() {
   const int KB = KBlas;
   const double alpha=1.0;
   const double beta=0.0;
+  
+#ifdef HAVE_MKL
+  
   double *ABlasp;
   double *BBlasp;
-  
+
   // Get size of packed A
   size_t ABlasp_size = dgemm_pack_get_size("A",&MB,&NB,&KB);
   ABlasp = (double *)mkl_malloc(ABlasp_size,64);
@@ -129,6 +132,26 @@ int main() {
   
   mkl_free(ABlasp);
   mkl_free(BBlasp);
+
+#elif HAVE_OPENBLAS
+
+  qmckl_unpack_matrix(context, CUnpack, M, N);
+
+  dgemm_compute("P","P",&MB,&NB,&KB,ABlasp,&KB,BBlasp,&NB,&beta,DBlas,&MB);
+  cblas_dgemm(CBLAS_NO_TRANS, CBLAS_ROW_MAJOR,MB,NB,KB,alpha,ABlas,KB,BBlas,NB,beta,DBlas,MB)  
+  qmckl_exit_code rc = get_diff_matrix_ABT(CUnpack,DBlas, M, N);
+
+  if(rc == QMCKL_FAILURE){
+    printf(" QMCKL_FAILURE !\n");
+    return QMCKL_FAILURE;
+  }
+  else{
+    printf(" QMCKL_SUCCESS !\n");
+  }
+  printf("\n----------------------------------\n");
+  
+#endif
+
   qmckl_context_destroy(context);
   free(A);
   free(B);
