@@ -28,7 +28,9 @@ program test
   
   ! C Pointers as int64
   integer(8) :: context
-  integer(8) :: tile_matrix
+  integer(8) :: tile_matrix_A
+  integer(8) :: tile_matrix_B
+  integer(8) :: tile_matrix_C
   !integer(8) :: A_tile, B_tile, C_tile
   !integer(8) :: A_tile, B_tile, C_tile
   double precision, allocatable :: A_tile(:), B_tile(:), C_tile(:)
@@ -49,7 +51,9 @@ program test
            k8 = k
 
            context = qmckl_context_create()
-           tile_matrix = qmckl_tile_matrix_create()
+           tile_matrix_A = qmckl_tile_matrix_create()
+           tile_matrix_B = qmckl_tile_matrix_create()
+           tile_matrix_C = qmckl_tile_matrix_create()
 
            ! Allocate matrices once for all
            allocate(A(k8,m8), B(n8,k8), C0(m8,n8), C1(n8,m8))
@@ -66,8 +70,8 @@ program test
            C0 = 0.0d0
            C1 = 0.0d0
 
-           rc = qmckl_init_pack(context, tile_matrix, 'C', m8, n8, k8)
-           rc = qmckl_pack_matrix(context, 'C', m8, n8, C1, LDC1)
+           rc = qmckl_init_pack(context, tile_matrix_C, 'C', m8, n8, k8)
+           rc = qmckl_pack_matrix(context, tile_matrix_C, 'C', m8, n8, C1, LDC1)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n
               print *, 'Failed tiling of C1'
@@ -75,16 +79,16 @@ program test
            end if
 
          
-           rc = qmckl_init_pack(context, tile_matrix, 'A', m8, k8, k8)
-           rc = qmckl_pack_matrix(context, 'A', m8, k8, A, LDA)
+           rc = qmckl_init_pack(context, tile_matrix_A, 'A', m8, k8, k8)
+           rc = qmckl_pack_matrix(context, tile_matrix_A, 'A', m8, k8, A, LDA)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
               print *, 'Failed tiling of A'
               call exit(-1)
            end if
            
-           rc = qmckl_init_pack(context, tile_matrix, 'B', k8, n8, k8)
-           rc = qmckl_pack_matrix(context, 'B', k8, n8, B, LDB)
+           rc = qmckl_init_pack(context, tile_matrix_B, 'B', k8, n8, k8)
+           rc = qmckl_pack_matrix(context, tile_matrix_B, 'B', k8, n8, B, LDB)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
               print *, 'Failed tiling of B'

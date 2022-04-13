@@ -41,11 +41,16 @@ qmckl_exit_code qmckl_init_pack(qmckl_context context, qmckl_tile_matrix tile_ma
      */
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
 
+  qmckl_tile_struct* const tile_mat = (qmckl_tile_struct* const) tile_matrix;
+
   if(mType == 'A' || mType == 'a'){
     // Initialize Tile data for A
     ctx->A_tile.Nt = K8;
     ctx->A_tile.NCt = K8;
+    tile_mat->Nt = K8;
+    tile_mat->NCt = K8;
     if(ctx->A_tile.Nt > 1152) ctx->A_tile.NCt = ctx->A_tile.Nt/2;
+    if(tile_mat->Nt > 1152) tile_mat->NCt = tile_mat->Nt/2;
     if((M8 % MR2) != 0){
 
       ctx->A_tile.Mt = (int64_t)((M8/MR2)+1)*MR2;
@@ -53,11 +58,17 @@ qmckl_exit_code qmckl_init_pack(qmckl_context context, qmckl_tile_matrix tile_ma
       if(ctx->A_tile.Mt > 1152) ctx->A_tile.MCt = ctx->A_tile.Mt/2;
       //if(ctx->A_tile.Mt < 512) ctx->A_tile.MCt = ctx->A_tile.Mt;
       //else ctx->A_tile.MCt = MR2*64;
+      tile_mat->Mt = (int64_t)((M8/MR2)+1)*MR2;
+      tile_mat->MCt = tile_mat->Mt;
+      if(tile_mat->Mt > 1152) tile_mat->MCt = tile_mat->Mt/2;
     }
     else{
       ctx->A_tile.Mt = (int64_t)M8;
       ctx->A_tile.MCt = ctx->A_tile.Mt;
       if(ctx->A_tile.Mt > 1152) ctx->A_tile.MCt = ctx->A_tile.Mt/2;
+      tile_mat->Mt = (int64_t)M8;
+      tile_mat->MCt = tile_mat->Mt;
+      if(tile_mat->Mt > 1152) tile_mat->MCt = tile_mat->Mt/2;
     }
   }
   else if(mType == 'B' || mType == 'b'){
@@ -73,6 +84,21 @@ qmckl_exit_code qmckl_init_pack(qmckl_context context, qmckl_tile_matrix tile_ma
       ctx->B_tile.Nt = (int64_t)N8;
       ctx->B_tile.NCt = ctx->B_tile.Nt;
       if(ctx->B_tile.Nt > 1152) ctx->B_tile.NCt = ctx->B_tile.Nt/2;
+    }
+
+    // Tile
+    tile_mat->Mt = K8;
+    tile_mat->MCt = K8;
+    if(tile_mat->Mt > 1152) tile_mat->MCt = tile_mat->Mt/2;
+    if((N8 % NR2) != 0){
+      tile_mat->Nt = (int64_t)((N8/NR2)+1)*NR2;
+      tile_mat->NCt = tile_mat->Nt;
+      if(tile_mat->Nt > 1152) tile_mat->NCt = tile_mat->Nt/2;
+    }
+    else{
+      tile_mat->Nt = (int64_t)N8;
+      tile_mat->NCt = tile_mat->Nt;
+      if(tile_mat->Nt > 1152) tile_mat->NCt = tile_mat->Nt/2;
     }
   }
   else if(mType == 'C' || mType == 'c'){
@@ -97,6 +123,29 @@ qmckl_exit_code qmckl_init_pack(qmckl_context context, qmckl_tile_matrix tile_ma
       ctx->C_tile.NCt = ctx->C_tile.Nt;
       if(ctx->C_tile.Nt > 1152) ctx->C_tile.NCt = ctx->C_tile.Nt/2;
     }
+
+    // Tile
+    if((M8 % MR2) != 0){
+
+      tile_mat->Mt = (int64_t)((M8/MR2)+1)*MR2;
+      tile_mat->MCt = tile_mat->Mt;
+      if(tile_mat->Mt > 1152) tile_mat->MCt = tile_mat->Mt/2;
+    }
+    else{
+      tile_mat->Mt = (int64_t)M8;
+      tile_mat->MCt = tile_mat->Mt;
+      if(tile_mat->Mt > 1152) tile_mat->MCt = tile_mat->Mt/2;
+    }
+    if((N8 % NR2) != 0){
+      tile_mat->Nt = (int64_t)((N8/NR2)+1)*NR2;
+      tile_mat->NCt = tile_mat->Nt;
+      if(tile_mat->Nt > 1152) tile_mat->NCt = tile_mat->Nt/2;
+    }
+    else{
+      tile_mat->Nt = (int64_t)N8;
+      tile_mat->NCt = tile_mat->Nt;
+      if(tile_mat->Nt > 1152) tile_mat->NCt = tile_mat->Nt/2;
+    }
   }
   else{
     printf("Wrong mType in qmckl_init_tile. mType=%c\n",mType);
@@ -105,7 +154,7 @@ qmckl_exit_code qmckl_init_pack(qmckl_context context, qmckl_tile_matrix tile_ma
   return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_pack_matrix(qmckl_context context, unsigned char mType, int64_t M8, int64_t N8, double *Ain, int64_t LDA) {
+qmckl_exit_code qmckl_pack_matrix(qmckl_context context, qmckl_tile_matrix tile_matrix, unsigned char mType, int64_t M8, int64_t N8, double *Ain, int64_t LDA) {
 
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
 
@@ -385,17 +434,19 @@ qmckl_exit_code qmckl_dgemm_tiled_NN(qmckl_context context, int64_t Min, int64_t
 				     double *B, int64_t incRowB,
 				     double *C, int64_t incRowC) {
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
-  qmckl_tile_matrix const tile_matrix;
+  qmckl_tile_matrix const tile_matrix_A;
+  qmckl_tile_matrix const tile_matrix_B;
+  qmckl_tile_matrix const tile_matrix_C;
 
   // Init memory
-  qmckl_init_pack(context, tile_matrix, 'A', Min, Nin, Kin);
-  qmckl_init_pack(context, tile_matrix, 'B', Min, Nin, Kin);
-  qmckl_init_pack(context, tile_matrix, 'C', Min, Nin, Kin);
+  qmckl_init_pack(context, tile_matrix_A, 'A', Min, Nin, Kin);
+  qmckl_init_pack(context, tile_matrix_B, 'B', Min, Nin, Kin);
+  qmckl_init_pack(context, tile_matrix_C, 'C', Min, Nin, Kin);
 
   // Tile A and B
-  qmckl_pack_matrix(context, 'A', Min, Kin, A, incRowA);
-  qmckl_pack_matrix(context, 'B', Kin, Nin, B, incRowB);
-  qmckl_pack_matrix(context, 'C', Min, Nin, C, incRowB);
+  qmckl_pack_matrix(context, tile_matrix_A, 'A', Min, Kin, A, incRowA);
+  qmckl_pack_matrix(context, tile_matrix_B, 'B', Kin, Nin, B, incRowB);
+  qmckl_pack_matrix(context, tile_matrix_C, 'C', Min, Nin, C, incRowB);
 
 
 

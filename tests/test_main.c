@@ -38,16 +38,15 @@ int main() {
   
   qmckl_context context = qmckl_context_create();
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
-  qmckl_tile_matrix tile_matrix = qmckl_tile_matrix_create();
+  qmckl_tile_matrix tile_matrix_A = qmckl_tile_matrix_create();
+  qmckl_tile_matrix tile_matrix_B = qmckl_tile_matrix_create();
+  qmckl_tile_matrix tile_matrix_C = qmckl_tile_matrix_create();
 
   //init_dims_avx2_input(context, DIM_M, DIM_N, DIM_K);
-  qmckl_init_pack(context, tile_matrix, 'A', DIM_M, DIM_N, DIM_K);
-  qmckl_init_pack(context, tile_matrix, 'B', DIM_M, DIM_N, DIM_K);
-  qmckl_init_pack(context, tile_matrix, 'C', DIM_M, DIM_N, DIM_K);
+  qmckl_init_pack(context, tile_matrix_A, 'A', DIM_M, DIM_N, DIM_K);
+  qmckl_init_pack(context, tile_matrix_B, 'B', DIM_M, DIM_N, DIM_K);
+  qmckl_init_pack(context, tile_matrix_C, 'C', DIM_M, DIM_N, DIM_K);
   
-  //M = qmckl_M;
-  //N = qmckl_N;
-  //K = qmckl_K;
   M = DIM_M;
   N = DIM_N;
   K = DIM_K;
@@ -80,9 +79,9 @@ int main() {
   
   int i,j=rep;
   
-  qmckl_pack_matrix(context, 'A', M, K, A, incRowA);
-  qmckl_pack_matrix(context, 'B', K, N, B, incRowB);
-  qmckl_pack_matrix(context, 'C', M, N, C, incRowC);
+  qmckl_pack_matrix(context, tile_matrix_A, 'A', M, K, A, incRowA);
+  qmckl_pack_matrix(context, tile_matrix_B, 'B', K, N, B, incRowB);
+  qmckl_pack_matrix(context, tile_matrix_C, 'C', M, N, C, incRowC);
   
   qmckl_dgemm_tiled_avx2_nn(context, A, incRowA,
 			   B, incRowB,
