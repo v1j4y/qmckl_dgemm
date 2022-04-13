@@ -18,6 +18,22 @@ qmckl_context qmckl_context_create() {
   return (qmckl_context) ctx;
 }
 
+qmckl_context qmckl_tile_matrix_create() {
+
+  qmckl_tile_struct* const tile_mat = (qmckl_tile_struct* const) malloc (sizeof(qmckl_tile_struct));
+
+  if (tile_mat == NULL) {
+    return QMCKL_NULL_CONTEXT;
+  }
+
+  /* Set all pointers and values to NULL */
+  {
+    memset(tile_mat, 0, sizeof(qmckl_tile_struct));
+  }
+
+  return (qmckl_tile_matrix) tile_mat;
+}
+
 qmckl_exit_code qmckl_init_pack(qmckl_context context, qmckl_tile_matrix tile_matrix, unsigned char mType, int64_t M8, int64_t N8, int64_t K8) {
 
     /*

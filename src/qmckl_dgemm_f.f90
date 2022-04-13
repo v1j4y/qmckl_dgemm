@@ -1,6 +1,7 @@
 module qmckl_dgemm
   use, intrinsic :: iso_c_binding
   integer  , parameter :: qmckl_context = c_int64_t
+  integer  , parameter :: qmckl_tile_matrix = c_int64_t
   integer*8, parameter :: QMCKL_NULL_CONTEXT = 0 
   integer  , parameter :: qmckl_exit_code = c_int32_t
   integer(qmckl_exit_code), parameter :: QMCKL_SUCCESS                  = 0
@@ -12,6 +13,13 @@ module qmckl_dgemm
        use, intrinsic :: iso_c_binding
        import
      end function qmckl_context_create
+  end interface
+  
+  interface
+     integer (qmckl_tile_matrix) function qmckl_tile_matrix_create() bind(C)
+       use, intrinsic :: iso_c_binding
+       import
+     end function qmckl_tile_matrix_create
   end interface
   
   interface

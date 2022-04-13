@@ -49,6 +49,7 @@ program test
            k8 = k
 
            context = qmckl_context_create()
+           tile_matrix = qmckl_tile_matrix_create()
 
            ! Allocate matrices once for all
            allocate(A(k8,m8), B(n8,k8), C0(m8,n8), C1(n8,m8))
