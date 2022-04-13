@@ -16,9 +16,9 @@ qmckl_exit_code qmckl_init_pack(qmckl_context context, qmckl_tile_matrix tile_ma
 
 qmckl_exit_code qmckl_pack_matrix(qmckl_context context, qmckl_tile_matrix tile_matrix, unsigned char mType, int64_t M8, int64_t N8, double *A, int64_t LDA);
 
-qmckl_exit_code qmckl_dgemm_tiled_avx2_nn(qmckl_context context, double *A, int64_t incRowA,
-                                                double *B, int64_t incRowB,
-                                                double *C, int64_t incRowC);
+qmckl_exit_code qmckl_dgemm_tiled_avx2_nn(qmckl_context context, qmckl_tile_matrix tile_matrix_A, int64_t incRowA,
+                                                qmckl_tile_matrix tile_matrix_B, int64_t incRowB,
+                                                qmckl_tile_matrix tile_matrix_C, int64_t incRowC);
 
 qmckl_exit_code qmckl_dgemm_tiled_NN(qmckl_context context, int64_t Min, int64_t Nin, int64_t Kin,
 				     double *A, int64_t incRowA,

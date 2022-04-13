@@ -83,9 +83,9 @@ int main() {
   qmckl_pack_matrix(context, tile_matrix_B, 'B', K, N, B, incRowB);
   qmckl_pack_matrix(context, tile_matrix_C, 'C', M, N, C, incRowC);
   
-  qmckl_dgemm_tiled_avx2_nn(context, A, incRowA,
-			   B, incRowB,
-			   C, incRowC);
+  qmckl_dgemm_tiled_avx2_nn(context, tile_matrix_A, incRowA,
+			   tile_matrix_B, incRowB,
+			   tile_matrix_C, incRowC);
   
   const int MB = MBlas;
   const int NB = NBlas;

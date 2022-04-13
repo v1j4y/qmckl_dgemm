@@ -96,7 +96,7 @@ program test
            end if
            
            
-           rc = qmckl_dgemm_tiled_avx2_nn(context, A, LDA, B, LDB, C1, LDC1)
+           rc = qmckl_dgemm_tiled_avx2_nn(context, tile_matrix_A, LDA, tile_matrix_B, LDB, tile_matrix_C, LDC1)
 
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k

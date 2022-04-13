@@ -84,11 +84,11 @@ module qmckl_dgemm
  
      integer (c_int64_t) , intent(in)  , value :: context
      integer (c_int64_t) , intent(in)  , value :: lda
-     real    (c_double ) , intent(in)          :: A(lda,*)
+     integer (c_int64_t) , intent(in)  , value :: A
      integer (c_int64_t) , intent(in)  , value :: ldb
-     real    (c_double ) , intent(in)          :: B(ldb,*)
+     integer (c_int64_t) , intent(in)  , value :: B
      integer (c_int64_t) , intent(in)  , value :: ldc
-     real    (c_double ) , intent(inout)       :: C(ldc,*)
+     integer (c_int64_t) , intent(in)  , value :: C
  
    end function qmckl_dgemm_tiled_avx2_nn
  end interface
