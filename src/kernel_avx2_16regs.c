@@ -484,15 +484,15 @@ VMOVUPD(MEM(RCX, 4*8), YMM( 1))
 
 
 void dgemm_macro_kernel_avx2_16regs(int64_t mc, int64_t kc, int64_t nc, double *C, int64_t incRowC, int64_t incColC, double *  _A, double *  _B) {
-    int64_t mp = mc / MR2;
-    int64_t np = nc / NR2;
+    int64_t mp = (int64_t) mc / MR2;
+    int64_t np = (int64_t) nc / NR2;
     int64_t nmcnc = 0;
     int64_t MR2NR2 = MR2*NR2;
     int64_t MR2KC = MR2*kc;
     int64_t NR2KC = NR2*kc;
     int64_t KC64 = (kc/64) * 64;
-    int64_t KC32 = ((kc - KC64)/32) * 32;
-    int64_t KC16 = ((kc - KC64 - KC32)/16) * 16;
+    int64_t KC32 = (int64_t) ((kc - KC64)/32) * 32;
+    int64_t KC16 = (int64_t) ((kc - KC64 - KC32)/16) * 16;
     int64_t MR2KC64 = MR2 * KC64;
     int64_t NR2KC64 = NR2 * KC64;
     int64_t MR2KC32 = MR2 * KC32;
@@ -504,6 +504,8 @@ void dgemm_macro_kernel_avx2_16regs(int64_t mc, int64_t kc, int64_t nc, double *
     double *_C_p;
     int i,j,k;
     int kk,ll,mm;
+
+    printf("np=%ld mp=%ld NR2=%ld MR2=%ld nc=%ld mc=%ld\n",np,mp,NR2,MR2,nc,mc);
 
    _B_p = &(_B[(0+0)*NR2KC]);
    _A_p = &(_A[(0+0)*NR2KC]);
