@@ -104,7 +104,7 @@ program test
               call exit(-1)
            end if
            
-           rc = qmckl_unpack_matrix(context, C1, m8, n8)
+           rc = qmckl_unpack_matrix(context, tile_matrix_C, C1, m8, n8)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
               print *, 'Failed untiling of C'

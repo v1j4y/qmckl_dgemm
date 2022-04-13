@@ -25,7 +25,7 @@ qmckl_exit_code qmckl_dgemm_tiled_NN(qmckl_context context, int64_t Min, int64_t
 				     double *B, int64_t incRowB,
 				     double *C, int64_t incRowC);
 
-qmckl_exit_code qmckl_unpack_matrix(qmckl_context context, double *B, int64_t M, int64_t N);
+qmckl_exit_code qmckl_unpack_matrix(qmckl_context context, qmckl_tile_matrix tile_matrix, double *B, int64_t M, int64_t N);
 
 qmckl_exit_code qmckl_tile_matrix_destroy(qmckl_context context);
 

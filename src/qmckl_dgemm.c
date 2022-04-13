@@ -363,14 +363,14 @@ qmckl_exit_code qmckl_dgemm_tiled_avx2_nn(qmckl_context context, qmckl_tile_matr
   qmckl_tile_struct* const tmatC = (qmckl_tile_struct* const) tile_matrix_C;
 
   int64_t mb = tmatA->Mt / tmatA->MCt;
-  int64_t nb = ctx->B_tile.Nt / ctx->B_tile.NCt;
+  int64_t nb = tmatB->Nt / tmatB->NCt;
   int64_t kb = tmatA->Nt / tmatA->NCt;
   int64_t idxi = 0;
   int64_t idxk = 0;
   int64_t nmbnb = 0;
   int64_t nmbnb_prev = 0;
   int64_t mc = tmatA->MCt;
-  int64_t nc = ctx->B_tile.NCt;
+  int64_t nc = tmatB->NCt;
   int64_t kc = tmatA->NCt;
   int64_t MCNC = mc*nc;
   size_t szeA = mc*kc*sizeof(double);
@@ -388,7 +388,7 @@ qmckl_exit_code qmckl_dgemm_tiled_avx2_nn(qmckl_context context, qmckl_tile_matr
   i_tile_b = 0;
   i_tile_a = 0;
 
-  B_tile_p = ctx->B_tile.data;
+  B_tile_p = tmatB->data;
   A_tile_p = tmatA->data;
 
 //#pragma omp parallel
@@ -406,7 +406,7 @@ qmckl_exit_code qmckl_dgemm_tiled_avx2_nn(qmckl_context context, qmckl_tile_matr
             idxk = k * kc;
 
             //B_tile_p = _B_tile + i_tile_b * (NCKC);
-            C_tile_p = ctx->C_tile.data + (imb) * MCNC;
+            C_tile_p = tmatC->data + (imb) * MCNC;
 
             for(j=0;j<mb;++j) {
                 #pragma forceinline
@@ -427,10 +427,11 @@ qmckl_exit_code qmckl_dgemm_tiled_avx2_nn(qmckl_context context, qmckl_tile_matr
 }
 
 
-qmckl_exit_code qmckl_unpack_matrix(qmckl_context context, double *B, int64_t M, int64_t N) {
+qmckl_exit_code qmckl_unpack_matrix(qmckl_context context, qmckl_tile_matrix tile_matrix, double *B, int64_t M, int64_t N) {
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
-  int64_t mc = ctx->C_tile.MCt;
-  int64_t nc = ctx->C_tile.NCt;
+  qmckl_tile_struct* const tmat = (qmckl_tile_struct* const) tile_matrix;
+  int64_t mc = tmat->MCt;
+  int64_t nc = tmat->NCt;
   int64_t mb = M / mc;
   int64_t nb = N / nc;
   int64_t mp = mc / MR;
@@ -444,7 +445,7 @@ qmckl_exit_code qmckl_unpack_matrix(qmckl_context context, double *B, int64_t M,
       int64_t kmc = ( j / mc );
       int64_t kmr = ( j - kmc * mc ) / MR;
       int64_t k   = ( ( j - kmc * mc ) - ( kmr * MR ) );
-      B[i + j*N] = ctx->C_tile.data[(mc*nc)*(lnc*mb) + (mc*nc)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k];
+      B[i + j*N] = tmat->data[(mc*nc)*(lnc*mb) + (mc*nc)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k];
       }
   }
   return QMCKL_SUCCESS;
@@ -520,7 +521,7 @@ qmckl_exit_code qmckl_dgemm_tiled_NN(qmckl_context context, int64_t Min, int64_t
              ctx->C_tile.data, incRowC);
 
   // Unpacking
-  qmckl_unpack_matrix(context, C, Min, Nin);
+  qmckl_unpack_matrix(context, tile_matrix_C, C, Min, Nin);
 
   //// Free memory
   //qmckl_context_destroy(context);

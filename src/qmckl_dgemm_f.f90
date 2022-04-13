@@ -117,13 +117,14 @@ module qmckl_dgemm
 
    interface
    integer(c_int32_t) function qmckl_unpack_matrix &
-       (context, A, m, n) &
+       (context, tile_matrix, A, m, n) &
        bind(C)
      use, intrinsic :: iso_c_binding
      import
      implicit none
  
      integer (c_int64_t) , intent(in)  , value :: context
+     integer (c_int64_t) , intent(in)  , value :: tile_matrix
      integer (c_int64_t) , intent(in)  , value :: m
      integer (c_int64_t) , intent(in)  , value :: n
      real    (c_double ) , intent(in)          :: A(n,*)
