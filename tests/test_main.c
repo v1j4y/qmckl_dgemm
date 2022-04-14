@@ -1,6 +1,10 @@
 #include <stdio.h>
 
+#if defined(HAVE_MKL)
 #include "mkl.h"
+#elif defined(HAVE_OPENBLAS) || defined(HAVE_SYSTEM_BLAS)
+#include "cblas.h"
+#endif
 
 #include "utils.h"
 #include "qmckl_dgemm.h"
@@ -57,7 +61,7 @@ int main() {
   NBlas = N;
   KBlas = K;
   printf("\n----------------------------------\n");
-  printf("(%d, %d, %d) | M=%ld K=%ld N=%ld | ",iterM, iterN, iterK, (long)M,(long)K,(long)N);
+  printf("(%ld, %ld, %ld) | M=%ld K=%ld N=%ld | ",iterM, iterN, iterK, (long)M,(long)K,(long)N);
   
   int64_t incRowA = K;
   int64_t incRowB = N;
@@ -96,7 +100,7 @@ int main() {
   const double alpha=1.0;
   const double beta=0.0;
   
-#ifdef HAVE_MKL
+#if defined(HAVE_MKL)
   
   double *ABlasp;
   double *BBlasp;
@@ -137,7 +141,7 @@ int main() {
   mkl_free(ABlasp);
   mkl_free(BBlasp);
 
-#elif HAVE_OPENBLAS
+#elif defined(HAVE_OPENBLAS) || defined(HAVE_SYSTEM_BLAS)
 
   qmckl_unpack_matrix(context, CUnpack, M, N);
 

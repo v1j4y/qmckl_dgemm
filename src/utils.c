@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "math.h"
 
 unsigned long long rdtsc(void)
 {
@@ -100,7 +101,7 @@ void print_diff_matrix(double *A, double *B, int64_t M, int64_t N) {
     for(j=0;j<N;++j) {
         for(i=0;i<M;++i) {
           if( abs(A[i + j*M] - B[i + j*M]) > 1e-13){
-            printf(" %5.3f ",abs(A[i + j*M] - B[i + j*M]));
+            printf(" %5.3f ",fabs(A[i + j*M] - B[i + j*M]));
             printf("Fail\n");
             return;
           };
@@ -118,7 +119,7 @@ void print_diff_matrix_ABT(double *A, double *B, int64_t M, int64_t N) {
 	  //printf(" %5.3f (%5.3f) ",A[i + j*M], B[idi*M + idj]);
 	  //printf(" %5.3f ((%d,%d)) ",A[i + j*M], idi,idj);
 	  if( abs(A[i + j*M] - B[idi*M + idj]) > 1e-13){
-	    printf(" %5.3f ",abs(A[i + j*M] - B[idi*M + idj]));
+	    printf(" %5.3f ",fabs(A[i + j*M] - B[idi*M + idj]));
 	    printf("Fail\n");
 	    return;
 	  };
@@ -212,7 +213,7 @@ void print_diff_matrix_ASer_BT(qmckl_context context, qmckl_tile_matrix tile_mat
           int64_t k   = ( ( j - kmc * mc ) - ( kmr * MR ) );
           int64_t l   = ( ( i - lnc * nc ) - ( lnr * NR ) );
           if(abs(A[(MCNC)*(lnc*mb) + (MCNC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[j + i*M]) > 1e-13){
-            printf(" %20.10e ",abs(A[(MCNC)*(lnc*mb) + (MCNC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[j + i*M]));
+            printf(" %20.10e ",fabs(A[(MCNC)*(lnc*mb) + (MCNC)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k] - B[j + i*M]));
             printf("Fail\n");
             return;
           };
