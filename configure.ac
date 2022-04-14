@@ -108,7 +108,6 @@ if test "$enable_mkl" = "yes"; then
   AM_LDFLAGS="$AM_LDFLAGS $MKL_LDFLAGS "
   LIBS="$LIBS $MKL_LIBS"
 else
-  if test "x$enable_blas" = "xyes"; then
 ######## Handle the BLAS library (linear algebra: BLAS + LAPACKe) ########
 # In case there are BLAS kernels that are used by the example applications
 # we may specify which library to use. Note that this is not used for StarPU
@@ -177,27 +176,27 @@ else
     #    fi
     #fi
     
-    #if test x$blas_lib = xmaybe -o x$blas_lib = xopenblas; then
-    #    PKG_CHECK_MODULES([OPENBLAS], [openblas],
-    #    				  [PKG_CHECK_MODULES([BLAS_OPENBLAS], [blas-openblas],
-    #				  				      [AC_DEFINE([HAVE_OPENBLAS], [1], [Define to 1 if you use the openblas library.])
-    #					          		       AC_SUBST([HAVE_OPENBLAS], [1])
-    #						          	       CFLAGS="${CFLAGS} ${OPENBLAS_CFLAGS} ${BLAS_OPENBLAS_CFLAGS} "
-    #							               LIBS="${LIBS} ${OPENBLAS_LIBS} ${BLAS_OPENBLAS_LIBS} "
-    #								       blas_lib=openblas
-    #      								      ],
-    #								      [ if test x$blas_lib = xopenblas; then
-    #				  				      	   AC_DEFINE([HAVE_OPENBLAS], [1], [Define to 1 if you use the openblas library.])
-    #					          		       	   AC_SUBST([HAVE_OPENBLAS], [1])
-    #									fi
-    #				  				      ])
-    #				  ],
-    #				  [ if test x$blas_lib = xopenblas; then
-    #				       AC_DEFINE([HAVE_OPENBLAS], [1], [Define to 1 if you use the openblas library.])
-    #				       AC_SUBST([HAVE_OPENBLAS], [1])
-    #      				    fi
-    #                                  ] )
-    #fi
+    if test x$blas_lib = xmaybe -o x$blas_lib = xopenblas; then
+        PKG_CHECK_MODULES([OPENBLAS], [openblas],
+        				  [PKG_CHECK_MODULES([BLAS_OPENBLAS], [openblas],
+    				  				      [AC_DEFINE([HAVE_OPENBLAS], [1], [Define to 1 if you use the openblas library.])
+    					          		       AC_SUBST([HAVE_OPENBLAS], [1])
+    						          	       CFLAGS="${CFLAGS} ${OPENBLAS_CFLAGS} ${BLAS_OPENBLAS_CFLAGS} "
+    							               LIBS="${LIBS} ${OPENBLAS_LIBS} ${BLAS_OPENBLAS_LIBS} "
+    								       blas_lib=openblas
+          								      ],
+    								      [ if test x$blas_lib = xopenblas; then
+    				  				      	   AC_DEFINE([HAVE_OPENBLAS], [1], [Define to 1 if you use the openblas library.])
+    					          		       	   AC_SUBST([HAVE_OPENBLAS], [1])
+    									fi
+    				  				      ])
+    				  ],
+    				  [ if test x$blas_lib = xopenblas; then
+    				       AC_DEFINE([HAVE_OPENBLAS], [1], [Define to 1 if you use the openblas library.])
+    				       AC_SUBST([HAVE_OPENBLAS], [1])
+          				    fi
+                                      ] )
+    fi
     
     #if test x$blas_lib = xmaybe -o x$blas_lib = xmkl; then
     #    # Should we use MKL ?
@@ -257,7 +256,6 @@ else
         AC_CHECK_HEADER([cblas.h], [have_cblas_h=yes], [have_cblas_h=no])
       	LDFLAGS="${LDFLAGS} $ac_cv_search_sgemm_"
     fi
-  fi
 fi
 ##############################################################################
 
@@ -290,7 +288,7 @@ LIBS ..........:  ${LIBS}
 
 Package features:
   Intel ICC    ...........:  ${enable_icc}
-  OpenBlas     ...........:  ${enable_openblas}
+  Blas         ...........:  ${enable_blas}
   MKL enabled  ...........:  ${enable_mkl}
 
 
