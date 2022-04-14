@@ -44,9 +44,6 @@ typedef struct qmckl_packed_struct{
 
 typedef struct qmckl_context_struct{
 
-double* _A;
-double* _B;
-
 } qmckl_context_struct;
 
 #endif
