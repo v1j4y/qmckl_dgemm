@@ -23,10 +23,10 @@
 #endif
 
 typedef int64_t qmckl_context;
-typedef int64_t qmckl_tile_matrix;
+typedef int64_t qmckl_packed_matrix;
 typedef int32_t qmckl_exit_code;
 
-typedef struct qmckl_tile_struct{
+typedef struct qmckl_packed_struct{
   // Container for Packed arrays
   double* data;
   // Type of Packing (A or B or C)
@@ -40,7 +40,7 @@ typedef struct qmckl_tile_struct{
   // Tile dimensions
   int64_t MRt;
   int64_t NRt;
-} qmckl_tile_struct;
+} qmckl_packed_struct;
 
 typedef struct qmckl_context_struct{
 

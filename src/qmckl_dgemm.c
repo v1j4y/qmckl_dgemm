@@ -18,39 +18,39 @@ qmckl_context qmckl_context_create() {
   return (qmckl_context) ctx;
 }
 
-qmckl_context qmckl_tile_matrix_create() {
+qmckl_context qmckl_packed_matrix_create() {
 
-  qmckl_tile_struct* const tile_mat = (qmckl_tile_struct* const) malloc (sizeof(qmckl_tile_struct));
+  qmckl_packed_struct* const packed_mat = (qmckl_packed_struct* const) malloc (sizeof(qmckl_packed_struct));
 
-  if (tile_mat == NULL) {
+  if (packed_mat == NULL) {
     return QMCKL_NULL_CONTEXT;
   }
 
   /* Set all pointers and values to NULL */
   {
-    memset(tile_mat, 0, sizeof(qmckl_tile_struct));
+    memset(packed_mat, 0, sizeof(qmckl_packed_struct));
   }
 
-  return (qmckl_tile_matrix) tile_mat;
+  return (qmckl_packed_matrix) packed_mat;
 }
 
-qmckl_exit_code qmckl_init_pack(qmckl_context context, qmckl_tile_matrix tile_matrix, unsigned char mType, int64_t M8, int64_t N8, int64_t K8) {
+qmckl_exit_code qmckl_init_pack(qmckl_context context, qmckl_packed_matrix packed_matrix, unsigned char mType, int64_t M8, int64_t N8, int64_t K8) {
 
     /*
      * AVX2: We work only in factors of 8 * 6
      */
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
 
-  qmckl_tile_struct* const tmat = (qmckl_tile_struct* const) tile_matrix;
+  qmckl_packed_struct* const pmat = (qmckl_packed_struct* const) packed_matrix;
 
   if(mType == 'A' || mType == 'a'){
     // Initialize Tile data for A
     //ctx->A_tile.Nt = K8;
     //ctx->A_tile.NCt = K8;
-    tmat->Nt = K8;
-    tmat->NCt = K8;
+    pmat->Nt = K8;
+    pmat->NCt = K8;
     //if(ctx->A_tile.Nt > 1152) ctx->A_tile.NCt = ctx->A_tile.Nt/2;
-    if(tmat->Nt > 1152) tmat->NCt = tmat->Nt/2;
+    if(pmat->Nt > 1152) pmat->NCt = pmat->Nt/2;
     if((M8 % MR2) != 0){
 
       //ctx->A_tile.Mt = (int64_t)((M8/MR2)+1)*MR2;
@@ -58,17 +58,17 @@ qmckl_exit_code qmckl_init_pack(qmckl_context context, qmckl_tile_matrix tile_ma
       //if(ctx->A_tile.Mt > 1152) ctx->A_tile.MCt = ctx->A_tile.Mt/2;
       //if(ctx->A_tile.Mt < 512) ctx->A_tile.MCt = ctx->A_tile.Mt;
       //else ctx->A_tile.MCt = MR2*64;
-      tmat->Mt = (int64_t)((M8/MR2)+1)*MR2;
-      tmat->MCt = tmat->Mt;
-      if(tmat->Mt > 1152) tmat->MCt = tmat->Mt/2;
+      pmat->Mt = (int64_t)((M8/MR2)+1)*MR2;
+      pmat->MCt = pmat->Mt;
+      if(pmat->Mt > 1152) pmat->MCt = pmat->Mt/2;
     }
     else{
       //ctx->A_tile.Mt = (int64_t)M8;
       //ctx->A_tile.MCt = ctx->A_tile.Mt;
       //if(ctx->A_tile.Mt > 1152) ctx->A_tile.MCt = ctx->A_tile.Mt/2;
-      tmat->Mt = (int64_t)M8;
-      tmat->MCt = tmat->Mt;
-      if(tmat->Mt > 1152) tmat->MCt = tmat->Mt/2;
+      pmat->Mt = (int64_t)M8;
+      pmat->MCt = pmat->Mt;
+      if(pmat->Mt > 1152) pmat->MCt = pmat->Mt/2;
     }
   }
   else if(mType == 'B' || mType == 'b'){
@@ -87,18 +87,18 @@ qmckl_exit_code qmckl_init_pack(qmckl_context context, qmckl_tile_matrix tile_ma
     //}
 
     // Tile
-    tmat->Mt = K8;
-    tmat->MCt = K8;
-    if(tmat->Mt > 1152) tmat->MCt = tmat->Mt/2;
+    pmat->Mt = K8;
+    pmat->MCt = K8;
+    if(pmat->Mt > 1152) pmat->MCt = pmat->Mt/2;
     if((N8 % NR2) != 0){
-      tmat->Nt = (int64_t)((N8/NR2)+1)*NR2;
-      tmat->NCt = tmat->Nt;
-      if(tmat->Nt > 1152) tmat->NCt = tmat->Nt/2;
+      pmat->Nt = (int64_t)((N8/NR2)+1)*NR2;
+      pmat->NCt = pmat->Nt;
+      if(pmat->Nt > 1152) pmat->NCt = pmat->Nt/2;
     }
     else{
-      tmat->Nt = (int64_t)N8;
-      tmat->NCt = tmat->Nt;
-      if(tmat->Nt > 1152) tmat->NCt = tmat->Nt/2;
+      pmat->Nt = (int64_t)N8;
+      pmat->NCt = pmat->Nt;
+      if(pmat->Nt > 1152) pmat->NCt = pmat->Nt/2;
     }
   }
   else if(mType == 'C' || mType == 'c'){
@@ -127,24 +127,24 @@ qmckl_exit_code qmckl_init_pack(qmckl_context context, qmckl_tile_matrix tile_ma
     // Tile
     if((M8 % MR2) != 0){
 
-      tmat->Mt = (int64_t)((M8/MR2)+1)*MR2;
-      tmat->MCt = tmat->Mt;
-      if(tmat->Mt > 1152) tmat->MCt = tmat->Mt/2;
+      pmat->Mt = (int64_t)((M8/MR2)+1)*MR2;
+      pmat->MCt = pmat->Mt;
+      if(pmat->Mt > 1152) pmat->MCt = pmat->Mt/2;
     }
     else{
-      tmat->Mt = (int64_t)M8;
-      tmat->MCt = tmat->Mt;
-      if(tmat->Mt > 1152) tmat->MCt = tmat->Mt/2;
+      pmat->Mt = (int64_t)M8;
+      pmat->MCt = pmat->Mt;
+      if(pmat->Mt > 1152) pmat->MCt = pmat->Mt/2;
     }
     if((N8 % NR2) != 0){
-      tmat->Nt = (int64_t)((N8/NR2)+1)*NR2;
-      tmat->NCt = tmat->Nt;
-      if(tmat->Nt > 1152) tmat->NCt = tmat->Nt/2;
+      pmat->Nt = (int64_t)((N8/NR2)+1)*NR2;
+      pmat->NCt = pmat->Nt;
+      if(pmat->Nt > 1152) pmat->NCt = pmat->Nt/2;
     }
     else{
-      tmat->Nt = (int64_t)N8;
-      tmat->NCt = tmat->Nt;
-      if(tmat->Nt > 1152) tmat->NCt = tmat->Nt/2;
+      pmat->Nt = (int64_t)N8;
+      pmat->NCt = pmat->Nt;
+      if(pmat->Nt > 1152) pmat->NCt = pmat->Nt/2;
     }
   }
   else{
@@ -154,104 +154,104 @@ qmckl_exit_code qmckl_init_pack(qmckl_context context, qmckl_tile_matrix tile_ma
   return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_pack_matrix(qmckl_context context, qmckl_tile_matrix tile_matrix, unsigned char mType, int64_t M8, int64_t N8, double *Ain, int64_t LDA) {
+qmckl_exit_code qmckl_pack_matrix(qmckl_context context, qmckl_packed_matrix packed_matrix, unsigned char mType, int64_t M8, int64_t N8, double *Ain, int64_t LDA) {
 
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
-  qmckl_tile_struct* const tmat = (qmckl_tile_struct* const) tile_matrix;
+  qmckl_packed_struct* const pmat = (qmckl_packed_struct* const) packed_matrix;
 
   if(mType == 'A' || mType == 'a'){
-    int64_t mb = tmat->Mt / tmat->MCt;
-    int64_t kb = tmat->Nt / tmat->NCt;
+    int64_t mb = pmat->Mt / pmat->MCt;
+    int64_t kb = pmat->Nt / pmat->NCt;
     int64_t idxi = 0;
     int64_t idxk = 0;
     int64_t nmbnb = 0;
     int64_t nmbnb_prev = 0;
-    int64_t MCKC = tmat->MCt*tmat->NCt;
+    int64_t MCKC = pmat->MCt*pmat->NCt;
     int64_t MCmax, NCmax;
-    int64_t i_tile_b, i_tile_a;
+    int64_t i_packed_b, i_packed_a;
     int i,j,k,ii;
     int64_t Min = M8;
 
     // Initialize buffers
     if( ctx->_A == NULL) {
-      ctx->_A  = (double *)aligned_alloc(64, tmat->MCt*tmat->NCt * sizeof(double));
-      for(i=0;i<tmat->MCt*tmat->NCt;++i){
+      ctx->_A  = (double *)aligned_alloc(64, pmat->MCt*pmat->NCt * sizeof(double));
+      for(i=0;i<pmat->MCt*pmat->NCt;++i){
 	ctx->_A[i]=0.0;
       }
     }
   
     // Tile
     // Initialize indices
-    i_tile_b = 0;
-    i_tile_a = 0;
+    i_packed_b = 0;
+    i_packed_a = 0;
 
-    if( tmat->data == NULL) tmat->data = (double *)aligned_alloc(64, tmat->Mt*tmat->Nt* sizeof(double));
+    if( pmat->data == NULL) pmat->data = (double *)aligned_alloc(64, pmat->Mt*pmat->Nt* sizeof(double));
 
     for(k=0;k<kb;++k) {
-      int64_t kc = tmat->NCt;
+      int64_t kc = pmat->NCt;
 
       idxk = k * kc;
 
       for(j=0;j<mb;++j) {
-	if ( (j+1)*tmat->MCt > Min){
-	  MCmax = Min - (j+0)*tmat->MCt;
+	if ( (j+1)*pmat->MCt > Min){
+	  MCmax = Min - (j+0)*pmat->MCt;
 	}
 	else{
-	  MCmax = tmat->MCt;
+	  MCmax = pmat->MCt;
 	}
-	packA_general(context, tile_matrix, kc, MCmax, &Ain[idxk + j*tmat->MCt*LDA], LDA, 1, ctx->_A);
+	packA_general(context, packed_matrix, kc, MCmax, &Ain[idxk + j*pmat->MCt*LDA], LDA, 1, ctx->_A);
 
 	// Write to tiled matrix to A
 	for(ii=0;ii<MCKC;++ii) {
-	  tmat->data[i_tile_a * (MCKC) + ii] = ctx->_A[ii];
+	  pmat->data[i_packed_a * (MCKC) + ii] = ctx->_A[ii];
 	}
-	i_tile_a += 1;
+	i_packed_a += 1;
       }
     }
   }
   else if(mType == 'B' || mType == 'b'){
-    int64_t nb = tmat->Nt / tmat->NCt;
-    int64_t kb = tmat->Mt / tmat->MCt;
+    int64_t nb = pmat->Nt / pmat->NCt;
+    int64_t kb = pmat->Mt / pmat->MCt;
     int64_t idxi = 0;
     int64_t idxk = 0;
     int64_t nmbnb = 0;
     int64_t nmbnb_prev = 0;
-    int64_t NCKC = tmat->NCt*tmat->MCt;
+    int64_t NCKC = pmat->NCt*pmat->MCt;
     int64_t MCmax, NCmax;
-    int64_t i_tile_b, i_tile_a;
+    int64_t i_packed_b, i_packed_a;
     int i,j,k,ii;
     int64_t Nin = N8;
 
     // Initialize buffers
     if( ctx->_B == NULL) {
-      ctx->_B  = (double *)aligned_alloc(64, tmat->NCt*tmat->MCt * sizeof(double));
-      for(i=0;i<tmat->NCt*tmat->MCt;++i){
+      ctx->_B  = (double *)aligned_alloc(64, pmat->NCt*pmat->MCt * sizeof(double));
+      for(i=0;i<pmat->NCt*pmat->MCt;++i){
 	ctx->_B[i]=0.0;
       }
     }
 
     // Tile
-    i_tile_b = 0;
-    i_tile_a = 0;
+    i_packed_b = 0;
+    i_packed_a = 0;
 
-    if( tmat->data == NULL) tmat->data = (double *)aligned_alloc(64, tmat->Mt*tmat->Nt * sizeof(double));
+    if( pmat->data == NULL) pmat->data = (double *)aligned_alloc(64, pmat->Mt*pmat->Nt * sizeof(double));
 
     for(i=0;i<nb;++i) {
-      if ( (i+1)*tmat->NCt > Nin){
-        NCmax = Nin - (i+0)*tmat->NCt;
+      if ( (i+1)*pmat->NCt > Nin){
+        NCmax = Nin - (i+0)*pmat->NCt;
       }
       else{
-        NCmax = tmat->NCt;
+        NCmax = pmat->NCt;
       }
       for(k=0;k<kb;++k) {
-	int64_t kc = tmat->MCt;
-	packB_general(context, tile_matrix, kc, NCmax, &Ain[k*tmat->MCt*LDA + i*tmat->NCt], LDA, 1, ctx->_B);
+	int64_t kc = pmat->MCt;
+	packB_general(context, packed_matrix, kc, NCmax, &Ain[k*pmat->MCt*LDA + i*pmat->NCt], LDA, 1, ctx->_B);
 
 	// Write to tiled matrix to B
 	for(ii=0;ii<NCKC;++ii) {
-	  tmat->data[i_tile_b * (NCKC) + ii] = ctx->_B[ii];
+	  pmat->data[i_packed_b * (NCKC) + ii] = ctx->_B[ii];
 	}
-	i_tile_b += 1;
+	i_packed_b += 1;
       }
     }
   }
@@ -260,11 +260,11 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, qmckl_tile_matrix tile_
     int i,j,k,ii;
 
     // Tile
-    if( tmat->data == NULL) tmat->data = (double *)aligned_alloc(64, tmat->Mt*tmat->Nt   * sizeof(double));
+    if( pmat->data == NULL) pmat->data = (double *)aligned_alloc(64, pmat->Mt*pmat->Nt   * sizeof(double));
 
     // Initialize C_tile
-    for(i=0;i<tmat->Mt*tmat->Nt;++i){
-      tmat->data[i] = 0.0;
+    for(i=0;i<pmat->Mt*pmat->Nt;++i){
+      pmat->data[i] = 0.0;
     }
   }
   else{
@@ -275,25 +275,25 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, qmckl_tile_matrix tile_
 }
 
 
-qmckl_exit_code qmckl_dgemm_tiled_avx2_nn(qmckl_context context, qmckl_tile_matrix tile_matrix_A, int64_t incRowA,
-                                                qmckl_tile_matrix tile_matrix_B, int64_t incRowB,
-                                                qmckl_tile_matrix tile_matrix_C, int64_t incRowC) {
+qmckl_exit_code qmckl_dgemm_tiled_avx2_nn(qmckl_context context, qmckl_packed_matrix packed_matrix_A, int64_t incRowA,
+                                                qmckl_packed_matrix packed_matrix_B, int64_t incRowB,
+                                                qmckl_packed_matrix packed_matrix_C, int64_t incRowC) {
 
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
-  qmckl_tile_struct* const tmatA = (qmckl_tile_struct* const) tile_matrix_A;
-  qmckl_tile_struct* const tmatB = (qmckl_tile_struct* const) tile_matrix_B;
-  qmckl_tile_struct* const tmatC = (qmckl_tile_struct* const) tile_matrix_C;
+  qmckl_packed_struct* const pmatA = (qmckl_packed_struct* const) packed_matrix_A;
+  qmckl_packed_struct* const pmatB = (qmckl_packed_struct* const) packed_matrix_B;
+  qmckl_packed_struct* const pmatC = (qmckl_packed_struct* const) packed_matrix_C;
 
-  int64_t mb = tmatA->Mt / tmatA->MCt;
-  int64_t nb = tmatB->Nt / tmatB->NCt;
-  int64_t kb = tmatA->Nt / tmatA->NCt;
+  int64_t mb = pmatA->Mt / pmatA->MCt;
+  int64_t nb = pmatB->Nt / pmatB->NCt;
+  int64_t kb = pmatA->Nt / pmatA->NCt;
   int64_t idxi = 0;
   int64_t idxk = 0;
   int64_t nmbnb = 0;
   int64_t nmbnb_prev = 0;
-  int64_t mc = tmatA->MCt;
-  int64_t nc = tmatB->NCt;
-  int64_t kc = tmatA->NCt;
+  int64_t mc = pmatA->MCt;
+  int64_t nc = pmatB->NCt;
+  int64_t kc = pmatA->NCt;
   int64_t MCNC = mc*nc;
   size_t szeA = mc*kc*sizeof(double);
   size_t szeB = nc*kc*sizeof(double);
@@ -301,25 +301,25 @@ qmckl_exit_code qmckl_dgemm_tiled_avx2_nn(qmckl_context context, qmckl_tile_matr
   int MCKC = mc*kc;
   int NCKC = nc*kc;
 
-  int64_t i_tile_b, i_tile_a;
-  double *A_tile_p __attribute__ ((aligned(64)));
-  double *B_tile_p __attribute__ ((aligned(64)));
-  double *C_tile_p __attribute__ ((aligned(64)));
+  int64_t i_packed_b, i_packed_a;
+  double *A_packed_p __attribute__ ((aligned(64)));
+  double *B_packed_p __attribute__ ((aligned(64)));
+  double *C_packed_p __attribute__ ((aligned(64)));
 
   // Initialize indices
-  i_tile_b = 0;
-  i_tile_a = 0;
+  i_packed_b = 0;
+  i_packed_a = 0;
 
-  B_tile_p = tmatB->data;
-  A_tile_p = tmatA->data;
+  B_packed_p = pmatB->data;
+  A_packed_p = pmatA->data;
 
 //#pragma omp parallel
 //{
     for(i=0;i<nb;++i) {
         nmbnb_prev = i*mb;
-        i_tile_a = 0;
-        A_tile_p = tmatA->data;
-        //B_tile_p = _B_tile + i*kb*(NCKC);
+        i_packed_a = 0;
+        A_packed_p = pmatA->data;
+        //B_packed_p = _B_tile + i*kb*(NCKC);
         imb = i*mb;
 //#pragma omp single
         for(k=0;k<kb;++k) {
@@ -327,20 +327,20 @@ qmckl_exit_code qmckl_dgemm_tiled_avx2_nn(qmckl_context context, qmckl_tile_matr
             idxi = i * nc * incRowC;
             idxk = k * kc;
 
-            //B_tile_p = _B_tile + i_tile_b * (NCKC);
-            C_tile_p = tmatC->data + (imb) * MCNC;
+            //B_packed_p = _B_tile + i_packed_b * (NCKC);
+            C_packed_p = pmatC->data + (imb) * MCNC;
 
             for(j=0;j<mb;++j) {
                 #pragma forceinline
-                dgemm_macro_kernel_avx2_16regs(mc, kc, nc, C_tile_p, incRowC, 1, A_tile_p, B_tile_p);
-                A_tile_p += (MCKC);
-                C_tile_p +=  MCNC;
+                dgemm_macro_kernel_avx2_16regs(mc, kc, nc, C_packed_p, incRowC, 1, A_packed_p, B_packed_p);
+                A_packed_p += (MCKC);
+                C_packed_p +=  MCNC;
                 //nmbnb = nmbnb + 1;
-                i_tile_a += 1;
+                i_packed_a += 1;
             }
             //if(k < (kb-1)) nmbnb = nmbnb_prev;
-            B_tile_p += (NCKC);
-            i_tile_b += 1;
+            B_packed_p += (NCKC);
+            i_packed_b += 1;
         }
     }
 //}
@@ -349,11 +349,11 @@ qmckl_exit_code qmckl_dgemm_tiled_avx2_nn(qmckl_context context, qmckl_tile_matr
 }
 
 
-qmckl_exit_code qmckl_unpack_matrix(qmckl_context context, qmckl_tile_matrix tile_matrix, double *B, int64_t M, int64_t N) {
+qmckl_exit_code qmckl_unpack_matrix(qmckl_context context, qmckl_packed_matrix packed_matrix, double *B, int64_t M, int64_t N) {
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
-  qmckl_tile_struct* const tmat = (qmckl_tile_struct* const) tile_matrix;
-  int64_t mc = tmat->MCt;
-  int64_t nc = tmat->NCt;
+  qmckl_packed_struct* const pmat = (qmckl_packed_struct* const) packed_matrix;
+  int64_t mc = pmat->MCt;
+  int64_t nc = pmat->NCt;
   int64_t mb = M / mc;
   int64_t nb = N / nc;
   int64_t mp = mc / MR;
@@ -367,20 +367,20 @@ qmckl_exit_code qmckl_unpack_matrix(qmckl_context context, qmckl_tile_matrix til
       int64_t kmc = ( j / mc );
       int64_t kmr = ( j - kmc * mc ) / MR;
       int64_t k   = ( ( j - kmc * mc ) - ( kmr * MR ) );
-      B[i + j*N] = tmat->data[(mc*nc)*(lnc*mb) + (mc*nc)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k];
+      B[i + j*N] = pmat->data[(mc*nc)*(lnc*mb) + (mc*nc)*(kmc) + (MR*NR)*(lnr*mp) + (MR*NR)*(kmr) + (l*MR) + k];
       }
   }
   return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_tile_matrix_destroy(qmckl_tile_matrix tile_matrix){
+qmckl_exit_code qmckl_packed_matrix_destroy(qmckl_packed_matrix packed_matrix){
 
-  qmckl_tile_struct* const tmat = (qmckl_tile_struct* const) tile_matrix;
+  qmckl_packed_struct* const pmat = (qmckl_packed_struct* const) packed_matrix;
 
   // Free data
-  if( tmat->data != NULL){
-    free(tmat->data);
-    tmat->data = NULL;
+  if( pmat->data != NULL){
+    free(pmat->data);
+    pmat->data = NULL;
   }
 
   return QMCKL_SUCCESS;
@@ -421,29 +421,29 @@ qmckl_exit_code qmckl_dgemm_tiled_NN(qmckl_context context, int64_t Min, int64_t
 				     double *B, int64_t incRowB,
 				     double *C, int64_t incRowC) {
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
-  qmckl_tile_matrix const tile_matrix_A;
-  qmckl_tile_matrix const tile_matrix_B;
-  qmckl_tile_matrix const tile_matrix_C;
+  qmckl_packed_matrix const packed_matrix_A;
+  qmckl_packed_matrix const packed_matrix_B;
+  qmckl_packed_matrix const packed_matrix_C;
 
   // Init memory
-  qmckl_init_pack(context, tile_matrix_A, 'A', Min, Nin, Kin);
-  qmckl_init_pack(context, tile_matrix_B, 'B', Min, Nin, Kin);
-  qmckl_init_pack(context, tile_matrix_C, 'C', Min, Nin, Kin);
+  qmckl_init_pack(context, packed_matrix_A, 'A', Min, Nin, Kin);
+  qmckl_init_pack(context, packed_matrix_B, 'B', Min, Nin, Kin);
+  qmckl_init_pack(context, packed_matrix_C, 'C', Min, Nin, Kin);
 
   // Tile A and B
-  qmckl_pack_matrix(context, tile_matrix_A, 'A', Min, Kin, A, incRowA);
-  qmckl_pack_matrix(context, tile_matrix_B, 'B', Kin, Nin, B, incRowB);
-  qmckl_pack_matrix(context, tile_matrix_C, 'C', Min, Nin, C, incRowB);
+  qmckl_pack_matrix(context, packed_matrix_A, 'A', Min, Kin, A, incRowA);
+  qmckl_pack_matrix(context, packed_matrix_B, 'B', Kin, Nin, B, incRowB);
+  qmckl_pack_matrix(context, packed_matrix_C, 'C', Min, Nin, C, incRowB);
 
 
 
   // Call DGEMM kernel
-  qmckl_dgemm_tiled_avx2_nn(context, tile_matrix_A, incRowA,
-             tile_matrix_B, incRowB,
-             tile_matrix_C, incRowC);
+  qmckl_dgemm_tiled_avx2_nn(context, packed_matrix_A, incRowA,
+             packed_matrix_B, incRowB,
+             packed_matrix_C, incRowC);
 
   // Unpacking
-  qmckl_unpack_matrix(context, tile_matrix_C, C, Min, Nin);
+  qmckl_unpack_matrix(context, packed_matrix_C, C, Min, Nin);
 
   //// Free memory
   //qmckl_context_destroy(context);

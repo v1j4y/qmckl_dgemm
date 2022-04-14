@@ -28,9 +28,9 @@ program test
   
   ! C Pointers as int64
   integer(8) :: context
-  integer(8) :: tile_matrix_A
-  integer(8) :: tile_matrix_B
-  integer(8) :: tile_matrix_C
+  integer(8) :: packed_matrix_A
+  integer(8) :: packed_matrix_B
+  integer(8) :: packed_matrix_C
   !integer(8) :: A_tile, B_tile, C_tile
   !integer(8) :: A_tile, B_tile, C_tile
   double precision, allocatable :: A_tile(:), B_tile(:), C_tile(:)
@@ -51,9 +51,9 @@ program test
            k8 = k
 
            context = qmckl_context_create()
-           tile_matrix_A = qmckl_tile_matrix_create()
-           tile_matrix_B = qmckl_tile_matrix_create()
-           tile_matrix_C = qmckl_tile_matrix_create()
+           packed_matrix_A = qmckl_packed_matrix_create()
+           packed_matrix_B = qmckl_packed_matrix_create()
+           packed_matrix_C = qmckl_packed_matrix_create()
 
            ! Allocate matrices once for all
            allocate(A(k8,m8), B(n8,k8), C0(m8,n8), C1(n8,m8))
@@ -70,8 +70,8 @@ program test
            C0 = 0.0d0
            C1 = 0.0d0
 
-           rc = qmckl_init_pack(context, tile_matrix_C, 'C', m8, n8, k8)
-           rc = qmckl_pack_matrix(context, tile_matrix_C, 'C', m8, n8, C1, LDC1)
+           rc = qmckl_init_pack(context, packed_matrix_C, 'C', m8, n8, k8)
+           rc = qmckl_pack_matrix(context, packed_matrix_C, 'C', m8, n8, C1, LDC1)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n
               print *, 'Failed tiling of C1'
@@ -79,16 +79,16 @@ program test
            end if
 
          
-           rc = qmckl_init_pack(context, tile_matrix_A, 'A', m8, k8, k8)
-           rc = qmckl_pack_matrix(context, tile_matrix_A, 'A', m8, k8, A, LDA)
+           rc = qmckl_init_pack(context, packed_matrix_A, 'A', m8, k8, k8)
+           rc = qmckl_pack_matrix(context, packed_matrix_A, 'A', m8, k8, A, LDA)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
               print *, 'Failed tiling of A'
               call exit(-1)
            end if
            
-           rc = qmckl_init_pack(context, tile_matrix_B, 'B', k8, n8, k8)
-           rc = qmckl_pack_matrix(context, tile_matrix_B, 'B', k8, n8, B, LDB)
+           rc = qmckl_init_pack(context, packed_matrix_B, 'B', k8, n8, k8)
+           rc = qmckl_pack_matrix(context, packed_matrix_B, 'B', k8, n8, B, LDB)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
               print *, 'Failed tiling of B'
@@ -96,7 +96,7 @@ program test
            end if
            
            
-           rc = qmckl_dgemm_tiled_avx2_nn(context, tile_matrix_A, LDA, tile_matrix_B, LDB, tile_matrix_C, LDC1)
+           rc = qmckl_dgemm_tiled_avx2_nn(context, packed_matrix_A, LDA, packed_matrix_B, LDB, packed_matrix_C, LDC1)
 
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
@@ -104,7 +104,7 @@ program test
               call exit(-1)
            end if
            
-           rc = qmckl_unpack_matrix(context, tile_matrix_C, C1, m8, n8)
+           rc = qmckl_unpack_matrix(context, packed_matrix_C, C1, m8, n8)
            if (rc /= QMCKL_SUCCESS) then
               print *, m,n,k
               print *, 'Failed untiling of C'
@@ -136,9 +136,9 @@ program test
            deallocate(B)
            deallocate(C0)
            deallocate(C1)
-           res = qmckl_tile_matrix_destroy(tile_matrix_A)
-           res = qmckl_tile_matrix_destroy(tile_matrix_B)
-           res = qmckl_tile_matrix_destroy(tile_matrix_C)
+           res = qmckl_packed_matrix_destroy(packed_matrix_A)
+           res = qmckl_packed_matrix_destroy(packed_matrix_B)
+           res = qmckl_packed_matrix_destroy(packed_matrix_C)
            res = qmckl_context_destroy(context)
 
         end do
