@@ -171,12 +171,13 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, qmckl_packed_matrix pac
     int64_t i_packed_b, i_packed_a;
     int i,j,k,ii;
     int64_t Min = M8;
+    double *_A=NULL;
 
     // Initialize buffers
-    if( ctx->_A == NULL) {
-      ctx->_A  = (double *)aligned_alloc(64, pmat->MCt*pmat->NCt * sizeof(double));
+    if( _A == NULL) {
+      _A  = (double *)aligned_alloc(64, pmat->MCt*pmat->NCt * sizeof(double));
       for(i=0;i<pmat->MCt*pmat->NCt;++i){
-	ctx->_A[i]=0.0;
+	_A[i]=0.0;
       }
     }
   
@@ -199,15 +200,16 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, qmckl_packed_matrix pac
 	else{
 	  MCmax = pmat->MCt;
 	}
-	packA_general(context, packed_matrix, kc, MCmax, &Ain[idxk + j*pmat->MCt*LDA], LDA, 1, ctx->_A);
+	packA_general(context, packed_matrix, kc, MCmax, &Ain[idxk + j*pmat->MCt*LDA], LDA, 1, _A);
 
 	// Write to tiled matrix to A
 	for(ii=0;ii<MCKC;++ii) {
-	  pmat->data[i_packed_a * (MCKC) + ii] = ctx->_A[ii];
+	  pmat->data[i_packed_a * (MCKC) + ii] = _A[ii];
 	}
 	i_packed_a += 1;
       }
     }
+    free(_A);
   }
   else if(mType == 'B' || mType == 'b'){
     int64_t nb = pmat->Nt / pmat->NCt;
@@ -221,12 +223,13 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, qmckl_packed_matrix pac
     int64_t i_packed_b, i_packed_a;
     int i,j,k,ii;
     int64_t Nin = N8;
+    double *_B=NULL;
 
     // Initialize buffers
-    if( ctx->_B == NULL) {
-      ctx->_B  = (double *)aligned_alloc(64, pmat->NCt*pmat->MCt * sizeof(double));
+    if( _B == NULL) {
+      _B  = (double *)aligned_alloc(64, pmat->NCt*pmat->MCt * sizeof(double));
       for(i=0;i<pmat->NCt*pmat->MCt;++i){
-	ctx->_B[i]=0.0;
+	_B[i]=0.0;
       }
     }
 
@@ -245,15 +248,16 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, qmckl_packed_matrix pac
       }
       for(k=0;k<kb;++k) {
 	int64_t kc = pmat->MCt;
-	packB_general(context, packed_matrix, kc, NCmax, &Ain[k*pmat->MCt*LDA + i*pmat->NCt], LDA, 1, ctx->_B);
+	packB_general(context, packed_matrix, kc, NCmax, &Ain[k*pmat->MCt*LDA + i*pmat->NCt], LDA, 1, _B);
 
 	// Write to tiled matrix to B
 	for(ii=0;ii<NCKC;++ii) {
-	  pmat->data[i_packed_b * (NCKC) + ii] = ctx->_B[ii];
+	  pmat->data[i_packed_b * (NCKC) + ii] = _B[ii];
 	}
 	i_packed_b += 1;
       }
     }
+    free(_B);
   }
   else if(mType == 'C' || mType == 'c'){
 
@@ -389,14 +393,6 @@ qmckl_exit_code qmckl_packed_matrix_destroy(qmckl_packed_matrix packed_matrix){
 qmckl_exit_code qmckl_context_destroy(qmckl_context context){
 
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
-  if( ctx->_A != NULL){
-    free(ctx->_A);
-    ctx->_A = NULL;
-  }
-  if( ctx->_B != NULL){
-    free(ctx->_B);
-    ctx->_B = NULL;
-  }
 
   // Free tiles
   //if( ctx->A_tile.data != NULL){
@@ -446,6 +442,9 @@ qmckl_exit_code qmckl_dgemm_tiled_NN(qmckl_context context, int64_t Min, int64_t
   qmckl_unpack_matrix(context, packed_matrix_C, C, Min, Nin);
 
   //// Free memory
+  qmckl_packed_matrix_destroy(packed_matrix_A);
+  qmckl_packed_matrix_destroy(packed_matrix_B);
+  qmckl_packed_matrix_destroy(packed_matrix_C);
   //qmckl_context_destroy(context);
 
   return QMCKL_SUCCESS;
