@@ -29,6 +29,8 @@ AC_LANG(C)
 
 AC_PROG_FC(FC)
 
+PKG_PROG_PKG_CONFIG([])
+
 # Generate config
 AC_CONFIG_HEADERS([config.h])
 
@@ -265,7 +267,8 @@ AC_SUBST(AM_CPPFLAGS)
 AC_SUBST(AM_LDFLAGS)
 
 # Generate Makefile from Makefile.in
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile
+                 pkgconfig/qmckldgemm.pc])
 
 # Done
 AC_OUTPUT

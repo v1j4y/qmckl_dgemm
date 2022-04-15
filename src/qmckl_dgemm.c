@@ -412,14 +412,14 @@ qmckl_exit_code qmckl_context_destroy(qmckl_context context){
 }
 
 
-qmckl_exit_code qmckl_dgemm_tiled_NN(qmckl_context context, int64_t Min, int64_t Nin, int64_t Kin,
+qmckl_exit_code qmckl_dgemm_tiled(qmckl_context context, int64_t Min, int64_t Nin, int64_t Kin,
 				     double *A, int64_t incRowA,
 				     double *B, int64_t incRowB,
 				     double *C, int64_t incRowC) {
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
-  qmckl_packed_matrix const packed_matrix_A;
-  qmckl_packed_matrix const packed_matrix_B;
-  qmckl_packed_matrix const packed_matrix_C;
+  qmckl_packed_matrix packed_matrix_A = qmckl_packed_matrix_create();
+  qmckl_packed_matrix packed_matrix_B = qmckl_packed_matrix_create();
+  qmckl_packed_matrix packed_matrix_C = qmckl_packed_matrix_create();
 
   // Init memory
   qmckl_init_pack(context, packed_matrix_A, 'A', Min, Nin, Kin);

@@ -20,7 +20,7 @@ qmckl_exit_code qmckl_dgemm_tiled_avx2_nn(qmckl_context context, qmckl_packed_ma
                                                 qmckl_packed_matrix packed_matrix_B, int64_t incRowB,
                                                 qmckl_packed_matrix packed_matrix_C, int64_t incRowC);
 
-qmckl_exit_code qmckl_dgemm_tiled_NN(qmckl_context context, int64_t Min, int64_t Nin, int64_t Kin,
+qmckl_exit_code qmckl_dgemm_tiled(qmckl_context context, int64_t Min, int64_t Nin, int64_t Kin,
 				     double *A, int64_t incRowA,
 				     double *B, int64_t incRowB,
 				     double *C, int64_t incRowC);
