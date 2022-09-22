@@ -2,13 +2,11 @@
 #define __QMCKL_DGEMM_H
 #include "qmckl_dgemm_private.h"
 
-typedef int64_t qmckl_context;
 typedef int32_t qmckl_exit_code;
+typedef int64_t qmckl_packed_matrix;
 #define QMCKL_NULL_CONTEXT (qmckl_exit_code) 0
 #define QMCKL_SUCCESS (qmckl_exit_code) 0
 #define QMCKL_FAILURE (qmckl_exit_code) 101
-
-//qmckl_context qmckl_context_create();
 
 qmckl_packed_matrix qmckl_packed_matrix_create();
 
@@ -29,5 +27,4 @@ qmckl_exit_code qmckl_unpack_matrix(qmckl_packed_matrix packed_matrix, double *B
 
 qmckl_exit_code qmckl_packed_matrix_destroy(qmckl_packed_matrix packed_matrix);
 
-//qmckl_exit_code qmckl_context_destroy(qmckl_context context);
 #endif
