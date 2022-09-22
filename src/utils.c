@@ -193,8 +193,8 @@ qmckl_exit_code get_diff_matrix_ABT(double *A, double *B, int64_t M, int64_t N) 
 //    }
 //}
 
-void print_diff_matrix_ASer_BT(qmckl_context context, qmckl_packed_matrix packed_matrix, double *A, double *B, int64_t M, int64_t N) {
-  qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
+void print_diff_matrix_ASer_BT(qmckl_packed_matrix packed_matrix, double *A, double *B, int64_t M, int64_t N) {
+  //qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
   qmckl_packed_struct* const tmat = (qmckl_packed_struct* const) packed_matrix;
     int64_t mc = tmat->MCt;
     int64_t nc = tmat->NCt;
@@ -302,8 +302,8 @@ void print_diff_matrix_ASer_BT(qmckl_context context, qmckl_packed_matrix packed
 //}
 
 // Pack A which is traversed row wise (MC rows and KC columns)
-void packA_general(qmckl_context context, qmckl_packed_matrix packed_matrix, int64_t kc, int64_t MCmax, double *A, int64_t dimRowA, int64_t dimColA, double *buffer) {
-  qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
+void packA_general(qmckl_packed_matrix packed_matrix, int64_t kc, int64_t MCmax, double *A, int64_t dimRowA, int64_t dimColA, double *buffer) {
+  //qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
   qmckl_packed_struct* const tmat = (qmckl_packed_struct* const) packed_matrix;
   int64_t mp = tmat->MCt / MR;
   double *buffer_start = buffer;
@@ -328,8 +328,8 @@ void packA_general(qmckl_context context, qmckl_packed_matrix packed_matrix, int
 }
 
 // Pack B which is traversed column wise (NC rows and KC columns)
-void packB_general(qmckl_context context, qmckl_packed_matrix packed_matrix, int64_t kc, int64_t NCmax, double *B, int64_t dimRowB, int64_t dimColB, double *buffer) {
-  qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
+void packB_general(qmckl_packed_matrix packed_matrix, int64_t kc, int64_t NCmax, double *B, int64_t dimRowB, int64_t dimColB, double *buffer) {
+  //qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
   qmckl_packed_struct* const tmat = (qmckl_packed_struct* const) packed_matrix;
   int64_t np = tmat->NCt / NR;
   double *buffer_start = buffer;

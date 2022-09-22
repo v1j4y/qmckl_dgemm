@@ -75,9 +75,9 @@ qmckl_exit_code get_diff_matrix_ABT(double *A, double *B, int64_t M, int64_t N);
 //void print_diff_matrix_AT_B( double *A, double *B, int64_t M, int64_t N);
 //void packA(int64_t kc, double *A, int64_t incRowA, int64_t incColA, double *buffer);
 //void packB(int64_t kc, double *B, int64_t incRowB, int64_t incColB, double *buffer);
-void packA_general(qmckl_context context, qmckl_packed_matrix packed_matrix, int64_t kc, int64_t MCmax, double *A, int64_t dimRowA, int64_t dimColA, double *buffer);
-void packB_general(qmckl_context context, qmckl_packed_matrix packed_matrix, int64_t kc, int64_t NCmax, double *B, int64_t dimRowB, int64_t dimColB, double *buffer);
+void packA_general(qmckl_packed_matrix packed_matrix, int64_t kc, int64_t MCmax, double *A, int64_t dimRowA, int64_t dimColA, double *buffer);
+void packB_general(qmckl_packed_matrix packed_matrix, int64_t kc, int64_t NCmax, double *B, int64_t dimRowB, int64_t dimColB, double *buffer);
 //void print_diff_matrix_ASer_B(double *A, double *B, int64_t M, int64_t N);
-void print_diff_matrix_ASer_BT(qmckl_context context, qmckl_packed_matrix packed_matrix, double *A, double *B, int64_t M, int64_t N);
+void print_diff_matrix_ASer_BT(qmckl_packed_matrix packed_matrix, double *A, double *B, int64_t M, int64_t N);
 //void print_matrix_ASer(double *A, int64_t M, int64_t N);
 #endif 

@@ -41,8 +41,8 @@ int main() {
 	DIM_K = iterK;
     
   
-  qmckl_context context = qmckl_context_create();
-  qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
+	//qmckl_context context = qmckl_context_create();
+	//qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
   qmckl_packed_matrix packed_matrix_A = qmckl_packed_matrix_create();
   qmckl_packed_matrix packed_matrix_B = qmckl_packed_matrix_create();
   qmckl_packed_matrix packed_matrix_C = qmckl_packed_matrix_create();
@@ -51,9 +51,9 @@ int main() {
   qmckl_packed_struct* const pmatC = (qmckl_packed_struct* const) packed_matrix_C;
 
   //init_dims_avx2_input(context, DIM_M, DIM_N, DIM_K);
-  qmckl_init_pack(context, packed_matrix_A, 'A', DIM_M, DIM_N, DIM_K);
-  qmckl_init_pack(context, packed_matrix_B, 'B', DIM_M, DIM_N, DIM_K);
-  qmckl_init_pack(context, packed_matrix_C, 'C', DIM_M, DIM_N, DIM_K);
+  qmckl_init_pack(packed_matrix_A, 'A', DIM_M, DIM_N, DIM_K);
+  qmckl_init_pack(packed_matrix_B, 'B', DIM_M, DIM_N, DIM_K);
+  qmckl_init_pack(packed_matrix_C, 'C', DIM_M, DIM_N, DIM_K);
   
   M = DIM_M;
   N = DIM_N;
@@ -87,11 +87,11 @@ int main() {
   
   int i,j=rep;
   
-  qmckl_pack_matrix(context, packed_matrix_A, 'A', M, K, A, incRowA);
-  qmckl_pack_matrix(context, packed_matrix_B, 'B', K, N, B, incRowB);
-  qmckl_pack_matrix(context, packed_matrix_C, 'C', M, N, C, incRowC);
+  qmckl_pack_matrix(packed_matrix_A, 'A', M, K, A, incRowA);
+  qmckl_pack_matrix(packed_matrix_B, 'B', K, N, B, incRowB);
+  qmckl_pack_matrix(packed_matrix_C, 'C', M, N, C, incRowC);
   
-  qmckl_dgemm_tiled_avx2_nn(context, packed_matrix_A, incRowA,
+  qmckl_dgemm_tiled_avx2_nn(packed_matrix_A, incRowA,
 			   packed_matrix_B, incRowB,
 			   packed_matrix_C, incRowC);
   
@@ -127,7 +127,7 @@ int main() {
   //printf("\n-------------diff-----------------\n");
   //print_diff_matrix_AT_B(C,D, M, N);
   //print_diff_matrix_ASer_BT(context, C,DBlas, M, N);
-  qmckl_unpack_matrix(context, packed_matrix_C, CUnpack, M, N);
+  qmckl_unpack_matrix(packed_matrix_C, CUnpack, M, N);
   //print_diff_matrix(CUnpack,DBlas, M, N);
   qmckl_exit_code rc = get_diff_matrix_ABT(CUnpack,DBlas, M, N);
   if(rc == QMCKL_FAILURE){
@@ -145,7 +145,7 @@ int main() {
 
 #elif defined(HAVE_OPENBLAS) || defined(HAVE_SYSTEM_BLAS)
 
-  qmckl_unpack_matrix(context, packed_matrix_C, CUnpack, M, N);
+  qmckl_unpack_matrix(packed_matrix_C, CUnpack, M, N);
 
   cblas_dgemm(CBLAS_NO_TRANS, CBLAS_ROW_MAJOR,MB,NB,KB,alpha,ABlas,KB,BBlas,NB,beta,DBlas,MB)  
   qmckl_exit_code rc = get_diff_matrix_ABT(CUnpack,DBlas, M, N);
@@ -164,7 +164,7 @@ int main() {
   qmckl_packed_matrix_destroy(packed_matrix_A);
   qmckl_packed_matrix_destroy(packed_matrix_B);
   qmckl_packed_matrix_destroy(packed_matrix_C);
-  qmckl_context_destroy(context);
+  //qmckl_context_destroy(context);
   free(A);
   free(B);
   free(C);

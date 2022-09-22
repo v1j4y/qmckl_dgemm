@@ -22,7 +22,7 @@
 #define NR2 6
 #endif
 
-typedef int64_t qmckl_context;
+//typedef int64_t qmckl_context;
 typedef int64_t qmckl_packed_matrix;
 typedef int32_t qmckl_exit_code;
 
@@ -42,8 +42,8 @@ typedef struct qmckl_packed_struct{
   int64_t NRt;
 } qmckl_packed_struct;
 
-typedef struct qmckl_context_struct{
-
-} qmckl_context_struct;
+//typedef struct qmckl_context_struct{
+//
+//} qmckl_context_struct;
 
 #endif

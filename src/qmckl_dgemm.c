@@ -2,21 +2,21 @@
 #include "qmckl_dgemm.h"
 #include "qmckl_dgemm_private.h"
 
-qmckl_context qmckl_context_create() {
-
-  qmckl_context_struct* const ctx = (qmckl_context_struct* const) malloc (sizeof(qmckl_context_struct));
-
-  if (ctx == NULL) {
-    return QMCKL_NULL_CONTEXT;
-  }
-
-  /* Set all pointers and values to NULL */
-  {
-    memset(ctx, 0, sizeof(qmckl_context_struct));
-  }
-
-  return (qmckl_context) ctx;
-}
+//qmckl_context qmckl_context_create() {
+//
+//  qmckl_context_struct* const ctx = (qmckl_context_struct* const) malloc (sizeof(qmckl_context_struct));
+//
+//  if (ctx == NULL) {
+//    return QMCKL_NULL_CONTEXT;
+//  }
+//
+//  /* Set all pointers and values to NULL */
+//  {
+//    memset(ctx, 0, sizeof(qmckl_context_struct));
+//  }
+//
+//  return (qmckl_context) ctx;
+//}
 
 qmckl_context qmckl_packed_matrix_create() {
 
@@ -34,12 +34,12 @@ qmckl_context qmckl_packed_matrix_create() {
   return (qmckl_packed_matrix) packed_mat;
 }
 
-qmckl_exit_code qmckl_init_pack(qmckl_context context, qmckl_packed_matrix packed_matrix, unsigned char mType, int64_t M8, int64_t N8, int64_t K8) {
+qmckl_exit_code qmckl_init_pack(qmckl_packed_matrix packed_matrix, unsigned char mType, int64_t M8, int64_t N8, int64_t K8) {
 
     /*
      * AVX2: We work only in factors of 8 * 6
      */
-  qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
+  //qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
 
   qmckl_packed_struct* const pmat = (qmckl_packed_struct* const) packed_matrix;
 
@@ -154,9 +154,9 @@ qmckl_exit_code qmckl_init_pack(qmckl_context context, qmckl_packed_matrix packe
   return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_pack_matrix(qmckl_context context, qmckl_packed_matrix packed_matrix, unsigned char mType, int64_t M8, int64_t N8, double *Ain, int64_t LDA) {
+qmckl_exit_code qmckl_pack_matrix(qmckl_packed_matrix packed_matrix, unsigned char mType, int64_t M8, int64_t N8, double *Ain, int64_t LDA) {
 
-  qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
+  //qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
   qmckl_packed_struct* const pmat = (qmckl_packed_struct* const) packed_matrix;
 
   if(mType == 'A' || mType == 'a'){
@@ -171,7 +171,8 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, qmckl_packed_matrix pac
     int64_t i_packed_b, i_packed_a;
     int i,j,k,ii;
     int64_t Min = M8;
-    double *_A=NULL;
+    double *_A;
+    _A = NULL;
 
     // Initialize buffers
     if( _A == NULL) {
@@ -200,7 +201,7 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, qmckl_packed_matrix pac
 	else{
 	  MCmax = pmat->MCt;
 	}
-	packA_general(context, packed_matrix, kc, MCmax, &Ain[idxk + j*pmat->MCt*LDA], LDA, 1, _A);
+	packA_general(packed_matrix, kc, MCmax, &Ain[idxk + j*pmat->MCt*LDA], LDA, 1, _A);
 
 	// Write to tiled matrix to A
 	for(ii=0;ii<MCKC;++ii) {
@@ -248,7 +249,7 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, qmckl_packed_matrix pac
       }
       for(k=0;k<kb;++k) {
 	int64_t kc = pmat->MCt;
-	packB_general(context, packed_matrix, kc, NCmax, &Ain[k*pmat->MCt*LDA + i*pmat->NCt], LDA, 1, _B);
+	packB_general(packed_matrix, kc, NCmax, &Ain[k*pmat->MCt*LDA + i*pmat->NCt], LDA, 1, _B);
 
 	// Write to tiled matrix to B
 	for(ii=0;ii<NCKC;++ii) {
@@ -279,11 +280,11 @@ qmckl_exit_code qmckl_pack_matrix(qmckl_context context, qmckl_packed_matrix pac
 }
 
 
-qmckl_exit_code qmckl_dgemm_tiled_avx2_nn(qmckl_context context, qmckl_packed_matrix packed_matrix_A, int64_t incRowA,
+qmckl_exit_code qmckl_dgemm_tiled_avx2_nn(qmckl_packed_matrix packed_matrix_A, int64_t incRowA,
                                                 qmckl_packed_matrix packed_matrix_B, int64_t incRowB,
                                                 qmckl_packed_matrix packed_matrix_C, int64_t incRowC) {
 
-  qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
+  //qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
   qmckl_packed_struct* const pmatA = (qmckl_packed_struct* const) packed_matrix_A;
   qmckl_packed_struct* const pmatB = (qmckl_packed_struct* const) packed_matrix_B;
   qmckl_packed_struct* const pmatC = (qmckl_packed_struct* const) packed_matrix_C;
@@ -353,8 +354,8 @@ qmckl_exit_code qmckl_dgemm_tiled_avx2_nn(qmckl_context context, qmckl_packed_ma
 }
 
 
-qmckl_exit_code qmckl_unpack_matrix(qmckl_context context, qmckl_packed_matrix packed_matrix, double *B, int64_t M, int64_t N) {
-  qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
+qmckl_exit_code qmckl_unpack_matrix(qmckl_packed_matrix packed_matrix, double *B, int64_t M, int64_t N) {
+  //qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
   qmckl_packed_struct* const pmat = (qmckl_packed_struct* const) packed_matrix;
   int64_t mc = pmat->MCt;
   int64_t nc = pmat->NCt;
@@ -390,56 +391,56 @@ qmckl_exit_code qmckl_packed_matrix_destroy(qmckl_packed_matrix packed_matrix){
   return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_context_destroy(qmckl_context context){
+//qmckl_exit_code qmckl_context_destroy(qmckl_context context){
+//
+//  qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
+//
+//  // Free tiles
+//  //if( ctx->A_tile.data != NULL){
+//  //  free(ctx->A_tile.data);
+//  //  ctx->A_tile.data = NULL;
+//  //}
+//  //if( ctx->B_tile.data != NULL){
+//  //  free(ctx->B_tile.data);
+//  //  ctx->B_tile.data = NULL;
+//  //}
+//  //if( ctx->C_tile.data != NULL){
+//  //  free(ctx->C_tile.data);
+//  //  ctx->C_tile.data = NULL;
+//  //}
+//
+//  return QMCKL_SUCCESS;
+//}
 
-  qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
 
-  // Free tiles
-  //if( ctx->A_tile.data != NULL){
-  //  free(ctx->A_tile.data);
-  //  ctx->A_tile.data = NULL;
-  //}
-  //if( ctx->B_tile.data != NULL){
-  //  free(ctx->B_tile.data);
-  //  ctx->B_tile.data = NULL;
-  //}
-  //if( ctx->C_tile.data != NULL){
-  //  free(ctx->C_tile.data);
-  //  ctx->C_tile.data = NULL;
-  //}
-
-  return QMCKL_SUCCESS;
-}
-
-
-qmckl_exit_code qmckl_dgemm_tiled(qmckl_context context, int64_t Min, int64_t Nin, int64_t Kin,
+qmckl_exit_code qmckl_dgemm_tiled(int64_t Min, int64_t Nin, int64_t Kin,
 				     double *A, int64_t incRowA,
 				     double *B, int64_t incRowB,
 				     double *C, int64_t incRowC) {
-  qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
+  //qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
   qmckl_packed_matrix packed_matrix_A = qmckl_packed_matrix_create();
   qmckl_packed_matrix packed_matrix_B = qmckl_packed_matrix_create();
   qmckl_packed_matrix packed_matrix_C = qmckl_packed_matrix_create();
 
   // Init memory
-  qmckl_init_pack(context, packed_matrix_A, 'A', Min, Nin, Kin);
-  qmckl_init_pack(context, packed_matrix_B, 'B', Min, Nin, Kin);
-  qmckl_init_pack(context, packed_matrix_C, 'C', Min, Nin, Kin);
+  qmckl_init_pack(packed_matrix_A, 'A', Min, Kin, Kin);
+  qmckl_init_pack(packed_matrix_B, 'B', Kin, Nin, Kin);
+  qmckl_init_pack(packed_matrix_C, 'C', Min, Nin, Kin);
 
   // Tile A and B
-  qmckl_pack_matrix(context, packed_matrix_A, 'A', Min, Kin, A, incRowA);
-  qmckl_pack_matrix(context, packed_matrix_B, 'B', Kin, Nin, B, incRowB);
-  qmckl_pack_matrix(context, packed_matrix_C, 'C', Min, Nin, C, incRowB);
+  qmckl_pack_matrix(packed_matrix_A, 'A', Min, Kin, A, Kin);
+  qmckl_pack_matrix(packed_matrix_B, 'B', Kin, Nin, B, Nin);
+  qmckl_pack_matrix(packed_matrix_C, 'C', Min, Nin, C, Nin);
 
 
 
   // Call DGEMM kernel
-  qmckl_dgemm_tiled_avx2_nn(context, packed_matrix_A, incRowA,
-             packed_matrix_B, incRowB,
-             packed_matrix_C, incRowC);
+  qmckl_dgemm_tiled_avx2_nn(packed_matrix_A, Kin,
+             packed_matrix_B, Nin,
+             packed_matrix_C, Nin);
 
   // Unpacking
-  qmckl_unpack_matrix(context, packed_matrix_C, C, Min, Nin);
+  qmckl_unpack_matrix(packed_matrix_C, C, Min, Nin);
 
   //// Free memory
   qmckl_packed_matrix_destroy(packed_matrix_A);
