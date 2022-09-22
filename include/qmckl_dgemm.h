@@ -1,6 +1,6 @@
 #ifndef __QMCKL_DGEMM_H
 #define __QMCKL_DGEMM_H
-#include "qmckl_dgemm_private.h"
+//#include "qmckl_dgemm_private.h"
 
 typedef int32_t qmckl_exit_code;
 typedef int64_t qmckl_packed_matrix;

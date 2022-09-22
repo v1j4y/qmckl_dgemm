@@ -9,6 +9,7 @@
 
 #include "utils.h"
 #include "qmckl_dgemm.h"
+#include "qmckl_dgemm_private.h"
 
 //int main(int argc, char *argv[]) {
 int main() {
