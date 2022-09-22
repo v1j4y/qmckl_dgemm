@@ -505,7 +505,7 @@ void dgemm_macro_kernel_avx2_16regs(int64_t mc, int64_t kc, int64_t nc, double *
     int i,j,k;
     int kk,ll,mm;
 
-    printf("np=%ld mp=%ld NR2=%ld MR2=%ld nc=%ld mc=%ld\n",np,mp,NR2,MR2,nc,mc);
+    printf("np=%ld mp=%ld NR2=%d MR2=%d nc=%ld mc=%ld\n",np,mp,NR2,MR2,nc,mc);
 
    _B_p = &(_B[(0+0)*NR2KC]);
    _A_p = &(_A[(0+0)*NR2KC]);

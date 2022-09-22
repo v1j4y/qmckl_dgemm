@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "qmckl_dgemm_private.h"
 #include "math.h"
 
 unsigned long long rdtsc(void)

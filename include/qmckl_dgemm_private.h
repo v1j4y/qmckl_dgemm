@@ -23,8 +23,6 @@
 #endif
 
 //typedef int64_t qmckl_context;
-typedef int64_t qmckl_packed_matrix;
-typedef int32_t qmckl_exit_code;
 
 typedef struct qmckl_packed_struct{
   // Container for Packed arrays

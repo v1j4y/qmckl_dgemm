@@ -2,7 +2,7 @@
 
 To clone the repository, use:
 ```
-git clone https://github.com/v1j4y/qmckl_dgemm.git
+git clone https://github.com/trex-coe/qmckl_dgemm.git
 ```
 
 # Installation

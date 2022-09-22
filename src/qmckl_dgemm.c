@@ -2,28 +2,12 @@
 #include "qmckl_dgemm.h"
 #include "qmckl_dgemm_private.h"
 
-//qmckl_context qmckl_context_create() {
-//
-//  qmckl_context_struct* const ctx = (qmckl_context_struct* const) malloc (sizeof(qmckl_context_struct));
-//
-//  if (ctx == NULL) {
-//    return QMCKL_NULL_CONTEXT;
-//  }
-//
-//  /* Set all pointers and values to NULL */
-//  {
-//    memset(ctx, 0, sizeof(qmckl_context_struct));
-//  }
-//
-//  return (qmckl_context) ctx;
-//}
-
-qmckl_context qmckl_packed_matrix_create() {
+qmckl_packed_matrix qmckl_packed_matrix_create() {
 
   qmckl_packed_struct* const packed_mat = (qmckl_packed_struct* const) malloc (sizeof(qmckl_packed_struct));
 
   if (packed_mat == NULL) {
-    return QMCKL_NULL_CONTEXT;
+    return (qmckl_packed_matrix) 0;
   }
 
   /* Set all pointers and values to NULL */
