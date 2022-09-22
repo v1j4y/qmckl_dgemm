@@ -26,8 +26,11 @@ AC_ARG_ENABLE(mkl,
 	AC_MSG_RESULT([no]))
 
 AC_LANG(C)
-
-AC_PROG_FC(FC)
+ 
+AC_PROG_FC
+AC_PROG_CC
+AC_PROG_CC_C_O
+AM_PROG_CC_C_O
 
 PKG_PROG_PKG_CONFIG([])
 
@@ -38,6 +41,19 @@ AC_CONFIG_HEADERS([config.h])
 AC_ARG_WITH(mkl-dir,
 	[AS_HELP_STRING([--with-mkl-dir=<MKL path>],
 	[Provide an alternative path to the MKL library])])
+
+AC_ARG_ENABLE(fortran,
+	[AS_HELP_STRING([--enable-fortran],
+	[Use Fortran in test suite])],
+        [enable_fortran=yes],
+        [enable_fortran=no])
+
+AM_CONDITIONAL([HAVE_FORTRAN], [test "$enable_fortran" = "yes"])
+
+AS_IF([test "$enable_fortran" = "yes"],
+      [AC_PROG_FC_C_O
+       AC_DEFINE(HAVE_FORTRAN, [1], [use Fortran in test suite])
+      ])
 
 # Provide special options for BLAS
 AC_MSG_CHECKING([whether BLAS is enabled])
@@ -143,7 +159,7 @@ else
     #        exit -1
     #     fi
     # ])
-    
+
     #if test x$blas_lib = xmaybe -o x$blas_lib = xgoto; then
     #   AC_ARG_WITH(goto-dir, [AS_HELP_STRING([--with-goto-dir=<dir>], [specify GotoBLAS lib location])],
     #   	[
@@ -157,7 +173,7 @@ else
     #	)
     #
     #fi
-    
+
     #if test x$blas_lib = xmaybe -o x$blas_lib = xatlas; then
     #    AC_ARG_WITH(atlas-dir, [AS_HELP_STRING([--with-atlas-dir=<dir>], [specify ATLAS lib location])],
     #	[
@@ -177,7 +193,7 @@ else
     #	AC_CHECK_HEADER([cblas.h],,AC_MSG_ERROR([cannot find atlas headers]))
     #    fi
     #fi
-    
+
     if test x$blas_lib = xmaybe -o x$blas_lib = xopenblas; then
         PKG_CHECK_MODULES([OPENBLAS], [openblas],
         				  [PKG_CHECK_MODULES([BLAS_OPENBLAS], [openblas],
@@ -199,7 +215,7 @@ else
           				    fi
                                       ] )
     fi
-    
+
     #if test x$blas_lib = xmaybe -o x$blas_lib = xmkl; then
     #    # Should we use MKL ?
     #    if test -n "$MKLROOT" ; then
@@ -235,7 +251,7 @@ else
     #	AC_DEFINE(HAVE_MKL, [1], [use MKL library])
     #    fi
     #fi
-    
+
     if test x$blas_lib = xmaybe; then
         #perhaps it is possible to use some BLAS lib from the system
         use_system_blas=no
@@ -253,7 +269,7 @@ else
     	blas_lib=none
         fi
     fi
-    
+
     if test x$blas_lib = xsystem; then
         AC_CHECK_HEADER([cblas.h], [have_cblas_h=yes], [have_cblas_h=no])
       	LDFLAGS="${LDFLAGS} $ac_cv_search_sgemm_"
@@ -276,7 +292,7 @@ AC_OUTPUT
 echo \
 "-------------------------------------------------
 
-${PACKAGE_NAME} Version ${PACKAGE_VERSION} 
+${PACKAGE_NAME} Version ${PACKAGE_VERSION}
 
 Prefix ........:  ${prefix}
 CC ............:  ${CC}
@@ -284,8 +300,6 @@ FC ............:  ${FC}
 CPPFLAGS ......:  ${CPPFLAGS}
 CFLAGS ........:  ${CFLAGS}
 FCFLAGS........:  ${FCFLAGS}
-FC ............:  ${FC}
-FCLAGS ........:  ${FCFLAGS}
 LDFLAGS .......:  ${LDFLAGS}
 LIBS ..........:  ${LIBS}
 
@@ -293,11 +307,12 @@ Package features:
   Intel ICC    ...........:  ${enable_icc}
   Blas         ...........:  ${enable_blas}
   MKL enabled  ...........:  ${enable_mkl}
+  Fortran enabled  .......:  ${enable_fortran}
 
 
 Now type 'make @<:@<target>@:>@'
 where the optional <target> is:
   all           - build C library and Fortran binding
   check	        - run unit tests
-  install       - install the library 
+  install       - install the library
 --------------------------------------------------"
