@@ -146,23 +146,14 @@ int main() {
 
 #else
 
+   enum CBLAS_ORDER order = CblasColMajor;
+   enum CBLAS_TRANSPOSE transA = CblasTrans;
+   enum CBLAS_TRANSPOSE transB = CblasTrans;
+
   qmckl_unpack_matrix(packed_matrix_C, CUnpack, M, N);
 
-  cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, MB, NB, KB,
-              alpha, ABlas, KBlas, BBlas, NBlas, beta,
-              DBlas, MBlas);
+  cblas_dgemm(order, transA, transB, MB,NB,KB,alpha,ABlas,KB,BBlas,NB,beta,DBlas,MB);
 
-  int idtot=0;
-  for(int j=0;j<N;++j) {
-      for(int i=0;i<M;++i) {
-	int idi = idtot % N;
-	int idj = (idtot - idi)/N;
-	if( abs(CUnpack[i + j*M] - DBlas[idi*M + idj]) > 1e-13){
-	  printf("%4d  %4d  %e  %e\n", i, j, CUnpack[i + j*M] , DBlas[idi*M + idj]);
-        };
-	idtot+=1;
-      }
-  }
   qmckl_exit_code rc = get_diff_matrix_ABT(CUnpack,DBlas, M, N);
 
   if(rc == QMCKL_FAILURE){
