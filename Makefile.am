@@ -33,3 +33,4 @@ tests_test_f_LDFLAGS = -no-install
 endif
 
 check_PROGRAMS = $(TESTS)
+CLEANFILES = qmckl_dgemm.mod
